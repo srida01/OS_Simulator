@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html><head>
+	<title>Page Replacement Algorithm</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="script.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="styles.css">
+</head><body>
+	<header class="navbar">
+		<div class="logo">OS Explorer</div>
+		<nav class="navbar">
+			<a href="../index.html">Home</a>
+			<a href="../about.html">About</a>
+		</nav>
+	</header>
+<div class="container">
+	<h1 style="color:black" class="display-3" font="" color="black" align = "center">
+		<strong>PAGE REPLACEMENT ALGORITHMS</strong>
+	</h1>
+	<p style="color:black" class="lead">A Page Replacement Algorithm is a technique employed by the OS (Operating System) to manage memory by selecting which page to replace in the main memory when it becomes full. The primary goal is to minimize page faults and optimize system performance. Page fault means the page requested is not in the main memory, which results in a slower access to the secondary memory to fetch the page and load it on the main memory.</p>
+	<p style="color:black" class="lead">Various algorithms like FIFO (First in First out), Optimal, LRU (Least Recently Used), MRU (Most Recently Used), LFU (Least Frequently Used), MFU (Most Frequently Used), and Random are used, each with its own strategy for determining the page to evict. The choice of algorithm depends on system requirements and workload characteristics.</p>
+	<p style="color:black" class="lead">Of these algorithms, Optimal requires foreknowledge of the page stream and therefore is not used in practical implementations. The others use only the available data to determine which page to evict.</p>
+	<p style="color:black" class="lead">FIFO: The page which arrived first is replaced.<br>Optimal: The page with the latest next occurence is replaced.<br>LRU: The page with the earliest last usage is replaced.<br>MRU: The page with the latest last usage is replaced.<br>LFU: The page with the minimum number of uses is replaced. FIFO is used as tie-breaker.<br>MFU: The page with the maximum number of uses is replaced. FIFO is used as tie-breaker.<br>Random: The page to replace is selected randomly.<br></p>
+</div>
+<div class="container">
+	<div class="func" align="center">
+		<div class="heading">
+			<h1 align="center">PAGE REPLACEMENT VISUALIZER</h1>
+		</div>
+		Enter the Stream of Pages :
+		<div class="input-string">
+			<input type="text" id="input_string" required>
+		</div>
+		Enter the Number of Frames :
+		<div class="frame-size">
+			<input id="frame_size" placeholder="" type="number" name="frame" min="1" required>
+		</div>
+		<label for="algo">Choose the Algorithm : </label>
+		<div class="algorithm">
+			<select id="drop_down" name="algo" required>
+				<option value="" disabled selected>Select your option</option>
+				<option value="FIFO">First In First Out </option>
+				<option value="Optimal">Optimal</option>
+				<option value="LRU">Least Recently Used</option>
+				<option value="MRU">Most Recently Used</option>
+				<option value="LFU">Least Frequently Used</option>
+				<option value="MFU">Most Frequently Used</option>
+				<option value="Random">Random</option>
+			</select>
+		</div>
+		<div class="button">
+			<input id="btn1" style="background-color:#02b126"; type="button" onclick="visualize();" class="frmBtn btn btn-lg btn-block btn-success" value="VISUALIZE">
+		</div>
+	</div>
+</div>
+<div class="container" id="SUM" style="display:none;">
+	<div class="func">
+		<br>
+		<div class="heading">
+			<h1 align="center">VISUALIZATION AND SUMMARY</h1>
+		</div>
+		<div class="data">
+			<table id="tbl" class="table table-bordered">
+				<thead></thead><tbody></tbody>
+			</table>
+		</div>
+		<div align="center">
+			<p id="page_miss"></p>
+			<p id="page_hits"></p>
+			<p id="miss_rate"></p>
+			<p id="hit_rate"></p>
+		</div>
+	</div>
+</div>
+</body></html>

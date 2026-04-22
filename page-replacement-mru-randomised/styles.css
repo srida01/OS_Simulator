@@ -1,0 +1,915 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Inter, sans-serif;
+}
+
+@supports (font-variation-settings: normal) {
+    :root { font-family: InterVariable, sans-serif; }
+}  
+
+body {
+    background: url('../landing.jpeg') no-repeat center center fixed;
+    background-size: cover;
+    padding: 20px;
+    color: #fff;
+    line-height: 1.6;
+}
+
+.step-btn{
+    display: none;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px);
+    position: relative;
+}
+
+/* Remove header styles as we don't need them */
+header {
+    display: none;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #fff;
+}
+
+h2 {
+    margin-bottom: 15px;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+h3 {
+    margin-bottom: 10px;
+    color: #f0f0f0;
+}
+
+/* Back button and How to Use button */
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: rgba(0, 224, 255, 0.7);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    z-index: 10;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    box-shadow: 0 5px 15px rgba(0, 224, 255, 0.4);
+}
+
+.back-button i {
+    font-size: 14px;
+}
+
+.how-to-use-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.how-to-use-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Input section styling */
+.input-section {
+    margin: 50px auto 40px;
+    max-width: 800px;
+    padding: 20px;
+    border-radius: 16px;
+    background-color: rgba(61, 79, 97, 0.5);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #d0d0d0;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #00e0ff;
+}
+
+.form-group input[type="number"] {
+    width: 120px;
+}
+
+/* Fix dropdown styling */
+.form-group select {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.1) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 10px center;
+    background-size: 16px;
+    padding-right: 30px;
+    color: white;
+}
+
+.form-group select option {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+/* Button styling */
+button {
+    padding: 10px 15px;
+    background-color: rgba(0, 224, 255, 0.8);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: rgba(0, 224, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 224, 255, 0.4);
+}
+
+button:disabled {
+    background-color: rgba(204, 204, 204, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Simulation container styling */
+.simulation-container {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 30px;
+}
+
+.simulation-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.speed-control {
+    display: flex;
+    align-items: center;
+}
+
+.speed-control label {
+    margin-right: 10px;
+    color: #d0d0d0;
+}
+
+/* Reference string display */
+.reference-display {
+    margin-bottom: 30px;
+}
+
+#reference-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.ref-item {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-weight: bold;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ref-item.current {
+    background-color: rgba(0, 224, 255, 0.3);
+    color: white;
+    border-color: rgba(0, 224, 255, 0.6);
+}
+
+/* Frames container styling */
+#frames-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 10px;
+}
+
+.frame-row {
+    display: flex;
+    gap: 10px;
+}
+
+.frame {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.frame.active {
+    background-color: rgba(0, 224, 255, 0.2);
+    border-color: rgba(0, 224, 255, 0.4);
+}
+
+.frame.new {
+    background-color: rgba(15, 157, 88, 0.3);
+    border-color: rgba(15, 157, 88, 0.5);
+}
+
+.frame.replaced {
+    background-color: rgba(219, 68, 55, 0.3);
+    border-color: rgba(219, 68, 55, 0.5);
+}
+
+/* Statistics styling */
+.statistics {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 20px;
+    border-radius: 16px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 20px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+/* Frame visualization improvements */
+.frame-changes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.change-indicator {
+    font-size: 14px;
+    padding: 5px 10px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+}
+
+.new-page {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.replaced-page {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.hit-result {
+    background-color: rgba(15, 157, 88, 0.3);
+    color: #d4edda;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    border: 1px solid rgba(15, 157, 88, 0.5);
+}
+
+.fault-result {
+    background-color: rgba(219, 68, 55, 0.3);
+    color: #f8d7da;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    border: 1px solid rgba(219, 68, 55, 0.5);
+}
+
+.step-divider {
+    margin: 20px 0;
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+    padding-top: 10px;
+    text-align: center;
+    color: #d0d0d0;
+    font-size: 14px;
+}
+
+/* Table styles */
+.simulation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.simulation-table th, 
+.simulation-table td {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px;
+    text-align: center;
+}
+
+.simulation-table th {
+    background-color: rgba(0, 224, 255, 0.2);
+    font-weight: bold;
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.simulation-table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.simulation-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Page cell styling */
+.page-cell {
+    font-weight: bold;
+    background-color: rgba(0, 224, 255, 0.2);
+}
+
+/* Frames cell styling */
+.frames-cell {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.frame-in-table {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.empty-frame {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.new-frame {
+    background-color: rgba(15, 157, 88, 0.3);
+    border-color: rgba(15, 157, 88, 0.5);
+    color: #d4edda;
+}
+
+.hit-frame {
+    background-color: rgba(0, 224, 255, 0.2);
+    border-color: rgba(0, 224, 255, 0.4);
+    color: #fff;
+}
+
+/* Result cell styling */
+td.hit-result {
+    background-color: rgba(15, 157, 88, 0.3);
+    color: #d4edda;
+    font-weight: bold;
+}
+
+td.fault-result {
+    background-color: rgba(219, 68, 55, 0.3);
+    color: #f8d7da;
+    font-weight: bold;
+}
+
+/* Action cell styling */
+.action-cell {
+    text-align: left;
+    font-size: 14px;
+}
+
+/* Row highlighting for current step */
+.simulation-table tr.current-step {
+    background-color: rgba(255, 193, 7, 0.2);
+    border-left: 3px solid rgba(255, 193, 7, 0.6);
+}
+
+/* Enhanced table styles */
+.table-caption {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-left: 4px solid rgba(0, 224, 255, 0.8);
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+}
+
+.table-caption ul {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+.table-caption li {
+    margin-bottom: 5px;
+}
+
+/* Improved result badges */
+.result-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 60px;
+}
+
+td.hit-result .result-badge {
+    background-color: rgba(15, 157, 88, 0.6);
+    color: white;
+}
+
+td.fault-result .result-badge {
+    background-color: rgba(219, 68, 55, 0.6);
+    color: white;
+}
+
+/* Styling for the detailed text */
+.detail-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+/* To be replaced frame */
+.to-be-replaced {
+    background-color: rgba(255, 193, 7, 0.3);
+    border-color: rgba(255, 193, 7, 0.5);
+    color: #fff3cd;
+}
+
+/* Tab styling */
+.view-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tab-button {
+    padding: 10px 20px;
+    border: 1px solid transparent;
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 8px 8px 0 0;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.tab-button:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tab-button.active {
+    color: #fff;
+    background-color: rgba(0, 224, 255, 0.1);
+    border-color: rgba(0, 224, 255, 0.3);
+    border-bottom: 1px solid transparent;
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Step view styling */
+#step-details {
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    margin-top: 20px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.step-result {
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.frame-comparison {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.comparison-section {
+    flex: 1;
+}
+
+.comparison-section h5 {
+    margin-bottom: 10px;
+    color: #d0d0d0;
+}
+
+.comparison-frames {
+    display: flex;
+    gap: 10px;
+}
+
+.comparison-arrow {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.comparison-frame {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.step-explanation, .algorithm-state {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid rgba(0, 224, 255, 0.8);
+    margin-bottom: 20px;
+}
+
+.algorithm-state ul {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+/* Complete modal redesign for proper viewport positioning */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100vh;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: none;
+    margin : 0;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-content {
+    position: relative;
+    background-color: rgba(30, 30, 30, 0.938);
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    border-radius: 16px;
+    padding: 30px;
+    margin: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+    transform: translateY(0);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content h2 {
+    position: static;
+    color: #00e0ff;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 224, 255, 0.3);
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1002;
+    background-color: transparent;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    color: white;
+    font-size: 28px;
+    font-weight: 300;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 224, 255, 0.3);
+    border-radius: 10px;
+    border: 2px solid rgba(30, 30, 30, 0.8);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 224, 255, 0.5);
+}
+
+/* Footer styling */
+footer {
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 30px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+/* Title styling */
+.page-title {
+    text-align: center;
+    margin: 20px 0 40px;
+    font-size: 32px;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure input fields have proper styling */
+input, select {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Algorithm section styling */
+.modal-section {
+    margin-bottom: 30px;
+    padding: 0 5px;
+}
+
+.modal-section h3 {
+    color: #00e0ff;
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.modal-section h4 {
+    color: white;
+    margin: 20px 0 10px;
+    background-color: rgba(0, 224, 255, 0.1);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid rgba(0, 224, 255, 0.6);
+}
+
+.modal-section p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.modal-section ul, .modal-section ol {
+    margin-left: 25px;
+    margin-bottom: 15px;
+}
+
+.modal-section li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+/* Add visual dividers between sections */
+.modal-section:not(:last-child) {
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-bottom: 25px;
+}
+
+/* Algorithm advantages/disadvantages */
+.modal-section ul li strong {
+    color: #00e0ff;
+}
+
+/* Numbered steps in how-to-use section */
+.modal-section ol {
+    counter-reset: step-counter;
+    list-style-type: none;
+    margin-left: 5px;
+}
+
+.modal-section ol li {
+    counter-increment: step-counter;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 15px;
+}
+
+.modal-section ol li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: -2px;
+    width: 25px;
+    height: 25px;
+    background-color: rgba(0, 224, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Understanding results section */
+.modal-section p strong {
+    color: #00e0ff;
+    font-weight: 600;
+}
+
+/* Theory Section Styling */
+.theory-section {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.theory-section h2 {
+    color: #1a237e;
+    font-size: 2.2rem;
+    margin-bottom: 1.8rem;
+    border-bottom: 3px solid #3f51b5;
+    padding-bottom: 0.8rem;
+}
+
+.theory-section h3 {
+    color: #283593;
+    font-size: 1.8rem;
+    margin: 2rem 0 1.2rem 0;
+}
+
+.theory-section h4 {
+    color: #303f9f;
+    font-size: 1.4rem;
+    margin: 1.5rem 0 1rem 0;
+}
+
+.theory-section p {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.theory-section ul {
+    padding-left: 2.5rem;
+    margin: 1.2rem 0;
+}
+
+.theory-section li {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    color: #37474f;
+    position: relative;
+}
+
+.theory-section strong {
+    color: #1565c0;
+    font-weight: 600;
+}
+
+/* Key concepts section */
+.theory-section ul li strong {
+    display: inline-block;
+    min-width: 150px;
+}
+
+/* Performance metrics styling */
+.theory-section ul li:has(strong) {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.5rem 0;
+}
+
+/* Memory access patterns styling */
+.theory-section h3:last-of-type + ul li {
+    background-color: #f5f5f5;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+}
+
+/* Hover effects */
+.theory-section li:hover {
+    background-color: #f3f6f9;
+    transform: translateX(8px);
+    transition: all 0.3s ease;
+    border-radius: 6px;
+}
+
+/* Algorithm details section */
+.theory-section h4 + p {
+    background-color: #e8eaf6;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+} 

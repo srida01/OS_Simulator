@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disk Scheduling Simulator</title>
+    <link rel="stylesheet" href="./disk-style.css">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="./disk.js" defer></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header class="navbar">
+            <a href="../index.html" class="logo">OS Explorer</a>
+            <nav>
+                <a href="../index.html">Home</a>
+<!--                 <button onclick="location.href = '../index.html';">Home</button> -->
+
+<!--                 <a href="#">Modules</a> -->
+<!--                 <a href="#">Contact</a> -->
+            </nav>
+        </header>
+
+        <section class="hero">
+
+            <script>
+                function admSelectCheck(nameSelect) {
+                    console.log(nameSelect);
+                    if (nameSelect) {
+                        x3 = document.getElementById("o3").value;
+                        x4 = document.getElementById("o4").value;
+                        x5 = document.getElementById("o5").value;
+                        x6 = document.getElementById("o6").value;
+                        x7 = document.getElementById("o7").value;
+                        x8 = document.getElementById("o8").value;
+                        // if (x3 == nameSelect.value || x4 == nameSelect.value || x5 == nameSelect.value || x6 == nameSelect.value || x7 == nameSelect.value || x8 == nameSelect.value) {
+                        //     document.getElementById("admDivCheck").style.display = "block";
+                        // }
+                        // else {
+                        //     document.getElementById("admDivCheck").style.display = "none";
+                        // }
+                    }
+                    else {
+                        document.getElementById("admDivCheck").style.display = "none";
+                    }
+                }
+            </script>
+            <h1>Disk Scheduling</h1>
+            <p>
+                Disk scheduling is the technique utilized by computer operating
+                systems to determine the sequence in which block I/O operations are dispatched to storage
+                volumes. This process, also known as I/O scheduling, orchestrates the order of disk operations
+                to optimize performance and resource utilization.
+                <br>
+<!--                 <a href="https://www.tpointtech.com/os-disk-scheduling" class="white">
+                    Click Here to know general terms related to Disk Scheduling
+                </a> -->
+                    
+            </p>
+            <br>
+            
+            <h1>Important Terms related to Disk Scheduling Algorithms</h1>
+            <p>
+                <ul>
+                    <li> Seek Time: As we know, the data may be stored on various blocks of disk. To access these data according to the request, the disk arm moves and finds the required block. The time taken by the arm in doing this search is known as "Seek Time". </li>
+                    <li> Rotational Latency: The required data block needs to move at a particular position from where the read/write head can fetch the data. So, the time taken in this movement is known as "Rotational Latency". This rotational time should be as less as possible so, the algorithm that will take less time to rotate will be considered a better algorithm.</li> 
+                    <li> Transfer Time: When a request is made from the user side, it takes some time to fetch these data and provide them as output. This time taken is known as "Transfer Time". </li>
+                    <li> Disk Access Time: It is defined as the total time taken by all the above processes. Disk access time = (seek time + rotational latency time + transfer time) </li>
+                    <li> Disk Response Time: The disk processes one request at a single time. So, the other requests wait in a queue to finish the ongoing process of request. The average of this waiting time is called "Disk Response Time".</li>
+                </ul>
+            </p>
+            <br>
+            
+            <h1>Disk Scheduling Algorithms</h1>
+            <p>Visualise and compare disk scheduling techniques interactively</p>
+<!--             <a href="https://edurev.in/t/187301/Disk-Scheduling-Algorithms" class="white">
+                Click Here to know general terms related to Disk Scheduling Algorithms
+            </a> -->
+
+        </section>
+
+        <section class="card-grid">
+            <div class="card">FCFS - First Come First Serve
+                <p>
+                    In this algorithm, incoming requests are added to the queue's end, and the
+                    next number in the queue is served next. However, this approach doesn't yield optimal results.
+                    To calculate the number of head movements, one simply counts the tracks traversed from one
+                    request to the next.
+                </p>
+                <p>
+<!--                     <a href="https://www.tpointtech.com/os-fcfs-scheduling-algorithm" class="white">
+                        Click Here to know more
+                    </a> -->
+                </p>
+            </div>
+            <div class="card">SSTF - Shortest Seek Time First
+                <p>
+                    The Shortest Seek Time First (SSTF) algorithm prioritizes disk I/O requests
+                    that demand the least arm movement from the current position, irrespective of direction. This
+                    strategy minimizes overall seek time compared to FCFS, enabling the head to advance to the
+                    nearest track in the service queue.
+                </p>
+                <p>
+<!--                     <a href=https://www.tpointtech.com/os-sstf-scheduling-algorithm" class="white">
+                        Click Here to know more
+                    </a> -->
+                </p>
+            </div>
+            <div class="card">SCAN - Elevator Algorithm
+                <p>
+                    This algorithm involves the disk arm moving in a single direction until
+                    reaching the end, servicing all requests along the way, then reversing direction to satisfy
+                    requests in the opposite path. This behavior is akin to an elevator's operation, hence its
+                    nickname, the elevator algorithm.
+                </p>
+                <p>
+<!--                     <a href="https://www.tpointtech.com/os-scan-and-c-scan-algorithm" class="white">
+                        Click Here to know more
+                    </a> -->
+                </p>
+            </div>
+            <div class="card">C-SCAN - Circular SCAN
+                <p>
+                    In the C-SCAN algorithm, the disk arm travels in one direction, servicing
+                    requests until it reaches the last cylinder. Then, without servicing any requests, it jumps to
+                    the last cylinder in the opposite direction. Subsequently, it reverses direction and begins
+                    servicing the remaining requests.
+                </p>
+                <p>
+<!--                     <a href="https://www.tpointtech.com/os-scan-and-c-scan-algorithm" class="white">
+                        Click Here to know more
+                    </a> -->
+                </p>
+            </div>
+            <div class="card">LOOK - Modified SCAN
+                <p>
+                    Similar to the SCAN algorithm, this method halts the disk arm's movement
+                    inward or outward when no further requests exist in that direction. Unlike SCAN, it mitigates
+                    the overhead by avoiding unnecessary movement of the disk arm in a direction where no requests
+                    are present.
+                </p>
+                <p>
+<!--                     <a href="https://www.tpointtech.com/look-vs-c-look-disk-scheduling-algorithm" class="white">
+                        Click Here to know more
+                    </a> -->
+                </p>
+            </div>
+            <div class="card">C-LOOK - Circular LOOK
+                <p>
+                    The C-Look Algorithm shares similarities with the C-SCAN algorithm. Here,
+                    the disk arm travels outward, servicing requests until reaching the highest requested cylinder.
+                    It then jumps to the lowest requested cylinder without servicing any requests before resuming
+                    outward movement to fulfill the remaining requests.
+                </p>
+                <p>
+<!--                     <a href="https://www.tpointtech.com/look-vs-c-look-disk-scheduling-algorithm" class="white">
+                        Click Here to know more
+                    </a> -->
+                </p>
+            </div>
+            <div class="card">LIFO - Last In First Out
+                <p>
+                    In the Last In, First Out (LIFO) algorithm, the most recent jobs are
+                    prioritized for service over existing ones. This means that the job that was most recently
+                    entered or added to the queue is the first to be serviced, followed by the others in the same
+                    order.
+                </p>
+                <p>
+<!--                     <a href="" class="white">
+                        Click Here to know more
+                    </a> -->
+                </p>
+            </div>
+            <div class="card">RSS - Random Seek Scheduling
+                <p>
+                    The Random Seek Scheduling algorithm, as its name implies, is inherently random
+                    in nature. It finds utility in scenarios where scheduling encompasses random elements like
+                    processing time, due dates, weights, and unpredictable machine breakdowns. This algorithm is
+                    commonly employed in analysis and simulation tasks due to its adaptability to such stochastic
+                    environments.</p>
+                <p>
+<!--                     <a href="" class="white">
+                        Click Here to know more
+                    </a> -->
+                </p>
+            </div>
+        </section>
+
+        <section class="controls">
+            <div class="blur-box">
+                <div class="form-container">
+                    <div class="control-row">
+                        <label for="algorithm">Select Algorithm:</label>
+                        <select name="" id="algorithm">
+                            <option id="o1" value="fcfs">FCFS</option>
+                            <option id="o2" value="sstf">SSTF</option>
+                            <option id="o3" value="scan">SCAN</option>
+                            <option id="o4" value="cscan">C-SCAN</option>
+                            <option id="o5" value="look">LOOK</option>
+                            <option id="o6" value="clook">C-LOOK</option>
+                            <option id="o7" value="lifo">LIFO</option>
+                            <option id="o8" value="rss">RSS</option>
+                        </select>
+                    </div>
+
+                    <div class="control-row">
+                        <label for="direction">Direction:</label>
+                        <select name="" id="direction">
+                            <option value="left" selected="selected">Left</option>
+                            <option value="right">Right</option>
+                        </select>
+                    </div>
+
+                    <div class="control-row">
+                        <label for="bitstream-input">Bit Stream:</label>
+                        <input type="text" name="" id="bitstream-input"
+                            placeholder="Enter space-seperated cylinder sequence">
+                    </div>
+
+                    <div class="control-row">
+                        <label for="initial-input">Initial Cylinder:</label>
+                        <input type="text" name="" id="initial-input" placeholder="Initial Cylinder (Head Pointer)">
+                    </div>
+
+                    <div class="control-row">
+                        <label for="final-input">Final Cylinder:</label>
+                        <input type="text" name="" id="final-input" placeholder="Final Cylinder">
+                    </div>
+
+                    <div class="control-row">
+                        <button id="plot-button" onclick="handlePlot()">Plot</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="alg_name"></div>
+        <div id="alg_seek"></div>
+        <div id="graph_area"></div>
+        <br>
+        <p>Module made by Vaibhavi Nagaraja Nayak - 231CS262</p>
+        <br>
+    </div>
+</body>
+
+</html>

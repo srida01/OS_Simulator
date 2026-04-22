@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dining Philosophers Problem</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../index.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  
+</head>
+<body>
+  <div class="container">
+    <h2>Dining Philosophers Problem</h2>
+
+    <p>The Dining Philosophers Problem illustrates the challenges of resource allocation and process synchronization. It involves five philosophers who alternate between thinking and eating. Each needs two chopsticks (one on the left and one on the right) to eat from a shared bowl of rice.</p>
+
+    <h4>Problem Description</h4>
+    <ul>
+      <li>Five philosophers sit around a table.</li>
+      <li>Each has one chopstick on their left and right.</li>
+      <li>They can pick up one chopstick at a time.</li>
+      <li>They eat only when both chopsticks are acquired.</li>
+      <li>After eating, they release the chopsticks and go back to thinking.</li>
+    </ul>
+
+    <h4>Goal</h4>
+    <p>
+      Design a solution that allows <strong>concurrent access</strong> while avoiding <strong>deadlock</strong> and <strong>starvation</strong>.
+    </p>
+
+    <h5>Shared Data</h5>
+    <ul>
+      <li><code class="inline">semaphore chopstick[5]</code> – represents each chopstick (all initialized to 1).</li>
+    </ul>
+    
+    
+
+    <h5>Philosopher Process (Pseudocode)</h5>
+    <pre><code>do {
+    wait(chopstick[i]);
+    wait(chopstick[(i+1)%5]);
+    // ...
+    // eat
+    // ...
+    signal(chopstick[i]);
+    signal(chopstick[(i+1)%5]);
+    // ...
+    // think
+    // ...
+} while (TRUE);</code></pre>
+
+    <h4>Deadlock Issue</h4>
+    <p>
+      If all philosophers pick up their left chopstick at the same time, none can acquire the right one, resulting in a deadlock. All semaphores are then set to 0, and the system halts.
+    </p>
+
+    <h4>Deadlock Handling Strategies</h4>
+    <ul>
+      <li><strong>Limit Concurrency:</strong> Allow at most four philosophers to sit at the table simultaneously.</li>
+      <li><strong>Check Availability:</strong> Allow picking up chopsticks only if both are available (in a critical section).</li>
+      <li><strong>Asymmetric Solution:</strong> Odd-numbered philosophers pick up the left chopstick first, while even-numbered ones pick up the right first to avoid circular wait.</li>
+    </ul>
+  </div>
+</body>
+</html>

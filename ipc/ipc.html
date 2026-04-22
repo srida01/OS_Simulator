@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inter-Process Communication - Operating Systems Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <style>
+    :root {
+      --primary-color: #0072ff;
+      --secondary-color: #00c6ff;
+      --accent-color: #ff6b6b;
+      --text-light: #ffffff;
+      --text-dark: #222;
+      --text-muted: #666;
+      --bg-light: #f8fafc;
+      --bg-dark: #1a202c;
+      --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+      background-attachment: fixed;
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+    
+    /* Add subtle pattern overlay like index page */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.5;
+    }
+    
+    nav {
+      background: rgba(205, 195, 195, 0.4);
+      backdrop-filter: blur(50px);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      height: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 5%;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      letter-spacing: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo i {
+      margin-right: 8px;
+    }
+    
+    .logo:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+    
+    nav a {
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      text-transform: uppercase;
+      position: relative;
+    }
+    
+    nav ul a::after {
+      content: '';
+      position: absolute;
+      bottom: 5px;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: white;
+      transform: translateX(-50%);
+      transition: var(--transition);
+    }
+    
+    nav ul a:hover::after {
+      width: 60%;
+    }
+    
+    nav ul a:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    header {
+      padding: 8rem 0 4rem;
+      color: var(--text-light);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header-content {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: var(--radius-md);
+      max-width: 900px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .header-title {
+      font-size: 3.5rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .header-subtitle {
+      font-size: 1.5rem;
+      font-weight: 300;
+      max-width: 700px;
+      margin: 0 auto;
+      opacity: 0.9;
+    }
+    
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      background: rgba(235, 224, 224, 0.6);
+      box-shadow: var(--shadow-md);
+      border-radius: var(--radius-md);
+      margin-bottom: 4rem;
+    }
+    
+    section {
+      margin-bottom: 3.5rem;
+    }
+    
+    h2 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(0, 114, 255, 0.1);
+    }
+    
+    h3 {
+      color: var(--text-dark);
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 1.5rem 0 1rem;
+    }
+    
+    p, li {
+      margin: 1rem 0;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+    }
+    
+    strong, code {
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+    
+    .info-card {
+      background-color: white;
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .info-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+    
+    .code-box {
+      border-radius: var(--radius-sm);
+      margin: 1.5rem 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #282c34;
+      color: #abb2bf;
+      padding: 0.5rem 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    
+    .code-content {
+      padding: 1rem;
+      overflow-x: auto;
+      background-color: #282c34;
+    }
+    
+    .accordion {
+      cursor: pointer;
+      width: 100%;
+      background: white;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      border: none;
+      text-align: left;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .accordion:hover {
+      background-color: #f8f9fa;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .accordion::after {
+      content: '\f078';
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      color: var(--primary-color);
+      transition: var(--transition);
+    }
+    
+    .accordion.active::after {
+      transform: rotate(180deg);
+    }
+    
+    .panel {
+      padding: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background-color: white;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
+    }
+    
+    .panel-content {
+      padding: 1.5rem;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    th {
+      background-color: #f8fafc;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    
+    tr:hover {
+      background-color: rgba(0, 114, 255, 0.05);
+    }
+    
+    .quiz {
+      background-color: white;
+      padding: 2rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-top: 3rem;
+    }
+    
+    .quiz h2 {
+      border-bottom: none;
+      color: var(--text-dark);
+      margin-bottom: 1rem;
+    }
+    
+    .quiz-question {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    
+    .quiz-option {
+      padding: 1rem;
+      background-color: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+    
+    .quiz-option:hover {
+      background-color: #edf2f7;
+      border-color: #cbd5e0;
+    }
+    
+    .option-selected {
+      border-color: var(--primary-color);
+      background-color: rgba(0, 114, 255, 0.1);
+    }
+    
+    .option-correct {
+      border-color: #48bb78;
+      background-color: rgba(72, 187, 120, 0.1);
+    }
+    
+    .option-incorrect {
+      border-color: #f56565;
+      background-color: rgba(245, 101, 101, 0.1);
+    }
+    
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      display: none;
+    }
+    
+    .result-correct {
+      background-color: rgba(72, 187, 120, 0.1);
+      color: #2f855a;
+      border: 1px solid rgba(72, 187, 120, 0.3);
+      display: block;
+    }
+    
+    .result-incorrect {
+      background-color: rgba(245, 101, 101, 0.1);
+      color: #e53e3e;
+      border: 1px solid rgba(245, 101, 101, 0.3);
+      display: block;
+    }
+    
+    .quiz-button {
+      margin-top: 1rem;
+      padding: 0.8rem 1.5rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+    }
+    
+    .quiz-button:hover {
+      background-color: #0060d5;
+      transform: translateY(-2px);
+    }
+    
+    .note-box {
+      background-color: rgba(0, 114, 255, 0.05);
+      border-left: 4px solid var(--primary-color);
+      padding: 1.2rem;
+      border-radius: var(--radius-sm);
+      margin: 1.5rem 0;
+    }
+    
+    .warning-box {
+      background-color: rgba(245, 158, 11, 0.05);
+      border-left: 4px solid #f59e0b;
+      padding: 1.2rem;
+      border-radius: var(--radius-sm);
+      margin: 1.5rem 0;
+    }
+    
+    .comparison-table td:first-child {
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+    
+    .comparison-table td:nth-child(2),
+    .comparison-table td:nth-child(3) {
+      text-align: center;
+    }
+    
+    .comparison-table .check {
+      color: #48bb78;
+    }
+    
+    .comparison-table .cross {
+      color: #f56565;
+    }
+    
+    .method-card {
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-sm);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      transition: var(--transition);
+    }
+    
+    .method-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    
+    .method-card h3 {
+      color: var(--primary-color);
+      margin-top: 0;
+    }
+    
+    .method-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+    
+    .diagram {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    
+    .diagram img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .process-flow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .process-box {
+      background-color: #f8fafc;
+      border: 2px solid var(--primary-color);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      text-align: center;
+      width: 150px;
+      margin: 0.5rem;
+    }
+    
+    .process-arrow {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      margin: 0 0.5rem;
+    }
+    
+    footer {
+      background: rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: white;
+      padding: 2rem 0;
+      text-align: center;
+      margin-top: 4rem;
+    }
+    
+    .footer-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4rem;
+    }
+    
+    .pagination a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.8rem 1.2rem;
+      background-color: white;
+      color: var(--primary-color);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .pagination a:hover {
+      background-color: var(--primary-color);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .arrow-left::before {
+      content: "\f060";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+    }
+    
+    .arrow-right::after {
+      content: "\f061";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+    }
+    
+    /* Visual representation of IPC mechanisms */
+    .ipc-visual {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+    
+    .ipc-box {
+      width: 200px;
+      background-color: white;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      text-align: center;
+    }
+    
+    .ipc-box:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .ipc-icon {
+      font-size: 2.5rem;
+      padding: 1.5rem;
+      color: white;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+    
+    .ipc-name {
+      padding: 1rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+    
+    @media (max-width: 768px) {
+      .header-title {
+        font-size: 2.5rem;
+      }
+      
+      nav {
+        height: auto;
+        padding: 1rem 5%;
+        flex-direction: column;
+      }
+      
+      nav ul {
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      main {
+        padding: 2rem 1rem;
+      }
+      
+      .quiz-options {
+        grid-template-columns: 1fr;
+      }
+      
+      .process-flow {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body style="background-image: url('../landing.jpeg'); background-size: cover; background-position: center;">
+  <nav>
+    <a href="../index.html" class="logo"><i class="fas fa-microchip"></i> OS VISUALIZER</a>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <!-- <li><a href="../about.html">About</a></li> -->
+    </ul>
+  </nav>
+
+  <header>
+    <div class="header-content">
+      <h1 class="header-title">Inter-Process Communication</h1>
+      <p class="header-subtitle">Learn how processes communicate and share data in modern operating systems</p>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2><i class="fas fa-exchange-alt"></i> What is Inter-Process Communication?</h2>
+      
+      <p>Inter-Process Communication (IPC) refers to the mechanisms an operating system provides to allow processes to communicate with each other and synchronize their actions. Since processes typically run in isolated memory spaces to ensure stability and security, IPC methods provide controlled ways for processes to exchange data and signals.</p>
+      
+      <div class="info-card">
+        <div class="info-card-title">
+          <i class="fas fa-info-circle"></i> Why IPC is Essential
+        </div>
+        <p>Modern computing relies heavily on IPC for everything from client-server applications to microservices architectures. IPC enables the modular design of software systems, where different components can work together while maintaining isolation. This approach improves security, stability, and potentially performance through parallelism.</p>
+      </div>
+      
+      <h3>Core Purposes of IPC</h3>
+      <ul>
+        <li><strong>Data Transfer:</strong> Moving information between processes</li>
+        <li><strong>Resource Sharing:</strong> Allowing multiple processes to access the same resources</li>
+        <li><strong>Notification:</strong> Alerting processes about events or state changes</li>
+        <li><strong>Process Control:</strong> One process influencing the execution of another</li>
+        <li><strong>Synchronization:</strong> Coordinating activities between multiple processes</li>
+      </ul>
+      
+      <div class="ipc-visual">
+        <div class="ipc-box">
+          <div class="ipc-icon">
+            <i class="fas fa-clipboard"></i>
+          </div>
+          <div class="ipc-name">Shared Memory</div>
+        </div>
+        
+        <div class="ipc-box">
+          <div class="ipc-icon">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <div class="ipc-name">Pipes</div>
+        </div>
+        
+        <div class="ipc-box">
+          <div class="ipc-icon">
+            <i class="fas fa-network-wired"></i>
+          </div>
+          <div class="ipc-name">Sockets</div>
+        </div>
+        
+        <div class="ipc-box">
+          <div class="ipc-icon">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <div class="ipc-name">Message Queues</div>
+        </div>
+      </div>
+      
+      <h3>Communication Models in IPC</h3>
+      
+      <p>IPC mechanisms generally fall into two communication models:</p>
+      
+      <div class="process-flow">
+        <div class="process-box">Process A</div>
+        <div class="process-arrow">⟷</div>
+        <div class="process-box">Process B</div>
+      </div>
+      
+      <ul>
+        <li><strong>Shared Memory Model:</strong> Processes access a common region of memory to exchange data. This approach offers high performance for large data transfers but requires careful synchronization.</li>
+        <li><strong>Message Passing Model:</strong> Processes exchange discrete messages through a channel provided by the OS. This approach is more structured but may have higher overhead.</li>
+      </ul>
+      
+      <div class="note-box">
+        <strong>Note:</strong> Some IPC mechanisms combine elements of both models or offer variations tailored to specific use cases.
+      </div>
+    </section>
+
+    <section>
+      <h2><i class="fas fa-list"></i> Common IPC Mechanisms</h2>
+      
+      <p>Operating systems provide various IPC mechanisms, each with different characteristics suitable for different scenarios:</p>
+      
+      <div class="method-card">
+        <div class="method-icon"><i class="fas fa-clipboard"></i></div>
+        <h3>Shared Memory</h3>
+        <p>Shared memory allows multiple processes to access the same block of memory. It's typically the fastest IPC method as data doesn't need to be copied between processes.</p>
+        <ul>
+          <li><strong>Advantages:</strong> Very high speed, especially for large amounts of data</li>
+          <li><strong>Challenges:</strong> Requires synchronization mechanisms (semaphores, mutexes) to prevent race conditions</li>
+          <li><strong>Use cases:</strong> High-performance computing, multimedia processing</li>
+        </ul>
+      </div>
+      
+      <div class="method-card">
+        <div class="method-icon"><i class="fas fa-project-diagram"></i></div>
+        <h3>Pipes</h3>
+        <p>Pipes provide a one-way flow of data between processes. Standard pipes connect related processes (like parent and child), while named pipes (FIFOs) allow unrelated processes to communicate.</p>
+        <ul>
+          <li><strong>Advantages:</strong> Simple to use, built into most shell environments</li>
+          <li><strong>Limitations:</strong> Typically unidirectional, often limited to related processes</li>
+          <li><strong>Use cases:</strong> Command-line pipelines, producer-consumer patterns</li>
+        </ul>
+      </div>
+      
+      <div class="method-card">
+        <div class="method-icon"><i class="fas fa-tasks"></i></div>
+        <h3>Message Queues</h3>
+        <p>Message queues allow processes to exchange discrete messages in a structured format. They provide asynchronous communication with automatic storage and retrieval of messages.</p>
+        <ul>
+          <li><strong>Advantages:</strong> Persistence of messages, prioritization capability, many-to-many communication</li>
+          <li><strong>Limitations:</strong> More complex than pipes, potential overhead</li>
+          <li><strong>Use cases:</strong> Task distribution systems, loosely coupled services</li>
+        </ul>
+      </div>
+      
+      <div class="method-card">
+        <div class="method-icon"><i class="fas fa-network-wired"></i></div>
+        <h3>Sockets</h3>
+        <p>Sockets provide a communication endpoint for sending and receiving data across a network or within a single system (Unix domain sockets).</p>
+        <ul>
+          <li><strong>Advantages:</strong> Work across different machines, standard API, bidirectional</li>
+          <li><strong>Limitations:</strong> More overhead than other local IPC methods</li>
+          <li><strong>Use cases:</strong> Network applications, client-server architectures, distributed systems</li>
+        </ul>
+      </div>
+      
+      <button class="accordion">Additional IPC Mechanisms</button>
+      <div class="panel">
+        <div class="panel-content">
+          <div class="method-card">
+            <div class="method-icon"><i class="fas fa-flag"></i></div>
+            <h3>Signals</h3>
+            <p>Signals are software interrupts sent to a process to notify it of important events. They're used for simple notifications rather than data exchange.</p>
+            <ul>
+              <li><strong>Advantages:</strong> Lightweight, asynchronous, built into the OS</li>
+              <li><strong>Limitations:</strong> Limited information transfer, can be lost if not handled promptly</li>
+              <li><strong>Use cases:</strong> Terminating processes, alerting about exceptions</li>
+            </ul>
+          </div>
+          
+          <div class="method-card">
+            <div class="method-icon"><i class="fas fa-memory"></i></div>
+            <h3>Semaphores</h3>
+            <p>Semaphores are synchronization primitives used to control access to shared resources. They don't transfer data directly but coordinate access to shared data.</p>
+            <ul>
+              <li><strong>Advantages:</strong> Prevent race conditions, relatively simple to implement</li>
+              <li><strong>Limitations:</strong> Can lead to deadlocks if not carefully managed</li>
+              <li><strong>Use cases:</strong> Synchronizing access to shared memory, implementing mutual exclusion</li>
+            </ul>
+          </div>
+          
+          <div class="method-card">
+            <div class="method-icon"><i class="fas fa-file-alt"></i></div>
+            <h3>Memory-Mapped Files</h3>
+            <p>Memory-mapped files allow a file to be mapped directly into a process's address space, allowing processes to share data through the filesystem.</p>
+            <ul>
+              <li><strong>Advantages:</strong> Persistence, can handle very large data sets efficiently</li>
+              <li><strong>Limitations:</strong> Requires file I/O, need for synchronization</li>
+              <li><strong>Use cases:</strong> Databases, caches, large data processing</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="table-container">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>IPC Mechanism</th>
+              <th>Speed</th>
+              <th>Complexity</th>
+              <th>Persistence</th>
+              <th>Network Support</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Shared Memory</td>
+              <td>Very Fast</td>
+              <td>Medium</td>
+              <td><i class="fas fa-times cross"></i></td>
+              <td><i class="fas fa-times cross"></i></td>
+            </tr>
+            <tr>
+              <td>Pipes</td>
+              <td>Fast</td>
+              <td>Low</td>
+              <td><i class="fas fa-times cross"></i></td>
+              <td><i class="fas fa-times cross"></i></td>
+            </tr>
+            <tr>
+              <td>Message Queues</td>
+              <td>Medium</td>
+              <td>Medium</td>
+              <td><i class="fas fa-check check"></i></td>
+              <td><i class="fas fa-times cross"></i></td>
+            </tr>
+            <tr>
+              <td>Sockets</td>
+              <td>Medium</td>
+              <td>High</td>
+              <td><i class="fas fa-times cross"></i></td>
+              <td><i class="fas fa-check check"></i></td>
+            </tr>
+            <tr>
+              <td>Memory-Mapped Files</td>
+              <td>Fast</td>
+              <td>Medium</td>
+              <td><i class="fas fa-check check"></i></td>
+              <td><i class="fas fa-times cross"></i></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+        <h2><i class="fas fa-laptop-code"></i> Interactive IPC Simulations</h2>
+        
+        <p>Experience how IPC mechanisms work through these interactive simulations:</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin: 2rem 0;">
+          <!-- Shared Memory Simulation Card -->
+          <div style="flex: 1; min-width: 300px; background: white; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm); transition: var(--transition);">
+            <div style="background: linear-gradient(135deg, var(--secondary-color), var(--primary-color)); padding: 1.5rem; color: white;">
+              <h3 style="margin-top: 0; color: white;">Shared Memory Simulation</h3>
+              <p>Explore how processes communicate directly through a common memory region.</p>
+            </div>
+            <div style="padding: 1.5rem;">
+              <ul>
+                <li>Write data from Process A</li>
+                <li>Read data from Process B</li>
+                <li>Visualize the shared memory region</li>
+              </ul>
+              <a href="shared.html" class="quiz-button" style="display: inline-block; margin-top: 1rem; text-decoration: none; text-align: center;">
+                <i class="fas fa-play-circle"></i> Launch Simulation
+              </a>
+            </div>
+          </div>
+          
+          <!-- Message Passing Simulation Card -->
+          <div style="flex: 1; min-width: 300px; background: white; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm); transition: var(--transition);">
+            <div style="background: linear-gradient(135deg, #8e2de2, #4a00e0); padding: 1.5rem; color: white;">
+              <h3 style="margin-top: 0; color: white;">Message Passing Simulation</h3>
+              <p>See how the kernel mediates messages between isolated processes.</p>
+            </div>
+            <div style="padding: 1.5rem;">
+              <ul>
+                <li>Send messages between processes</li>
+                <li>Observe how the kernel manages communication</li>
+                <li>Compare with shared memory approach</li>
+              </ul>
+              <a href="mp.html" class="quiz-button" style="display: inline-block; margin-top: 1rem; text-decoration: none; text-align: center;">
+                <i class="fas fa-play-circle"></i> Launch Simulation
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="note-box">
+          <strong>Learning tip:</strong> Try both simulations to understand the key differences between shared memory and message passing approaches to IPC. Note how shared memory provides direct access without kernel mediation, while message passing relies on the kernel as an intermediary.
+        </div>
+      </section>
+
+    <section>
+      <h2><i class="fas fa-code"></i> IPC Implementation Examples</h2>
+      
+      <h3>Shared Memory Example</h3>
+      <p>This example demonstrates how to create and use a shared memory segment between two processes.</p>
+      
+      <div class="code-box">
+        <div class="code-header">
+          <span>Shared Memory Example</span>
+        </div>
+        <div class="code-content">
+          <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/shm.h&gt;
+#include &lt;unistd.h&gt;
+
+#define SHM_SIZE 1024  // Size of shared memory segment
+
+int main() {
+    key_t key;
+    int shmid;
+    char *shm_ptr, *s;
+    
+    // Generate a unique key for shared memory
+    if ((key = ftok(".", 'a')) == -1) {
+        perror("ftok");
+        exit(1);
+    }
+    
+    // Create the shared memory segment
+    if ((shmid = shmget(key, SHM_SIZE, IPC_CREAT | 0666)) == -1) {
+        perror("shmget");
+        exit(1);
+    }
+    
+    printf("Shared memory segment created: %d\n", shmid);
+    
+    // Attach the shared memory segment
+    if ((shm_ptr = shmat(shmid, NULL, 0)) == (char *) -1) {
+        perror("shmat");
+        exit(1);
+    }
+    
+    printf("Shared memory attached at address: %p\n", shm_ptr);
+    
+    // Fork a child process
+    pid_t pid = fork();
+    
+    if (pid == -1) {
+        perror("fork");
+        exit(1);
+    }
+    
+    if (pid == 0) {
+        // Child process: read from shared memory
+        printf("Child process waiting for data...\n");
+        sleep(2);  // Wait for parent to write data
+        
+        printf("Child process reading: %s\n", shm_ptr);
+        
+        // Detach from shared memory
+        if (shmdt(shm_ptr) == -1) {
+            perror("shmdt");
+            exit(1);
+        }
+        
+        exit(0);
+    } else {
+        // Parent process: write to shared memory
+        strcpy(shm_ptr, "Hello from the parent process!");
+        printf("Parent wrote to shared memory\n");
+        
+        // Wait for child to finish
+        wait(NULL);
+        
+        // Detach from shared memory
+        if (shmdt(shm_ptr) == -1) {
+            perror("shmdt");
+            exit(1);
+        }
+        
+        // Remove the shared memory segment
+        if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+            perror("shmctl");
+            exit(1);
+        }
+        
+        printf("Shared memory removed\n");
+    }
+    
+    return 0;
+}</code></pre>
+        </div>
+      </div>
+      
+      <h3>Pipe Example</h3>
+      <p>This example shows how to use a pipe to send data from a parent process to a child process.</p>
+      
+      <div class="code-box">
+        <div class="code-header">
+          <span>Pipe Example</span>
+        </div>
+        <div class="code-content">
+          <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+
+int main() {
+    int pipefd[2];  // File descriptors for pipe
+    pid_t pid;
+    char buffer[100];
+    const char *message = "Hello from parent via pipe!";
+    
+    // Create the pipe
+    if (pipe(pipefd) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Create a child process
+    pid = fork();
+    
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+    
+    if (pid == 0) {
+        // Child process
+        
+        // Close the write end as we only need to read
+        close(pipefd[1]);
+        
+        // Read from pipe
+        int bytes_read = read(pipefd[0], buffer, sizeof(buffer));
+        
+        if (bytes_read > 0) {
+            buffer[bytes_read] = '\0';  // Null-terminate the string
+            printf("Child received: %s\n", buffer);
+        } else {
+            perror("read");
+        }
+        
+        // Close the read end
+        close(pipefd[0]);
+        
+        exit(EXIT_SUCCESS);
+    } else {
+        // Parent process
+        
+        // Close the read end as we only need to write
+        close(pipefd[0]);
+        
+        // Write to pipe
+        if (write(pipefd[1], message, strlen(message)) == -1) {
+            perror("write");
+        }
+        
+        printf("Parent sent: %s\n", message);
+        
+        // Close the write end
+        close(pipefd[1]);
+        
+        // Wait for child to finish
+        wait(NULL);
+    }
+    
+    return 0;
+}</code></pre>
+        </div>
+      </div>
+      
+      <button class="accordion">More IPC Examples</button>
+      <div class="panel">
+        <div class="panel-content">
+          <h3>Message Queue Example</h3>
+          <p>This example demonstrates how to create and use a message queue for IPC.</p>
+          
+          <div class="code-box">
+            <div class="code-header">
+              <span>Message Queue Example</span>
+            </div>
+            <div class="code-content">
+              <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+#include &lt;unistd.h&gt;
+
+// Define message structure
+struct message {
+    long msg_type;
+    char msg_text[100];
+};
+
+int main() {
+    key_t key;
+    int msgid;
+    struct message msg;
+    
+    // Generate a unique key for message queue
+    if ((key = ftok(".", 'b')) == -1) {
+        perror("ftok");
+        exit(1);
+    }
+    
+    // Create the message queue
+    if ((msgid = msgget(key, IPC_CREAT | 0666)) == -1) {
+        perror("msgget");
+        exit(1);
+    }
+    
+    printf("Message queue created: %d\n", msgid);
+    
+    pid_t pid = fork();
+    
+    if (pid == -1) {
+        perror("fork");
+        exit(1);
+    }
+    
+    if (pid == 0) {
+        // Child process: receive message
+        printf("Child waiting for message...\n");
+        
+        // Receive message
+        if (msgrcv(msgid, &msg, sizeof(msg.msg_text), 1, 0) == -1) {
+            perror("msgrcv");
+            exit(1);
+        }
+        
+        printf("Child received: %s\n", msg.msg_text);
+        
+        // Send a response back to parent
+        msg.msg_type = 2;  // Different message type for parent
+        strcpy(msg.msg_text, "Hello from the child process!");
+        
+        if (msgsnd(msgid, &msg, strlen(msg.msg_text) + 1, 0) == -1) {
+            perror("msgsnd");
+            exit(1);
+        }
+        
+        exit(0);
+    } else {
+        // Parent process: send message
+        msg.msg_type = 1;  // Message type for child
+        strcpy(msg.msg_text, "Hello from the parent process!");
+        
+        // Send the message
+        if (msgsnd(msgid, &msg, strlen(msg.msg_text) + 1, 0) == -1) {
+            perror("msgsnd");
+            exit(1);
+        }
+        
+        printf("Parent sent message\n");
+        
+        // Receive response from child
+        if (msgrcv(msgid, &msg, sizeof(msg.msg_text), 2, 0) == -1) {
+            perror("msgrcv");
+            exit(1);
+        }
+        
+        printf("Parent received: %s\n", msg.msg_text);
+        
+        // Wait for child to finish
+        wait(NULL);
+        
+        // Remove the message queue
+        if (msgctl(msgid, IPC_RMID, NULL) == -1) {
+            perror("msgctl");
+            exit(1);
+        }
+        
+        printf("Message queue removed\n");
+    }
+    
+    return 0;
+}</code></pre>
+            </div>
+          </div>
+          
+          <h3>Socket Example (Unix Domain)</h3>
+          <p>This example demonstrates local IPC using Unix domain sockets.</p>
+          
+          <div class="code-box">
+            <div class="code-header">
+              <span>Unix Domain Socket Example</span>
+            </div>
+            <div class="code-content">
+              <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;sys/un.h&gt;
+
+#define SOCKET_PATH "/tmp/ipc_socket"
+#define BUFFER_SIZE 100
+
+int main() {
+    pid_t pid;
+    
+    // Create child process
+    pid = fork();
+    
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+    
+    if (pid == 0) {
+        // Child process: client
+        sleep(1);  // Wait for server to set up
+        
+        int client_sock;
+        struct sockaddr_un server_addr;
+        char buffer[BUFFER_SIZE];
+        
+        // Create socket
+        if ((client_sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+            perror("socket");
+            exit(EXIT_FAILURE);
+        }
+        
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sun_family = AF_UNIX;
+        strncpy(server_addr.sun_path, SOCKET_PATH, sizeof(server_addr.sun_path) - 1);
+        
+        // Connect to server
+        if (connect(client_sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+            perror("connect");
+            exit(EXIT_FAILURE);
+        }
+        
+        printf("Client connected to server\n");
+        
+        // Send message to server
+        const char *message = "Hello from the client!";
+        if (send(client_sock, message, strlen(message), 0) == -1) {
+            perror("send");
+            exit(EXIT_FAILURE);
+        }
+        
+        // Receive response
+        int bytes_received = recv(client_sock, buffer, BUFFER_SIZE - 1, 0);
+        if (bytes_received == -1) {
+            perror("recv");
+            exit(EXIT_FAILURE);
+        }
+        
+        buffer[bytes_received] = '\0';
+        printf("Client received: %s\n", buffer);
+        
+        // Close connection
+        close(client_sock);
+        exit(EXIT_SUCCESS);
+    } else {
+        // Parent process: server
+        int server_sock, client_sock;
+        struct sockaddr_un server_addr, client_addr;
+        socklen_t client_len;
+        char buffer[BUFFER_SIZE];
+        
+        // Create socket
+        if ((server_sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+            perror("socket");
+            exit(EXIT_FAILURE);
+        }
+        
+        // Remove socket file if it already exists
+        unlink(SOCKET_PATH);
+        
+        // Setup address structure
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sun_family = AF_UNIX;
+        strncpy(server_addr.sun_path, SOCKET_PATH, sizeof(server_addr.sun_path) - 1);
+        
+        // Bind socket
+        if (bind(server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+            perror("bind");
+            exit(EXIT_FAILURE);
+        }
+        
+        // Listen for connections
+        if (listen(server_sock, 5) == -1) {
+            perror("listen");
+            exit(EXIT_FAILURE);
+        }
+        
+        printf("Server waiting for connection...\n");
+        
+        // Accept connection
+        client_len = sizeof(client_addr);
+        if ((client_sock = accept(server_sock, (struct sockaddr*)&client_addr, &client_len)) == -1) {
+            perror("accept");
+            exit(EXIT_FAILURE);
+        }
+        
+        printf("Server accepted connection\n");
+        
+        // Receive message
+        int bytes_received = recv(client_sock, buffer, BUFFER_SIZE - 1, 0);
+        if (bytes_received == -1) {
+            perror("recv");
+            exit(EXIT_FAILURE);
+        }
+        
+        buffer[bytes_received] = '\0';
+        printf("Server received: %s\n", buffer);
+        
+        // Send response
+        const char *response = "Hello from the server!";
+        if (send(client_sock, response, strlen(response), 0) == -1) {
+            perror("send");
+            exit(EXIT_FAILURE);
+        }
+        
+        // Clean up
+        close(client_sock);
+        close(server_sock);
+        unlink(SOCKET_PATH);
+        
+        // Wait for child to finish
+        wait(NULL);
+    }
+    
+    return 0;
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><i class="fas fa-lightbulb"></i> Best Practices and Considerations</h2>
+      
+      <h3>Choosing the Right IPC Mechanism</h3>
+      <p>Selecting the appropriate IPC mechanism depends on several factors:</p>
+      
+      <ul>
+        <li><strong>Relationship between processes:</strong> Parent-child relationships might favor pipes, while unrelated processes might use named pipes, message queues, or sockets</li>
+        <li><strong>Amount of data:</strong> For large data transfers, shared memory is typically most efficient</li>
+        <li><strong>Communication pattern:</strong> One-way, request-response, or complex messaging needs</li>
+        <li><strong>Persistence requirements:</strong> Whether data needs to survive process termination</li>
+        <li><strong>Location of processes:</strong> Same machine or different machines</li>
+      </ul>
+      
+      <div class="warning-box">
+        <strong>Common Challenges with IPC:</strong>
+        <ul>
+          <li><strong>Race Conditions:</strong> When multiple processes access shared resources without proper synchronization</li>
+          <li><strong>Deadlocks:</strong> Processes waiting for each other indefinitely</li>
+          <li><strong>Resource Management:</strong> Ensuring proper cleanup of IPC resources</li>
+          <li><strong>Error Handling:</strong> Dealing with various failure scenarios</li>
+        </ul>
+      </div>
+      
+      <h3>Synchronization Issues</h3>
+      <p>When using IPC mechanisms that involve shared resources (especially shared memory), proper synchronization is essential to prevent race conditions. Common synchronization primitives include:</p>
+      
+      <ul>
+        <li><strong>Mutexes:</strong> Provide mutual exclusion, ensuring only one process can access a resource at a time</li>
+        <li><strong>Semaphores:</strong> Control access to a finite number of resources</li>
+        <li><strong>Condition Variables:</strong> Allow processes to wait for specific conditions</li>
+      </ul>
+      
+      <div class="code-box">
+        <div class="code-header">
+          <span>Simple Mutex Example with Shared Memory</span>
+        </div>
+        <div class="code-content">
+          <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;sys/mman.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+// Structure to be placed in shared memory
+struct shared_data {
+    pthread_mutex_t mutex;  // Mutex for synchronization
+    int counter;            // Shared counter
+};
+
+int main() {
+    int shm_fd;
+    struct shared_data *shared;
+    const char *shm_name = "/my_shared_memory";
+    
+    // Open shared memory object
+    shm_fd = shm_open(shm_name, O_CREAT | O_RDWR, 0666);
+    if (shm_fd == -1) {
+        perror("shm_open");
+        exit(1);
+    }
+    
+    // Set the size of the shared memory object
+    ftruncate(shm_fd, sizeof(struct shared_data));
+    
+    // Map shared memory
+    shared = mmap(NULL, sizeof(struct shared_data), PROT_READ | PROT_WRITE, 
+                  MAP_SHARED, shm_fd, 0);
+    if (shared == MAP_FAILED) {
+        perror("mmap");
+        exit(1);
+    }
+    
+    // Initialize mutex with shared attribute
+    pthread_mutexattr_t mutex_attr;
+    pthread_mutexattr_init(&mutex_attr);
+    pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
+    pthread_mutex_init(&shared->mutex, &mutex_attr);
+    
+    // Initialize counter
+    shared->counter = 0;
+    
+    pid_t pid = fork();
+    
+    if (pid == -1) {
+        perror("fork");
+        exit(1);
+    }
+    
+    int i;
+    const int iterations = 5;
+    
+    if (pid == 0) {
+        // Child process
+        for (i = 0; i < iterations; i++) {
+            // Lock mutex
+            pthread_mutex_lock(&shared->mutex);
+            
+            // Critical section
+            shared->counter++;
+            printf("Child: Incremented counter to %d\n", shared->counter);
+            
+            // Unlock mutex
+            pthread_mutex_unlock(&shared->mutex);
+            
+            sleep(1);  // Sleep to make the interleaving visible
+        }
+    } else {
+        // Parent process
+        for (i = 0; i < iterations; i++) {
+            // Lock mutex
+            pthread_mutex_lock(&shared->mutex);
+            
+            // Critical section
+            shared->counter += 10;
+            printf("Parent: Incremented counter to %d\n", shared->counter);
+            
+            // Unlock mutex
+            pthread_mutex_unlock(&shared->mutex);
+            
+            sleep(1);  // Sleep to make the interleaving visible
+        }
+        
+        // Wait for child
+        wait(NULL);
+        
+        // Clean up
+        pthread_mutex_destroy(&shared->mutex);
+        pthread_mutexattr_destroy(&mutex_attr);
+        
+        // Unmap and close
+        munmap(shared, sizeof(struct shared_data));
+        close(shm_fd);
+        shm_unlink(shm_name);
+    }
+    
+    return 0;
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><i class="fas fa-clipboard-check"></i> Real-World Applications of IPC</h2>
+      
+      <p>IPC mechanisms are foundational to many modern computing paradigms and applications:</p>
+      
+      <h3>Client-Server Applications</h3>
+      <p>Most client-server applications rely on IPC mechanisms, especially sockets, to facilitate communication between client and server processes.</p>
+      
+      <h3>Microservices Architecture</h3>
+      <p>Microservices often communicate via HTTP/REST APIs, message queues, or gRPC, all of which are implementations of IPC principles.</p>
+      
+      <h3>Database Systems</h3>
+      <p>Database engines use various IPC mechanisms to handle connections from multiple clients and coordinate internal processes.</p>
+      
+      <h3>Web Browsers</h3>
+      <p>Modern browsers use process isolation (with IPC for communication) to enhance security and stability.</p>
+      
+      <h3>Operating System Services</h3>
+      <p>Within an OS, many system services communicate with each other and with user applications through IPC channels.</p>
+      
+      <div class="note-box">
+        <strong>Beyond Local IPC:</strong> While this tutorial focuses on local IPC within a single computer, many of the same principles apply to distributed computing, where processes communicate across network boundaries. Technologies like RPC (Remote Procedure Call), message brokers (RabbitMQ, Kafka), and REST APIs extend IPC concepts to distributed systems.
+      </div>
+    </section>
+
+    <section class="quiz">
+      <h2>IPC Quiz</h2>
+      
+      <div id="quiz-container">
+        <div class="quiz-question">
+          Which IPC mechanism typically provides the fastest data transfer for large amounts of data?
+        </div>
+        
+        <div class="quiz-options">
+          <div class="quiz-option" onclick="selectOption(0)">A. Pipes</div>
+          <div class="quiz-option" onclick="selectOption(1)">B. Shared Memory</div>
+          <div class="quiz-option" onclick="selectOption(2)">C. Message Queues</div>
+          <div class="quiz-option" onclick="selectOption(3)">D. Sockets</div>
+        </div>
+        
+        <div id="result" class="result"></div>
+        <button id="submit-btn" class="quiz-button" onclick="checkAnswer()">Submit Answer</button>
+        
+        <button id="next-question-btn" class="quiz-button" onclick="nextQuestion()" style="display: none;">Next Question</button>
+      </div>
+    </section>
+    
+    <div class="pagination">
+      <a href="../index.html" class="arrow-left">Back to Home</a>
+      <!-- <a href="../system-call/system_call.html" class="arrow-right">System Calls</a> -->
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 OS Visualizer. Operating Systems Laboratory Project.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script>
+    // Initialize syntax highlighting
+    document.addEventListener('DOMContentLoaded', () => {
+      hljs.highlightAll();
+    });
+
+    // Accordion functionality
+    const accordions = document.querySelectorAll('.accordion');
+    accordions.forEach(accordion => {
+      accordion.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const panel = this.nextElementSibling;
+        
+        if (panel.style.maxHeight) {
+          panel.style.maxHeight = null;
+        } else {
+          panel.style.maxHeight = panel.scrollHeight + "px";
+        }
+      });
+    });
+    
+    // Quiz functionality
+    let currentQuestion = 0;
+    const questions = [
+      {
+        question: "Which IPC mechanism typically provides the fastest data transfer for large amounts of data?",
+        options: ["Pipes", "Shared Memory", "Message Queues", "Sockets"],
+        correctAnswer: 1
+      },
+      {
+        question: "Which IPC mechanism is most suitable for communication between processes on different machines?",
+        options: ["Pipes", "Shared Memory", "Message Queues", "Sockets"],
+        correctAnswer: 3
+      },
+      {
+        question: "What is a potential issue when multiple processes access shared memory without synchronization?",
+        options: ["Network latency", "Race conditions", "Protocol errors", "Memory leaks"],
+        correctAnswer: 1
+      }
+    ];
+    
+    let selectedOption = -1;
+    
+    function loadQuestion(index) {
+      selectedOption = -1;
+      const quizContainer = document.getElementById("quiz-container");
+      const resultDiv = document.getElementById("result");
+      const question = quizContainer.querySelector(".quiz-question");
+      const options = quizContainer.querySelector(".quiz-options").children;
+      
+      question.textContent = questions[index].question;
+      
+      for (let i = 0; i < options.length; i++) {
+        options[i].textContent = `${String.fromCharCode(65 + i)}. ${questions[index].options[i]}`;
+        options[i].className = "quiz-option";
+      }
+      
+      resultDiv.className = "result";
+      resultDiv.textContent = "";
+      resultDiv.style.display = "none";
+      
+      document.getElementById("submit-btn").style.display = "block";
+      document.getElementById("next-question-btn").style.display = "none";
+    }
+    
+    function selectOption(index) {
+      const options = document.querySelectorAll(".quiz-option");
+      
+      options.forEach(option => {
+        option.classList.remove("option-selected");
+      });
+      
+      options[index].classList.add("option-selected");
+      selectedOption = index;
+    }
+    
+    function checkAnswer() {
+      if (selectedOption === -1) {
+        alert("Please select an answer first!");
+        return;
+      }
+      
+      const options = document.querySelectorAll(".quiz-option");
+      const correctAnswer = questions[currentQuestion].correctAnswer;
+      const resultDiv = document.getElementById("result");
+      
+      if (selectedOption === correctAnswer) {
+        resultDiv.textContent = "✓ Correct! Well done!";
+        resultDiv.className = "result result-correct";
+        options[selectedOption].classList.add("option-correct");
+      } else {
+        resultDiv.textContent = "✗ Incorrect! The correct answer is " + 
+                             String.fromCharCode(65 + correctAnswer) + ".";
+        resultDiv.className = "result result-incorrect";
+        options[selectedOption].classList.add("option-incorrect");
+        options[correctAnswer].classList.add("option-correct");
+      }
+      
+      resultDiv.style.display = "block";
+      document.getElementById("submit-btn").style.display = "none";
+      
+      if (currentQuestion < questions.length - 1) {
+        document.getElementById("next-question-btn").style.display = "block";
+      }
+    }
+    
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion(currentQuestion);
+      }
+    }
+    
+    // Initialize the first question
+    loadQuestion(currentQuestion);
+  </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Firing Squad Synchronization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="FiringSquad.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="navbar">
+            <div class="logo">OS Explorer</div>
+            <nav>
+                <a href="../index.html">Home</a>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <h1>Firing Squad Synchronization</h1>
+            <p>A visual simulation of process synchronization using the firing squad algorithm</p>
+        </section>
+
+        <section class="simulation-settings">
+            <div class="settings-form">
+                <div class="form-group">
+                    <label for="num-processes">Number of Processes:</label>
+                    <input type="number" id="num-processes" min="3" max="50" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="simulation-speed">Simulation Speed:</label>
+                    <input type="range" id="simulation-speed" min="100" max="2000" value="500" class="speed-control">
+                </div>
+                <div class="form-group">
+                    <button id="apply-settings">Apply Settings</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="simulation-panel">
+            <div class="controls">
+                <button id="start-btn">Start Simulation</button>
+                <button id="step-btn">Step Forward</button>
+                <button id="reset-btn">Reset</button>
+            </div>
+
+            <div class="step-display">Step: 0</div>
+            <div class="status-message"></div>
+
+            <div class="process-grid" id="process-container">
+                <!-- Processes will be generated here by JavaScript -->
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-leader"></div>
+                    <span>Leader</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-general"></div>
+                    <span>General</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-active"></div>
+                    <span>Active</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-fired"></div>
+                    <span>Fired</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="info-box">
+            <h3>About Firing Squad Synchronization</h3>
+            <p>The Firing Squad Synchronization Problem is a classic computer science challenge in distributed computing. The
+                goal is to synchronize a line of processes (or soldiers) so they all perform an action (or fire) at exactly
+                the same time.</p>
+            <p>In this simulation, one process acts as the leader, initiating signals that propagate through the line.
+                Eventually, all processes must reach the "fired" state simultaneously, demonstrating perfect synchronization.</p>
+        </section>
+    </div>
+    
+    <footer>
+        &copy; 2025 OS Explorer | CS257: Operating Systems Laboratory
+    </footer>
+    
+    <script src="FiringSquad.js"></script>
+</body>
+
+</html>

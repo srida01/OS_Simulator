@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Readers-Writers Problem</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../index.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    pre {
+      
+      padding: 1rem;
+      
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <h2 class="mb-4">Readers-Writers Problem</h2>
+
+    <p><strong>Shared Data:</strong> (e.g., a file or record)</p>
+    <ul>
+      <li><strong>Readers</strong> – only read the shared object</li>
+      <li><strong>Writers</strong> – update (read and write) the shared object</li>
+    </ul>
+
+    <p><strong>Problem:</strong> If a writer and another process (reader or writer) access the shared data simultaneously, it can lead to inconsistency.</p>
+
+    <h4 class="mt-4">Variations of the Readers-Writers Problem</h4>
+    <ol>
+      <li>
+        <strong>First Readers-Writers Problem:</strong><br>
+        No reader should wait unless a writer has already obtained permission to use the shared object.
+        <ul>
+          <li>Readers do not wait if a writer is only waiting.</li>
+          <li><strong>Writers may starve.</strong></li>
+        </ul>
+      </li>
+      <li>
+        <strong>Second Readers-Writers Problem:</strong><br>
+        Once a writer is ready, it should write as soon as possible, preventing new readers from starting.
+        <ul>
+          <li><strong>Readers may starve.</strong></li>
+        </ul>
+      </li>
+    </ol>
+
+    <h4 class="mt-4">First Readers-Writers Problem Implementation</h4>
+    <p><strong>Shared Variables:</strong></p>
+    <ul>
+      <li><code class="inline">int readcount</code> – keeps track of how many readers are currently accessing the object</li>
+      <li><code class="inline">semaphore mutex</code> – ensures mutual exclusion when <code class="inline">readcount</code> is updated</li>
+      <li><code class="inline">semaphore wrt</code> – mutual exclusion for writers</li>
+    </ul>
+
+    <p><strong>Initial Values:</strong></p>
+    <ul>
+      <li><code class="inline">mutex = 1</code></li>
+      <li><code class="inline">wrt = 1</code></li>
+      <li><code class="inline">readcount = 0</code></li>
+    </ul>
+
+    <h5 class="mt-4">Writer Process</h5>
+    <pre><code>wait(wrt);
+// ...
+// writing is performed
+// ...
+signal(wrt);</code></pre>
+
+    <h5 class="mt-4">Reader Process</h5>
+    <pre><code>wait(mutex);
+readcount++;
+if (readcount == 1)
+    wait(wrt);
+signal(mutex);
+
+// ...
+// reading is performed
+// ...
+
+wait(mutex);
+readcount--;
+if (readcount == 0)
+    signal(wrt);
+signal(mutex);</code></pre>
+  </div>
+</body>
+</html>

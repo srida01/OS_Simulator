@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Banker's Algorithm Demonstration</title>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>
+        <button class="how-to-use-btn" id="how-to-use-btn"><i class="fas fa-question"></i></button>
+        
+        <h1>Banker's Algorithm for Deadlock Avoidance</h1>
+        
+        <div class="theory-section">
+            <h2>Understanding Deadlock</h2>
+            <p>A deadlock is a situation where a set of processes are blocked because each process is holding a resource and waiting for another resource acquired by some other process.</p>
+
+            <h3>Coffman Conditions for Deadlock</h3>
+            <p>For a deadlock to occur, these four conditions must hold simultaneously:</p>
+            <ol>
+                <li><strong>Mutual Exclusion:</strong> ↔️ Resources cannot be shared simultaneously</li>
+                <li><strong>Hold and Wait:</strong> ⟲ Processes hold resources while waiting for others</li>
+                <li><strong>No Preemption:</strong> ⛔ Resources cannot be forcibly taken from processes</li>
+                <li><strong>Circular Wait:</strong> ⭕ A circular chain of processes waiting for resources</li>
+            </ol>
+
+            <h3>Deadlock Handling Strategies</h3>
+            <ul>
+                <li>🚫 <strong>Prevention:</strong> Ensure at least one Coffman condition cannot occur</li>
+                <li>⚠️ <strong>Avoidance:</strong> Make safe resource allocation decisions (Banker's Algorithm)</li>
+                <li>🔍 <strong>Detection:</strong> Allow deadlocks and then detect them</li>
+                <li>🔄 <strong>Recovery:</strong> Take action after deadlock is detected</li>
+            </ul>
+
+            <h3>Banker's Algorithm Concept</h3>
+            <p>The Banker's Algorithm is a deadlock avoidance algorithm that decides whether to grant or deny resource requests based on system safety:</p>
+            <ul>
+                <li><strong>Safe State:</strong> System can allocate resources to each process in some order without causing deadlock</li>
+                <li><strong>Unsafe State:</strong> No guarantee that resources can be allocated safely</li>
+                <li><strong>Available Resources:</strong> Total resources minus currently allocated ones</li>
+                <li><strong>Maximum Need:</strong> Maximum resources a process might need</li>
+                <li><strong>Current Allocation:</strong> Resources currently held by processes</li>
+                <li><strong>Need Matrix:</strong> Additional resources that might be requested (Maximum - Current)</li>
+            </ul>
+        </div>
+        
+        <div class="input-section">
+            <h2>System Configuration</h2>
+            
+            <div class="input-controls">
+                <div class="input-group">
+                    <label for="num-processes">Number of Processes:</label>
+                    <input type="number" id="num-processes" min="1" max="10" value="5">
+                </div>
+                
+                <div class="input-group">
+                    <label for="num-resources">Number of Resource Types:</label>
+                    <input type="number" id="num-resources" min="1" max="10" value="3">
+                </div>
+                
+                <button id="generate-tables">Generate Tables</button>
+                <button id="load-demo">Load Demo Scenario</button>
+            </div>
+        </div>
+        
+        <div id="tables-section" class="hidden">
+            <div class="matrix-container">
+                <div class="matrix-section">
+                    <h2>Maximum Demand Matrix</h2>
+                    <div id="max-matrix" class="matrix"></div>
+                </div>
+                
+                <div class="matrix-section">
+                    <h2>Current Allocation Matrix</h2>
+                    <div id="allocation-matrix" class="matrix"></div>
+                </div>
+                
+                <div class="matrix-section">
+                    <h2>Available Resources</h2>
+                    <div id="available-resources" class="resource-vector"></div>
+                </div>
+            </div>
+            
+            <button id="run-algorithm">Run Banker's Algorithm</button>
+        </div>
+        
+        <div id="results-section" class="hidden">
+            <h2>Results</h2>
+            
+            <div class="result-box">
+                <h3>Need Matrix</h3>
+                <div id="need-matrix" class="matrix"></div>
+            </div>
+            
+            <div class="result-box">
+                <h3>System State</h3>
+                <div id="system-state"></div>
+            </div>
+            
+            <div class="result-box">
+                <h3>Safe Sequence</h3>
+                <div id="safe-sequence"></div>
+            </div>
+            
+            <div class="result-box">
+                <h3>Step-by-Step Execution</h3>
+                <div id="step-execution"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- How to Use Modal -->
+    <div id="how-to-use-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <h2>How to Use the Banker's Algorithm Demonstration</h2>
+            
+            <div class="modal-section">
+                <h3>Overview</h3>
+                <p>The Banker's Algorithm is a resource allocation and deadlock avoidance algorithm used in operating systems. This tool helps you visualize how the algorithm works with different system configurations.</p>
+            </div>
+            
+            <div class="modal-section">
+                <h3>Step-by-Step Instructions</h3>
+                <ol>
+                    <li><strong>Configure the System:</strong> Set the number of processes and resource types using the input fields.</li>
+                    <li><strong>Generate Tables:</strong> Click "Generate Tables" to create the input matrices based on your configuration.</li>
+                    <li><strong>Fill in the Tables:</strong>
+                        <ul>
+                            <li><strong>Maximum Demand Matrix:</strong> Enter the maximum number of resources each process might need.</li>
+                            <li><strong>Current Allocation Matrix:</strong> Enter the resources currently allocated to each process.</li>
+                            <li><strong>Available Resources:</strong> Enter the resources currently available in the system.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Quick Demo:</strong> Alternatively, click "Load Demo Scenario" to populate the tables with a pre-configured example.</li>
+                    <li><strong>Run the Algorithm:</strong> Click "Run Banker's Algorithm" to check if the system is in a safe state.</li>
+                    <li><strong>View Results:</strong> The algorithm will display:
+                        <ul>
+                            <li>The Need Matrix (Max - Allocation)</li>
+                            <li>Whether the system is in a safe state</li>
+                            <li>A safe sequence of processes (if one exists)</li>
+                            <li>Step-by-step execution details</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+            
+            <div class="modal-section">
+                <h3>Understanding the Results</h3>
+                <p><strong>Safe State:</strong> Means the system can allocate resources to each process in some order without causing a deadlock.</p>
+                <p><strong>Unsafe State:</strong> Indicates a risk of deadlock if resource requests are granted in certain sequences.</p>
+                <p><strong>Safe Sequence:</strong> An order in which processes can be executed completely without deadlock.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html> 

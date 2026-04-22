@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sleeping Barber Problem</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../index.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    pre {
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    
+    <h2 class="mb-4">Sleeping Barber Problem</h2>
+
+    <p>
+      The Sleeping Barber Problem is a classic synchronization problem that illustrates the challenges of coordinating multiple processes (customers and a barber) with limited shared resources (chairs).
+    </p>
+
+    <p><strong>Scenario:</strong> A barber sleeps when no customers are present. If a customer arrives and the barber is asleep, the customer wakes him up. If the barber is busy and all chairs are occupied, the customer leaves. Otherwise, the customer waits.</p>
+
+    <h4 class="mt-4">Key Concepts:</h4>
+    <ul>
+      <li><strong>Waiting Chairs:</strong> Limited number of seats in the waiting room.</li>
+      <li><strong>Barber Chair:</strong> Only one customer can be serviced at a time.</li>
+      <li><strong>Customers:</strong> Arrive at random intervals seeking a haircut.</li>
+      <li><strong>Barber:</strong> Sleeps if no customer is waiting.</li>
+    </ul>
+
+    <h4 class="mt-4">Synchronization Tools:</h4>
+    <ul>
+      <li><code class="inline">semaphore waitingChairs</code> – controls access to limited chairs.</li>
+      <li><code class="inline">semaphore barberReady</code> – signals barber availability.</li>
+      <li><code class="inline">semaphore accessSeats</code> – mutex to safely update chair count.</li>
+    </ul>
+
+    <h5 class="mt-4">Customer Process</h5>
+    <pre><code>wait(accessSeats);
+if (availableChairs > 0) {
+    availableChairs--;
+    signal(barberReady);  // wake up the barber
+    signal(accessSeats);
+    wait(barberChair);    // wait for barber to be ready
+    // get haircut
+} else {
+    signal(accessSeats);
+    // leave the shop
+}</code></pre>
+
+    <h5 class="mt-4">Barber Process</h5>
+    <pre><code>while (true) {
+    wait(barberReady);     // sleep until customer arrives
+    wait(accessSeats);
+    availableChairs++;
+    signal(accessSeats);
+    signal(barberChair);   // ready for haircut
+    // cut hair
+}</code></pre>
+  </div>
+</body>
+</html>
