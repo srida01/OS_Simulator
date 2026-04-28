@@ -1,512 +1,587 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <title>MVT Simulation - OS Visualizer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MVT Simulation — OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:            #0f1115;
+      --bg2:           #121212;
+      --surface:       #1a1d23;
+      --border:        rgba(62, 166, 255, 0.12);
+      --border-bright: rgba(62, 166, 255, 0.35);
+      --accent:        #3ea6ff;
+      --accent2:       #00c2ff;
+      --purple:        #a78bfa;
+      --text:          #e6e6e6;
+      --muted:         #5a6472;
+      --dim:           #272b34;
+      --mono:  'IBM Plex Mono', monospace;
+      --sans:  'IBM Plex Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, rgba(173, 150, 220, 0.9), rgba(75, 192, 192, 0.9));
-            background-size: cover;
-            background-attachment: fixed;
-            color: #ffffff;
-            position: relative;
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-        
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><pattern id="dots" patternUnits="userSpaceOnUse" width="30" height="30"><circle cx="5" cy="5" r="1.5" fill="rgba(255, 255, 255, 0.2)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23dots)"/></svg>');
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        nav {
-            background-color: rgba(98, 0, 234, 0.95);
-            height: 80px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            padding: 0 5%;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .logo {
-            font-size: 28px;
-            font-weight: 700;
-            color: #ffffff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            padding: 10px 20px;
-            border-radius: 8px;
-            letter-spacing: 1px;
-        }
-        
-        .logo:hover {
-            background-color: rgba(133, 2, 247, 0.8);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        ul {
-            list-style: none;
-            display: flex;
-            margin: 0;
-            padding: 0;
-        }
-        
-        li {
-            margin: 0 5px;
-        }
-        
-        a {
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 600;
-            text-transform: uppercase;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        a:hover {
-            background-color: rgba(133, 2, 247, 0.8);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 120px 20px 60px;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 30px;
-            color: #6200ea;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            background-color: rgba(15, 15, 15, 0.8);
-            padding: 25px;
-            border-radius: 15px;
-        }
-        
-        .simulation-area {
-            background-color: rgba(15, 15, 15, 0.8);
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 30px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-            color: #d1c4e9;
-        }
-        
-        input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: none;
-            border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.9);
-            font-size: 1rem;
-            color: #333;
-            transition: all 0.3s ease;
-        }
-        
-        input[type="number"]:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.5);
-        }
-        
-        .button {
-            display: inline-block;
-            padding: 12px 28px;
-            background-color: #6200ea;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border: none;
-            cursor: pointer;
-            margin-bottom: 30px;
-        }
-        
-        .button1:hover {
-            background-color: #8502f7;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .block {
-            display: inline-block;
-            background-color: rgba(209, 196, 233, 0.7);
-            margin: 5px;
-            text-align: center;
-            line-height: 50px;
-            font-weight: bold;
-            color: #000;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            height: 50px;
-            position: relative;
-        }
-        
-        .block::after {
-            content: attr(data-process-id);
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.8rem;
-            color: #ffffff;
-        }
-        
-        .allocated {
-            background-color: rgba(98, 0, 234, 0.7);
-            color: #fff;
-            animation: pulse 2s infinite;
-        }
-        
-        /* Different colors for different processes */
-        .process-color-1 { background-color: rgba(98, 0, 234, 0.7); }
-        .process-color-2 { background-color: rgba(233, 30, 99, 0.7); }
-        .process-color-3 { background-color: rgba(0, 150, 136, 0.7); }
-        .process-color-4 { background-color: rgba(255, 87, 34, 0.7); }
-        .process-color-5 { background-color: rgba(63, 81, 181, 0.7); }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(98, 0, 234, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(98, 0, 234, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(98, 0, 234, 0);
-            }
-        }
-        
-        #block-container {
-            margin: 30px 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            min-height: 80px;
-            padding-bottom: 20px; /* Space for process IDs */
-        }
-        
-        #allocation-log {
-            margin-top: 30px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        #allocation-log p {
-            margin: 5px 0;
-            color: #d1c4e9;
-        }
-        
-        .section-title {
-            margin: 30px 0 15px;
-            font-size: 1.5rem;
-            color: #6200ea;
-            border-bottom: 2px solid rgba(98, 0, 234, 0.5);
-            padding-bottom: 10px;
-        }
-        
-        .memory-status {
-            margin-top: 20px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 15px;
-        }
-        
-        .memory-status p {
-            margin: 5px 0;
-            color: #d1c4e9;
-        }
-        
-        .floating-shape {
-            position: absolute;
-            opacity: 0.4;
-            z-index: -1;
-        }
-        
-        .shape1 {
-            top: 15%;
-            left: 10%;
-            width: 150px;
-            height: 150px;
-            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-            background-color: rgba(133, 2, 247, 0.6);
-            animation: float 12s ease-in-out infinite;
-        }
-        
-        .shape2 {
-            bottom: 20%;
-            right: 15%;
-            width: 180px;
-            height: 180px;
-            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-            background-color: rgba(75, 192, 192, 0.6);
-            animation: float 15s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(10deg);
-            }
-            100% {
-                transform: translateY(0) rotate(0deg);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .simulation-area {
-                padding: 20px;
-            }
-        }
-    </style>
+      /* Process palette */
+      --p1: rgba(62,166,255,0.5);
+      --p2: rgba(167,139,250,0.5);
+      --p3: rgba(0,194,255,0.5);
+      --p4: rgba(245,166,35,0.5);
+      --p5: rgba(52,211,153,0.5);
+
+      --p1b: rgba(62,166,255,0.9);
+      --p2b: rgba(167,139,250,0.9);
+      --p3b: rgba(0,194,255,0.9);
+      --p4b: rgba(245,166,35,0.9);
+      --p5b: rgba(52,211,153,0.9);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(62,166,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(62,166,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .container {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 32px; position: relative; z-index: 1;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+    }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--accent); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+    .logo { font-family: var(--display); font-size: 24px; letter-spacing: 2px; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--accent); }
+
+    nav { display: flex; align-items: center; gap: 8px; }
+    nav a {
+      color: var(--muted); text-decoration: none;
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid transparent; border-radius: 4px;
+      transition: all 0.2s;
+    }
+    nav a:hover, nav a.active {
+      color: var(--accent);
+      border-color: var(--border-bright);
+      background: rgba(62,166,255,0.05);
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      padding: 50px 0 36px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .breadcrumb {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb span { color: var(--dim); }
+
+    .page-header h1 {
+      font-family: var(--display);
+      font-size: 52px; line-height: 0.95;
+      letter-spacing: 3px; color: var(--text); margin-bottom: 10px;
+    }
+    .page-header h1 .accent { color: var(--accent); }
+    .page-header p {
+      font-family: var(--sans); font-size: 13px;
+      color: var(--muted); line-height: 1.7;
+    }
+
+    hr.divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* MAIN LAYOUT */
+    .sim-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 48px 0 80px;
+      animation: fadeUp 0.5s ease 0.15s both;
+    }
+
+    /* CONTROL PANEL */
+    .control-panel {
+      background: var(--bg2);
+      padding: 28px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    .panel-section {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-section:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .panel-label {
+      font-family: var(--mono); font-size: 9px; color: var(--muted);
+      letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 16px;
+    }
+
+    .field-label {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text); margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      font-family: var(--mono); font-size: 13px;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--border-bright);
+      background: rgba(62,166,255,0.04);
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      width: 100%; justify-content: center;
+      background: rgba(62,166,255,0.08); border: 1px solid var(--border);
+      border-radius: 4px; padding: 10px 16px;
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(62,166,255,0.15);
+      border-color: var(--border-bright);
+    }
+    .btn-primary {
+      background: var(--accent); color: #0f1115;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .btn-primary:hover {
+      background: var(--accent2); border-color: var(--accent2);
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+    }
+    .stat-box {
+      background: var(--surface); padding: 12px 10px; text-align: center;
+    }
+    .stat-box-label {
+      font-family: var(--mono); font-size: 8px; color: var(--muted);
+      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .stat-box-val {
+      font-family: var(--display); font-size: 20px;
+      letter-spacing: 1px; color: var(--accent);
+    }
+
+    /* VISUALIZATION PANEL */
+    .viz-panel {
+      background: var(--bg2);
+      padding: 28px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    .viz-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    }
+    .viz-title {
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .viz-badge {
+      font-family: var(--mono); font-size: 9px; color: var(--accent);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 10px; border: 1px solid var(--border);
+      border-radius: 20px; background: rgba(62,166,255,0.06);
+    }
+
+    /* Memory bar */
+    #block-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: flex-end;
+      min-height: 80px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .block {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 56px;
+      background: var(--dim);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .block::after {
+      content: attr(data-process-id);
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .allocated { animation: glow 2s ease-in-out infinite; }
+
+    .process-color-1 { background: var(--p1); border-color: var(--p1b); color: #e6e6e6; }
+    .process-color-2 { background: var(--p2); border-color: var(--p2b); color: #e6e6e6; }
+    .process-color-3 { background: var(--p3); border-color: var(--p3b); color: #e6e6e6; }
+    .process-color-4 { background: var(--p4); border-color: var(--p4b); color: #e6e6e6; }
+    .process-color-5 { background: var(--p5); border-color: var(--p5b); color: #e6e6e6; }
+
+    @keyframes glow {
+      0%   { box-shadow: 0 0 0 0 rgba(62,166,255,0.35); }
+      70%  { box-shadow: 0 0 0 5px rgba(62,166,255,0); }
+      100% { box-shadow: 0 0 0 0 rgba(62,166,255,0); }
+    }
+
+    /* Log */
+    .log-wrap {
+      display: flex; flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      flex: 1;
+    }
+    .log-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .terminal-dot.red    { background: #ff5f57; }
+    .terminal-dot.yellow { background: #febc2e; }
+    .terminal-dot.green  { background: #28c840; }
+    .log-title {
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      margin-left: auto; letter-spacing: 0.1em;
+    }
+
+    #allocation-log {
+      padding: 14px 16px;
+      max-height: 160px;
+      overflow-y: auto;
+      font-family: var(--mono); font-size: 12px;
+    }
+    #allocation-log p {
+      color: var(--muted); margin: 4px 0; line-height: 1.7;
+    }
+    #allocation-log p::before { content: '$ '; color: var(--accent); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border); padding: 28px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); text-decoration: none; transition: color 0.2s;
+    }
+    .footer-right a:hover { color: var(--accent); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .sim-layout { grid-template-columns: 1fr; }
+      .page-header h1 { font-size: 38px; }
+    }
+    @media (max-width: 600px) {
+      .container { padding: 0 16px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="floating-shape shape1"></div>
-    <div class="floating-shape shape2"></div>
+<div class="container">
 
+  <header class="navbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <a href="../index.html" class="logo">OS <span>EXPLORER</span></a>
+    </div>
     <nav>
-        <a class="logo" href="../index.html">OS VISUALIZER</a>
-        <ul>
-            <li><a class="button button1" href="#">Home</a></li>
-            <li><a class="button button1" href="about.html">About</a></li>
-            <li><a class="button button1" href="#">References</a></li>
-        </ul>
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
     </nav>
+  </header>
 
-    <div class="container">
-        <h1>Memory Management - MVT (Multiple Variable-size Tasks)</h1>
-        
-        <div class="simulation-area">
-            <div class="input-section">
-                <label for="block-size">Enter the total size of memory:</label>
-                <input type="number" id="block-size" min="1">
-                
-                <button onclick="createBlock()" class="button button1 dropbtn">Initialize Memory</button>
-            </div>
-            
-            <div id="block-container"></div>
-            
-            <div class="memory-status" id="memory-status">
-                <p>Memory not initialized</p>
-            </div>
-            
-            <p class="section-title">Process Allocation:</p>
-            
-            <div class="input-section">
-                <label for="process-size">Enter the size of the process:</label>
-                <input type="number" id="process-size" min="1">
-                
-                <button onclick="allocateProcess()" class="button button1 dropbtn">Allocate Process</button>
-            </div>
-            
-            <div id="allocation-log"></div>
+  <section class="page-header">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="MVFT.html">Memory Management</a>
+      <span>/</span>
+      <span>MVT Simulation</span>
+    </div>
+    <h1>MVT <span class="accent">SIMULATION</span></h1>
+    <p>Multiprogramming with Variable number of Tasks — dynamic partitioning, variable allocation, external fragmentation tracking.</p>
+  </section>
+
+  <hr class="divider">
+
+  <div class="sim-layout">
+
+    <!-- CONTROL PANEL -->
+    <div class="control-panel">
+
+      <div class="panel-section">
+        <div class="panel-label">Step 1 · Initialize</div>
+        <div class="field-label">Total Memory Size</div>
+        <input type="number" id="block-size" min="1" placeholder="e.g. 1000">
+        <button onclick="createBlock()" class="btn btn-primary">Initialize Memory</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">Step 2 · Allocate</div>
+        <div class="field-label">Process Size</div>
+        <input type="number" id="process-size" min="1" placeholder="e.g. 200">
+        <button onclick="allocateProcess()" class="btn">Allocate Process</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">Memory Status</div>
+        <div class="stats-grid" id="memory-status-grid">
+          <div class="stat-box">
+            <div class="stat-box-label">Total</div>
+            <div class="stat-box-val" id="stat-total">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-label">Used</div>
+            <div class="stat-box-val" id="stat-used">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-label">Free</div>
+            <div class="stat-box-val" id="stat-free">—</div>
+          </div>
         </div>
+      </div>
+
     </div>
 
-    <script>
-        var memoryBlocks = [];
-        var totalMemory = 0;
-        var allocatedMemory = 0;
-        var processCounter = 0;
-        var allocatedBlocks = [];
+    <!-- VISUALIZATION PANEL -->
+    <div class="viz-panel">
 
-        function createBlock() {
-            var size = parseInt(document.getElementById("block-size").value);
-            
-            if (isNaN(size) || size <= 0) {
-                alert("Please enter a valid memory size.");
-                return;
-            }
-            
-            var blockContainer = document.getElementById("block-container");
-            blockContainer.innerHTML = ""; // Clear existing blocks
-            
-            // Reset all variables
-            memoryBlocks = [];
-            allocatedBlocks = [];
-            totalMemory = size;
-            allocatedMemory = 0;
-            processCounter = 0;
-            
-            var block = document.createElement("div");
-            block.className = "block";
-            // Scale for visibility but cap at reasonable size
-            var displayWidth = Math.min(800, Math.max(100, size / 2));
-            block.style.width = displayWidth + "px";
-            block.style.height = "50px";
-            block.innerHTML = size;
-            
-            blockContainer.appendChild(block);
-            memoryBlocks.push({ 
-                size: size, 
-                element: block,
-                id: "free-space"
-            });
-            
-            updateMemoryStatus();
-            
-            document.getElementById("allocation-log").innerHTML = 
-                "<p>Memory initialized with size " + size + ".</p>";
-        }
+      <div class="viz-header">
+        <span class="viz-title">Memory Map</span>
+        <span class="viz-badge">MVT · Variable Partitions</span>
+      </div>
 
-        function updateMemoryStatus() {
-            var status = document.getElementById("memory-status");
-            var freeMemory = totalMemory - allocatedMemory;
-            
-            status.innerHTML = 
-                "<p>Total Memory: " + totalMemory + "</p>" +
-                "<p>Allocated Memory: " + allocatedMemory + "</p>" +
-                "<p>Free Memory: " + freeMemory + "</p>";
-        }
+      <div id="block-container">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--dim);margin:auto;">Initialize memory to begin →</span>
+      </div>
 
-        function allocateProcess() {
-            var processSize = parseInt(document.getElementById("process-size").value);
-            var allocationLog = document.getElementById("allocation-log");
-            
-            if (isNaN(processSize) || processSize <= 0) {
-                alert("Please enter a valid process size.");
-                return;
-            }
-            
-            if (memoryBlocks.length === 0 || totalMemory === 0) {
-                allocationLog.innerHTML += "<p>Please initialize memory first.</p>";
-                return;
-            }
-            
-            // Find first free block that can fit the process
-            var allocatedBlockIndex = -1;
-            
-            for (var i = 0; i < memoryBlocks.length; i++) {
-                if (memoryBlocks[i].id === "free-space" && memoryBlocks[i].size >= processSize) {
-                    allocatedBlockIndex = i;
-                    break;
-                }
-            }
+      <div class="log-wrap">
+        <div class="log-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+          <span class="log-title">allocation-log ~ mvt</span>
+        </div>
+        <div id="allocation-log"></div>
+      </div>
 
-            if (allocatedBlockIndex !== -1) {
-                processCounter++;
-                var currentBlock = memoryBlocks[allocatedBlockIndex];
-                var remainingSize = currentBlock.size - processSize;
-                
-                // Remove current block from DOM and array
-                currentBlock.element.remove();
-                memoryBlocks.splice(allocatedBlockIndex, 1);
-                
-                // Create process block (allocated memory)
-                var processBlock = document.createElement("div");
-                processBlock.className = "block allocated process-color-" + (processCounter % 5 + 1);
-                var displayWidth = Math.min(600, Math.max(50, processSize / 2));
-                processBlock.style.width = displayWidth + "px";
-                processBlock.style.height = "50px";
-                processBlock.innerHTML = processSize;
-                processBlock.dataset.processId = "P" + processCounter;
-                
-                // Add the process block to our tracking arrays
-                var processObj = {
-                    id: "P" + processCounter,
-                    size: processSize,
-                    element: processBlock
-                };
-                
-                allocatedBlocks.push(processObj);
-                memoryBlocks.splice(allocatedBlockIndex, 0, processObj);
-                
-                // Create remaining free space block if needed
-                if (remainingSize > 0) {
-                    var freeBlock = document.createElement("div");
-                    freeBlock.className = "block";
-                    var remainingDisplayWidth = Math.min(600, Math.max(50, remainingSize / 2));
-                    freeBlock.style.width = remainingDisplayWidth + "px";
-                    freeBlock.style.height = "50px";
-                    freeBlock.innerHTML = remainingSize;
-                    
-                    var freeObj = {
-                        id: "free-space",
-                        size: remainingSize,
-                        element: freeBlock
-                    };
-                    
-                    memoryBlocks.splice(allocatedBlockIndex + 1, 0, freeObj);
-                }
-                
-                // Update allocated memory amount
-                allocatedMemory += processSize;
-                updateMemoryStatus();
-                
-                // Rebuild the visual display to show all blocks in order
-                var blockContainer = document.getElementById("block-container");
-                blockContainer.innerHTML = "";
-                
-                for (var i = 0; i < memoryBlocks.length; i++) {
-                    blockContainer.appendChild(memoryBlocks[i].element);
-                }
+    </div>
+  </div>
 
-                allocationLog.innerHTML += 
-                    "<p>Process P" + processCounter + " of size " + processSize + 
-                    " allocated. Free memory remaining: " + (totalMemory - allocatedMemory) + "</p>";
-            } else {
-                allocationLog.innerHTML += 
-                    "<p>No available block found to allocate process of size " + processSize + "</p>";
-            }
-            
-            // Auto-scroll the log to the bottom
-            allocationLog.scrollTop = allocationLog.scrollHeight;
-        }
-    </script>
+  <footer>
+    <div class="footer-left">OS Explorer · MVT Simulation</div>
+    <div class="footer-right">
+      <a href="../index.html">Home</a>
+      <a href="MVFT.html">Memory</a>
+      <a href="MFT.html">MFT</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  var memoryBlocks = [];
+  var totalMemory = 0;
+  var allocatedMemory = 0;
+  var processCounter = 0;
+  var allocatedBlocks = [];
+
+  function createBlock() {
+    var size = parseInt(document.getElementById("block-size").value);
+
+    if (isNaN(size) || size <= 0) {
+      alert("Please enter a valid memory size.");
+      return;
+    }
+
+    var blockContainer = document.getElementById("block-container");
+    blockContainer.innerHTML = "";
+
+    memoryBlocks = [];
+    allocatedBlocks = [];
+    totalMemory = size;
+    allocatedMemory = 0;
+    processCounter = 0;
+
+    var block = document.createElement("div");
+    block.className = "block";
+    var displayWidth = Math.min(800, Math.max(100, size / 2));
+    block.style.width = displayWidth + "px";
+    block.style.height = "56px";
+    block.innerHTML = size;
+
+    blockContainer.appendChild(block);
+    memoryBlocks.push({ size: size, element: block, id: "free-space" });
+
+    updateStats();
+    document.getElementById("allocation-log").innerHTML =
+      "<p>Memory initialized: " + size + " units</p>";
+  }
+
+  function updateStats() {
+    var free = totalMemory - allocatedMemory;
+    document.getElementById("stat-total").textContent = totalMemory || "—";
+    document.getElementById("stat-used").textContent = allocatedMemory || (totalMemory ? "0" : "—");
+    document.getElementById("stat-free").textContent = totalMemory ? free : "—";
+  }
+
+  function allocateProcess() {
+    var processSize = parseInt(document.getElementById("process-size").value);
+    var allocationLog = document.getElementById("allocation-log");
+
+    if (isNaN(processSize) || processSize <= 0) {
+      alert("Please enter a valid process size.");
+      return;
+    }
+
+    if (memoryBlocks.length === 0 || totalMemory === 0) {
+      allocationLog.innerHTML += "<p>Initialize memory first.</p>";
+      return;
+    }
+
+    var allocatedBlockIndex = -1;
+
+    for (var i = 0; i < memoryBlocks.length; i++) {
+      if (memoryBlocks[i].id === "free-space" && memoryBlocks[i].size >= processSize) {
+        allocatedBlockIndex = i;
+        break;
+      }
+    }
+
+    if (allocatedBlockIndex !== -1) {
+      processCounter++;
+      var currentBlock = memoryBlocks[allocatedBlockIndex];
+      var remainingSize = currentBlock.size - processSize;
+
+      currentBlock.element.remove();
+      memoryBlocks.splice(allocatedBlockIndex, 1);
+
+      var colorClass = "process-color-" + ((processCounter - 1) % 5 + 1);
+      var processBlock = document.createElement("div");
+      processBlock.className = "block allocated " + colorClass;
+      var displayWidth = Math.min(600, Math.max(50, processSize / 2));
+      processBlock.style.width = displayWidth + "px";
+      processBlock.style.height = "56px";
+      processBlock.innerHTML = processSize;
+      processBlock.dataset.processId = "P" + processCounter;
+
+      var processObj = { id: "P" + processCounter, size: processSize, element: processBlock };
+      allocatedBlocks.push(processObj);
+      memoryBlocks.splice(allocatedBlockIndex, 0, processObj);
+
+      if (remainingSize > 0) {
+        var freeBlock = document.createElement("div");
+        freeBlock.className = "block";
+        var remainingDisplayWidth = Math.min(600, Math.max(50, remainingSize / 2));
+        freeBlock.style.width = remainingDisplayWidth + "px";
+        freeBlock.style.height = "56px";
+        freeBlock.innerHTML = remainingSize;
+
+        var freeObj = { id: "free-space", size: remainingSize, element: freeBlock };
+        memoryBlocks.splice(allocatedBlockIndex + 1, 0, freeObj);
+      }
+
+      allocatedMemory += processSize;
+      updateStats();
+
+      var blockContainer = document.getElementById("block-container");
+      blockContainer.innerHTML = "";
+      for (var i = 0; i < memoryBlocks.length; i++) {
+        blockContainer.appendChild(memoryBlocks[i].element);
+      }
+
+      allocationLog.innerHTML +=
+        "<p>P" + processCounter + "[size=" + processSize + "] allocated. Free: " +
+        (totalMemory - allocatedMemory) + "</p>";
+    } else {
+      allocationLog.innerHTML +=
+        "<p>No free block for process of size " + processSize + "</p>";
+    }
+
+    allocationLog.scrollTop = allocationLog.scrollHeight;
+  }
+</script>
 </body>
 </html>
