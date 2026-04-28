@@ -1,395 +1,377 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About - OS Explorer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
-            background-image: url('landing.jpeg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-blend-mode: overlay;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team — OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:            #0f1115;
+      --bg2:           #121212;
+      --surface:       #1a1d23;
+      --border:        rgba(62, 166, 255, 0.12);
+      --border-bright: rgba(62, 166, 255, 0.35);
+      --accent:        #3ea6ff;
+      --accent2:       #00c2ff;
+      --purple:        #a78bfa;
+      --text:          #e6e6e6;
+      --muted:         #5a6472;
+      --dim:           #272b34;
+      --mono:  'IBM Plex Mono', monospace;
+      --sans:  'IBM Plex Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--mono); min-height: 100vh; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(62,166,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(62,166,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
+    }
+    .container {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 32px; position: relative; z-index: 1;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    /* NAVBAR */
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+    }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 36px; height: 36px; border: 1.5px solid var(--accent);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+    .logo { font-family: var(--display); font-size: 24px; letter-spacing: 2px; color: var(--text); }
+    .logo span { color: var(--accent); }
+    nav { display: flex; align-items: center; gap: 8px; }
+    nav a {
+      color: var(--muted); text-decoration: none;
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid transparent; border-radius: 4px;
+      transition: all 0.2s;
+    }
+    nav a:hover, nav a.active { color: var(--accent); border-color: var(--border-bright); background: rgba(62,166,255,0.05); }
 
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            margin-bottom: 40px;
-        }
+    /* PAGE HEADER */
+    .page-header { padding: 60px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 60px; animation: fadeUp 0.6s ease both; }
+    .page-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(62,166,255,0.08); border: 1px solid var(--border-bright);
+      border-radius: 4px; padding: 6px 14px;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 24px;
+    }
+    .page-header h1 {
+      font-family: var(--display); font-size: 72px;
+      letter-spacing: 4px; margin-bottom: 16px; line-height: 1;
+    }
+    .page-header h1 span { color: var(--accent); }
+    .page-header p { font-family: var(--sans); color: var(--muted); font-size: 14px; max-width: 600px; line-height: 1.8; }
 
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: #4ecca3;
-        }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
 
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin-left: 20px;
-            transition: color 0.3s ease;
-        }
+    /* PROJECT INFO */
+    .project-info {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 36px; margin-bottom: 64px;
+      display: grid; grid-template-columns: 1fr 2fr;
+      gap: 48px; align-items: center;
+      animation: fadeUp 0.5s ease 0.1s both;
+    }
+    .project-info-left h2 {
+      font-family: var(--display); font-size: 36px;
+      letter-spacing: 2px; margin-bottom: 12px;
+    }
+    .project-info-left h2 span { color: var(--accent); }
+    .project-info-left p { font-family: var(--sans); font-size: 13px; color: var(--muted); line-height: 1.8; }
+    .info-pills { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill {
+      background: rgba(62,166,255,0.06); border: 1px solid var(--border);
+      border-radius: 6px; padding: 12px 18px;
+      font-family: var(--mono); font-size: 11px; color: var(--text);
+    }
+    .pill strong {
+      color: var(--accent); display: block;
+      font-family: var(--display); font-size: 28px;
+      letter-spacing: 2px; margin-bottom: 2px;
+    }
 
-        nav a:hover {
-            color: #4ecca3;
-        }
+    /* TEAM SECTION */
+    .team-section h2 {
+      font-family: var(--display); font-size: 48px;
+      letter-spacing: 3px; margin-bottom: 8px;
+    }
+    .team-section .section-sub {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); margin-bottom: 40px; letter-spacing: 0.08em;
+    }
 
-        .hero {
-            text-align: center;
-            padding: 40px 0;
-            margin-bottom: 30px;
-            background: rgba(26, 26, 46, 0.8);
-            border: 1px solid rgba(78, 204, 163, 0.3);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 1s ease-out;
-            backdrop-filter: blur(10px);
-        }
+    /* TEAM GRID */
+    .team-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; margin-bottom: 80px;
+    }
+    .member-card {
+      background: var(--bg2); padding: 28px;
+      transition: background 0.2s; animation: fadeUp 0.4s ease both;
+    }
+    .member-card:hover { background: var(--surface); }
+    .member-card:nth-child(1)  { animation-delay:.05s } .member-card:nth-child(2)  { animation-delay:.10s }
+    .member-card:nth-child(3)  { animation-delay:.15s } .member-card:nth-child(4)  { animation-delay:.20s }
+    .member-card:nth-child(5)  { animation-delay:.25s } .member-card:nth-child(6)  { animation-delay:.30s }
+    .member-card:nth-child(7)  { animation-delay:.35s } .member-card:nth-child(8)  { animation-delay:.40s }
+    .member-card:nth-child(9)  { animation-delay:.45s } .member-card:nth-child(10) { animation-delay:.50s }
+    .member-card:nth-child(11) { animation-delay:.55s }
 
-        .hero h1 {
-            color: #4ecca3;
-            font-size: 2.8em;
-            margin-bottom: 15px;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
+    .member-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 10px;
+      border: 2px solid var(--border);
+      background: linear-gradient(135deg, var(--bg), var(--surface));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--display); font-size: 22px; letter-spacing: 1px;
+      color: var(--accent); flex-shrink: 0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .member-card:hover .avatar { border-color: var(--border-bright); box-shadow: 0 0 16px rgba(62,166,255,0.2); }
+    .member-name { font-family: var(--display); font-size: 20px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
+    .member-id {
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      letter-spacing: 0.1em; background: var(--surface);
+      border: 1px solid var(--dim); border-radius: 4px;
+      padding: 2px 8px; display: inline-block;
+    }
+    .contributions { display: flex; flex-direction: column; gap: 7px; }
+    .contrib {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--sans); font-size: 12px; color: var(--muted); line-height: 1.4;
+    }
+    .contrib-icon { color: var(--accent); opacity: 0.6; flex-shrink: 0; }
 
-        .hero p {
-            color: #ffffff;
-            font-size: 1.3em;
-            opacity: 0.9;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border); padding: 28px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a { font-family: var(--mono); font-size: 11px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-right a:hover { color: var(--accent); }
 
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .team-member {
-            background: rgba(26, 26, 46, 0.8);
-            border: 1px solid rgba(78, 204, 163, 0.3);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            animation: slideUp 0.5s ease-out forwards;
-            opacity: 0;
-            transform: translateY(50px);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .team-member:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(78, 204, 163, 0.4);
-            background: rgba(26, 26, 46, 0.9);
-        }
-
-        .member-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4ecca3 0%, #2c7a6e 100%);
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: #fff;
-            text-transform: uppercase;
-        }
-
-        .member-name {
-            color: #4ecca3;
-            font-size: 1.4em;
-            margin-bottom: 10px;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .member-id {
-            color: #ffffff;
-            font-size: 0.9em;
-            margin-bottom: 15px;
-            opacity: 0.9;
-        }
-
-        .contribution-list {
-            text-align: left;
-            margin-top: 20px;
-        }
-
-        .contribution-item {
-            background: rgba(78, 204, 163, 0.15);
-            border-left: 3px solid #4ecca3;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            border-radius: 0 8px 8px 0;
-            transition: all 0.3s ease;
-            color: #ffffff;
-            font-weight: 500;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .contribution-item:hover {
-            transform: translateX(10px);
-            background: rgba(78, 204, 163, 0.25);
-            box-shadow: 0 4px 10px rgba(78, 204, 163, 0.3);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .section-title {
-            text-align: center;
-            color: #4ecca3;
-            font-size: 2.2em;
-            margin: 40px 0;
-            position: relative;
-            padding-bottom: 15px;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 3px;
-            background: #4ecca3;
-            border-radius: 2px;
-        }
-
-        .project-info {
-            background: rgba(26, 26, 46, 0.8);
-            border: 1px solid rgba(78, 204, 163, 0.3);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 40px 0;
-            animation: fadeIn 1s ease-out;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .project-info h2 {
-            color: #4ecca3;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .project-info p {
-            line-height: 1.8;
-            margin-bottom: 15px;
-            color: #ffffff;
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-    </style>
+    @media (max-width: 900px) {
+      .team-grid { grid-template-columns: repeat(2, 1fr); }
+      .project-info { grid-template-columns: 1fr; }
+      .page-header h1 { font-size: 52px; }
+    }
+    @media (max-width: 600px) {
+      .team-grid { grid-template-columns: 1fr; }
+      .container { padding: 0 16px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header class="navbar">
-            <div class="logo">OS Explorer</div>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="about.html" style="color: #4ecca3;">About</a>
-            </nav>
-        </header>
+<div class="container">
 
-        <section class="hero">
-            <h1>About Our Project</h1>
-            <p>A collaborative effort to visualize operating system concepts</p>
-        </section>
-
-        <div class="project-info">
-            <h2>Project Overview</h2>
-            <p>This project is a comprehensive visualization tool for understanding operating system concepts, particularly focusing on memory allocation algorithms and process scheduling. Our team has worked together to create interactive demonstrations that help students better understand these complex topics.</p>
-        </div>
-
-        <h2 class="section-title">Our Team</h2>
-        
-        <div class="team-grid">
-            <div class="team-member" style="animation-delay: 0.1s;">
-                <div class="member-avatar">U</div>
-                <h3 class="member-name">Utsav</h3>
-                <div class="member-id">231CS161</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">System Calls</div>
-                    <div class="contribution-item">Enhanced Second Chance</div>
-                    <div class="contribution-item">Inter Process Communication</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 0.2s;">
-                <div class="member-avatar">V</div>
-                <h3 class="member-name">Vamshi</h3>
-                <div class="member-id">231CS162</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">FCFS</div>
-                    <div class="contribution-item">Round Robin (RR)</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 0.3s;">
-                <div class="member-avatar">V</div>
-                <h3 class="member-name">Vanshika</h3>
-                <div class="member-id">231CS163</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">Reader-Writer</div>
-                    <div class="contribution-item">Producer-Consumer</div>
-                    <div class="contribution-item">Dining Philosopher</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 0.4s;">
-                <div class="member-avatar">V</div>
-                <h3 class="member-name">Vatsal</h3>
-                <div class="member-id">231CS164</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">Deadlock Detection</div>
-                    <div class="contribution-item">Deadlock Avoidance</div>
-                    <div class="contribution-item">Additional Page Replacement Algorithms</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 0.5s;">
-                <div class="member-avatar">V</div>
-                <h3 class="member-name">Vrishank</h3>
-                <div class="member-id">231CS165</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">MVT</div>
-                    <div class="contribution-item">MFT</div>
-                    <div class="contribution-item">LRU Approximation Algorithm</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 0.6s;">
-                <div class="member-avatar">A</div>
-                <h3 class="member-name">Anurag</h3>
-                <div class="member-id">231CS166</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">First Fit</div>
-                    <div class="contribution-item">Best Fit</div>
-                    <div class="contribution-item">Worst Fit</div>
-                    <div class="contribution-item">Next Fit</div>
-                    <div class="contribution-item">Weighted Best Fit</div>
-                    <div class="contribution-item">Size-Ordered First Fit</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 0.7s;">
-                <div class="member-avatar">U</div>
-                <h3 class="member-name">Unmesh</h3>
-                <div class="member-id">231CS261</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">LRU</div>
-                    <div class="contribution-item">LFU</div>
-                    <div class="contribution-item">FIFO</div>
-                    <div class="contribution-item">Optimal</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 0.8s;">
-                <div class="member-avatar">V</div>
-                <h3 class="member-name">Vaibhavi</h3>
-                <div class="member-id">231CS262</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">SCAN</div>
-                    <div class="contribution-item">SSTF</div>
-                    <div class="contribution-item">FCFS</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 0.9s;">
-                <div class="member-avatar">V</div>
-                <h3 class="member-name">Vishal</h3>
-                <div class="member-id">231CS263</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">Indexed</div>
-                    <div class="contribution-item">Linked</div>
-                    <div class="contribution-item">Sequential</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 1.0s;">
-                <div class="member-avatar">P</div>
-                <h3 class="member-name">Puja</h3>
-                <div class="member-id">231CS264</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">Single Level Directory Organization</div>
-                    <div class="contribution-item">Multiple Level Directory Organization</div>
-                    <div class="contribution-item">Resource Allocation Graph(Deadlock)</div>
-                </div>
-            </div>
-
-            <div class="team-member" style="animation-delay: 1.1s;">
-                <div class="member-avatar">Y</div>
-                <h3 class="member-name">Yashwanth</h3>
-                <div class="member-id">231CS265</div>
-                <div class="contribution-list">
-                    <div class="contribution-item">Shortest Job First (SJF)</div>
-                    <div class="contribution-item">Shortest Remaining Job First (SRJF)</div>
-                    <div class="contribution-item">Priority</div>
-                    <div class="contribution-item">Firing Squad(Process Synchronization)</div>
-                </div>
-            </div>
-        </div>
+  <header class="navbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <span class="logo">OS <span>EXPLORER</span></span>
     </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html" class="active">About</a>
+    </nav>
+  </header>
 
-    <script>
-        // Add animation to team members when they come into view
-        const observerOptions = {
-            threshold: 0.1
-        };
+  <div class="page-header">
+    <div class="page-tag">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Team · 231CS Batch
+    </div>
+    <h1>BEHIND <span>OS EXPLORER</span></h1>
+    <p>A collaborative effort to build interactive visualizations for operating system concepts — helping students understand complex algorithms through hands-on simulation.</p>
+  </div>
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
+  <div class="project-info">
+    <div class="project-info-left">
+      <h2>PROJECT <span>OVERVIEW</span></h2>
+      <p>A comprehensive visualization toolkit for OS concepts, from CPU scheduling to memory management and synchronization.</p>
+    </div>
+    <div class="info-pills">
+      <div class="pill"><strong>15</strong>Modules</div>
+      <div class="pill"><strong>11</strong>Contributors</div>
+      <div class="pill"><strong>5</strong>Categories</div>
+      <div class="pill"><strong>CS</strong>Lab Origin</div>
+    </div>
+  </div>
 
-        document.querySelectorAll('.team-member').forEach(member => {
-            observer.observe(member);
-        });
-    </script>
+  <section class="team-section">
+    <h2>THE TEAM</h2>
+    <p class="section-sub">11 contributors · 231CS batch</p>
+
+    <div class="team-grid">
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">U</div>
+          <div><div class="member-name">UTSAV</div><div class="member-id">231CS161</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></span>System Calls</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Enhanced Second Chance</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.4 2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.09 6.09z"/></svg></span>Inter Process Communication</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">V</div>
+          <div><div class="member-name">VAMSHI</div><div class="member-id">231CS162</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg></span>FCFS Scheduling</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></span>Round Robin (RR)</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">V</div>
+          <div><div class="member-name">VANSHIKA</div><div class="member-id">231CS163</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/><circle cx="12" cy="12" r="4"/></svg></span>Reader-Writer Problem</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>Producer-Consumer</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="20" r="2"/></svg></span>Dining Philosopher</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">V</div>
+          <div><div class="member-name">VATSAL</div><div class="member-id">231CS164</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Deadlock Detection</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>Deadlock Avoidance</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/></svg></span>Additional Page Replacement Algorithms</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">V</div>
+          <div><div class="member-name">VRISHANK</div><div class="member-id">231CS165</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10v4M10 10v4M14 10v4M18 10v4"/></svg></span>MVT Memory Management</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10v4M10 10v4M14 10v4M18 10v4"/></svg></span>MFT Memory Management</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>LRU Approximation Algorithm</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">A</div>
+          <div><div class="member-name">ANURAG</div><div class="member-id">231CS166</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>First / Best / Worst Fit</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>Next Fit / Weighted Best Fit</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>Size-Ordered First Fit</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">U</div>
+          <div><div class="member-name">UNMESH</div><div class="member-id">231CS261</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/></svg></span>LRU Page Replacement</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/></svg></span>LFU Page Replacement</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/></svg></span>FIFO &amp; Optimal</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">V</div>
+          <div><div class="member-name">VAIBHAVI</div><div class="member-id">231CS262</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></span>SCAN Disk Scheduling</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></span>SSTF Disk Scheduling</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></span>FCFS Disk Scheduling</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">V</div>
+          <div><div class="member-name">VISHAL</div><div class="member-id">231CS263</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Indexed File Allocation</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Linked File Allocation</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Sequential File Allocation</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">P</div>
+          <div><div class="member-name">PUJA</div><div class="member-id">231CS264</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>Single Level Directory</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>Multiple Level Directory</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg></span>Resource Allocation Graph</div>
+        </div>
+      </div>
+
+      <div class="member-card">
+        <div class="member-top">
+          <div class="avatar">Y</div>
+          <div><div class="member-name">YASHWANTH</div><div class="member-id">231CS265</div></div>
+        </div>
+        <div class="contributions">
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg></span>SJF / SRJF Scheduling</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>Priority Scheduling</div>
+          <div class="contrib"><span class="contrib-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="20" r="2"/></svg></span>Firing Squad Synchronization</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-left">OS Explorer · Operating Systems Laboratory Project</div>
+    <div class="footer-right">
+      <a href="index.html">Home</a>
+      <a href="about.html">Team</a>
+    </div>
+  </footer>
+
+</div>
 </body>
-</html> 
+</html>
