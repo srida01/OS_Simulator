@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OS Simulator — Demand Paging & Thrashing</title>
+<title>OS Simulator — Virtual Memory</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -13,22 +13,30 @@
 
   <!-- HEADER -->
   <header class="header">
-    <div class="header-brand"><span class="dot"></span> OS Simulator</div>
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('dp')">Demand Paging</button>
-      <button class="tab" onclick="switchTab('th')">Thrashing</button>
-    </div>
+    <button class="back-btn" onclick="history.back()">← Back</button>
   </header>
+  <div class="container">
+  <!-- HERO (always visible, outside tabs) -->
+  <div class="hero">
+    <h1><span class="accent">Virtual</span> Memory</h1>
+    <p>Interactive simulation of <strong>Demand Paging</strong> strategies and <strong>Thrashing</strong> behaviour — visualize how the OS manages memory under pressure.</p>
+  </div>
+
+  <!-- TABS (moved below hero, matching I/O Techniques style) -->
+  <div class="tabs-bar">
+    <button class="tab active" onclick="switchTab('dp')">
+      <span class="tab-icon">📄</span> Demand Paging
+    </button>
+    <button class="tab" onclick="switchTab('th')">
+      <span class="tab-icon">⚡</span> Thrashing
+    </button>
+  </div>
+  </div>
 
   <!-- ═══════════════════════════════════════════
        DEMAND PAGING
   ═══════════════════════════════════════════ -->
   <div id="dp" class="page active">
-    <div class="hero">
-      <div class="tag">Memory Management</div>
-      <h1>Demand Paging</h1>
-      <p>Pages are loaded into memory only when accessed. On a page fault the OS fetches the page from disk, possibly evicting another using the selected replacement policy.</p>
-    </div>
 
     <!-- Config + Stats -->
     <div class="row">
@@ -96,11 +104,6 @@
        THRASHING
   ═══════════════════════════════════════════ -->
   <div id="th" class="page">
-    <div class="hero">
-      <div class="tag">Memory Overload</div>
-      <h1>Thrashing</h1>
-      <p>When the combined working sets of all processes exceed available physical memory, the OS spends more time swapping pages than executing instructions — CPU utilization collapses.</p>
-    </div>
 
     <!-- Config + Metrics -->
     <div class="row">

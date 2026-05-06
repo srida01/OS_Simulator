@@ -26,12 +26,24 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--sans); m
 ::-webkit-scrollbar-track { background:var(--bg); }
 ::-webkit-scrollbar-thumb { background:var(--border-b); border-radius:2px; }
 
-.container { max-width:1280px; margin:0 auto; padding:24px 32px; }
+/* Subtle grid overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(96,184,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(96,184,255,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+
+.container { max-width:1280px; margin:0 auto; padding:24px 32px; position:relative; z-index:1; }
 
 /* BACK BTN */
 .back-btn {
   display:inline-flex; align-items:center; gap:8px;
   padding:8px 16px; background:transparent;
+  margin-top:20px; transition:all .2s;
   border:1px solid var(--border); border-radius:4px;
   color:var(--muted); text-decoration:none; cursor:pointer;
   font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;

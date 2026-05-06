@@ -504,12 +504,14 @@ function renderDmaViz() {
   <line x1="480" y1="150" x2="480" y2="260" stroke="${colCtrl}" stroke-width="${wCtrl}" marker-end="url(#ah)"/>
   <text x="496" y="210" font-family="JetBrains Mono,monospace" font-size="8" fill="${ph>=1&&ph<=3?'#60b8ff':'rgba(96,184,255,0.3)'}" transform="rotate(90,496,210)">${ph>=1&&ph<=3?'CTRL':'─────'}</text>
 
-  <!-- Data transfer: I/O → Memory (L-shaped path bottom) -->
-  <polyline points="430,305 430,345 170,345 170,305" fill="none" stroke="${colData}" stroke-width="${wData}" marker-end="url(#ah)"/>
-  <text x="300" y="360" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="${ph===3?'#2dc840':'rgba(45,200,64,0.3)'}">${ph===3?'DATA TRANSFER (DMA BUS MASTER)':''}</text>
-
+  <!-- Data transfer: I/O → Memory (straight path) -->
+<line x1="400" y1="305"
+      x2="200" y2="305"
+      stroke="${colData}"
+      stroke-width="${wData}"
+      marker-end="url(#ah)"/>
   <!-- IRQ: DMA → CPU (diagonal dashed) -->
-  <line x1="400" y1="105" x2="200" y2="105" stroke="${colIrq}" stroke-width="${wIrq}" stroke-dasharray="5,3" marker-end="url(#ah)"/>
+  <line x1="400" y1="105" x2="100" y2="105" stroke="${colIrq}" stroke-width="${wIrq}" stroke-dasharray="5,3" marker-end="url(#ah)"/>
   <text x="300" y="98" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="${ph===4?'#f5a822':'rgba(0,0,0,0)'}">${ph===4?'IRQ ←':''}</text>
 
   <!-- Animated particles -->
