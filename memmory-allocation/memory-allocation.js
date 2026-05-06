@@ -5,8 +5,8 @@ class MemoryBlock {
         this.startAddress = startAddress;
         this.allocated = false;
         this.processId = null;
-        this.remainingSpace = size;  // Track remaining space
-        this.allocatedProcesses = []; // Track allocated processes
+        this.remainingSpace = size;
+        this.allocatedProcesses = [];
     }
 }
 
@@ -48,7 +48,6 @@ class MemoryManager {
     bestFit(processSize) {
         let bestFitIndex = -1;
         let smallestDifference = Infinity;
-
         for (let i = 0; i < this.blocks.length; i++) {
             if (this.blocks[i].remainingSpace >= processSize) {
                 const difference = this.blocks[i].remainingSpace - processSize;
@@ -64,7 +63,6 @@ class MemoryManager {
     worstFit(processSize) {
         let worstFitIndex = -1;
         let largestDifference = -1;
-
         for (let i = 0; i < this.blocks.length; i++) {
             if (this.blocks[i].remainingSpace >= processSize) {
                 const difference = this.blocks[i].remainingSpace - processSize;
@@ -92,18 +90,13 @@ class MemoryManager {
     weightedBestFit(processSize) {
         let bestFitIndex = -1;
         let bestScore = -Infinity;
-
         for (let i = 0; i < this.blocks.length; i++) {
             if (this.blocks[i].remainingSpace >= processSize) {
-                // Calculate weighted score based on multiple factors
-                const sizeScore = 1 - Math.abs(this.blocks[i].remainingSpace - processSize) / this.blocks[i].size; // Prefer closest fit
-                const locationScore = 1 - (i / this.blocks.length); // Prefer blocks at the beginning
-                const fragmentationScore = this.blocks[i].allocatedProcesses.length === 0 ? 1 : 
-                    (this.blocks[i].remainingSpace - processSize) / this.blocks[i].size; // Prefer blocks with less fragmentation
-                
-                // Combine scores with weights (50% size, 30% location, 20% fragmentation)
+                const sizeScore = 1 - Math.abs(this.blocks[i].remainingSpace - processSize) / this.blocks[i].size;
+                const locationScore = 1 - (i / this.blocks.length);
+                const fragmentationScore = this.blocks[i].allocatedProcesses.length === 0 ? 1 :
+                    (this.blocks[i].remainingSpace - processSize) / this.blocks[i].size;
                 const totalScore = (sizeScore * 0.5) + (locationScore * 0.3) + (fragmentationScore * 0.2);
-                
                 if (totalScore > bestScore) {
                     bestScore = totalScore;
                     bestFitIndex = i;
@@ -114,16 +107,12 @@ class MemoryManager {
     }
 
     sizeOrderedFirstFit(processSize) {
-        // Create a sorted array of block indices based on remaining space
-        const sortedIndices = Array.from({length: this.blocks.length}, (_, i) => i)
+        const sortedIndices = Array.from({ length: this.blocks.length }, (_, i) => i)
             .sort((a, b) => {
-                // Sort by remaining space, prioritizing blocks that are not yet allocated
                 const aScore = this.blocks[a].allocated ? this.blocks[a].remainingSpace : this.blocks[a].size;
                 const bScore = this.blocks[b].allocated ? this.blocks[b].remainingSpace : this.blocks[b].size;
                 return aScore - bScore;
             });
-
-        // Find the first block that fits
         for (const index of sortedIndices) {
             if (this.blocks[index].remainingSpace >= processSize) {
                 return index;
@@ -134,43 +123,30 @@ class MemoryManager {
 
     allocateMemory(processId, processSize, algorithm) {
         let blockIndex = -1;
-        
         switch (algorithm) {
-            case 'first':
-                blockIndex = this.firstFit(processSize);
-                break;
-            case 'best':
-                blockIndex = this.bestFit(processSize);
-                break;
-            case 'worst':
-                blockIndex = this.worstFit(processSize);
-                break;
-            case 'next':
-                blockIndex = this.nextFit(processSize);
-                break;
-            case 'weighted':
-                blockIndex = this.weightedBestFit(processSize);
-                break;
-            case 'size-ordered':
-                blockIndex = this.sizeOrderedFirstFit(processSize);
-                break;
+            case 'first':   blockIndex = this.firstFit(processSize); break;
+            case 'best':    blockIndex = this.bestFit(processSize); break;
+            case 'worst':   blockIndex = this.worstFit(processSize); break;
+            case 'next':    blockIndex = this.nextFit(processSize); break;
+            case 'weighted': blockIndex = this.weightedBestFit(processSize); break;
+            case 'size-ordered': blockIndex = this.sizeOrderedFirstFit(processSize); break;
         }
 
         if (blockIndex !== -1) {
             const block = this.blocks[blockIndex];
             block.allocated = true;
             block.remainingSpace -= processSize;
-            block.allocatedProcesses.push({
-                processId: processId,
-                size: processSize
-            });
+            block.allocatedProcesses.push({ processId, size: processSize });
 
             const process = this.processes[processId - 1];
             process.status = 'Allocated';
             process.allocatedBlock = blockIndex + 1;
+
+            logMessage(`✓ P${processId} (${processSize} KB) → Block ${blockIndex + 1}`, 'success');
         } else {
             const process = this.processes[processId - 1];
             process.status = 'Failed';
+            logMessage(`✗ P${processId} (${processSize} KB) → No suitable block found`, 'error');
         }
 
         this.updateVisualization();
@@ -184,300 +160,272 @@ class MemoryManager {
             block.remainingSpace = block.size;
             block.allocatedProcesses = [];
         });
-        
         this.processes.forEach(process => {
             process.status = 'Pending';
             process.allocatedBlock = null;
         });
-        
         this.currentStep = 0;
         this.lastAllocationIndex = 0;
         this.updateVisualization();
     }
 
     updateVisualization() {
-        // Update process blocks visualization
+        // --- Process blocks ---
         const processBlocksContainer = document.getElementById('processBlocks');
         processBlocksContainer.innerHTML = '';
-        
+
+        const colorMap = ['process-color-1', 'process-color-2', 'process-color-3', 'process-color-4', 'process-color-5'];
+
         this.processes.forEach((process, index) => {
-            const processBlock = document.createElement('div');
-            processBlock.className = `process-block ${process.status.toLowerCase()}`;
-            
-            const processId = document.createElement('div');
-            processId.className = 'process-id';
-            processId.textContent = `P${index + 1}`;
-            
-            const processSize = document.createElement('div');
-            processSize.className = 'process-size';
-            processSize.textContent = `${process.size} KB`;
-            
-            const processStatus = document.createElement('div');
-            processStatus.className = 'process-status';
-            processStatus.textContent = process.status;
-            
-            processBlock.appendChild(processId);
-            processBlock.appendChild(processSize);
-            processBlock.appendChild(processStatus);
-            processBlocksContainer.appendChild(processBlock);
+            const el = document.createElement('div');
+            const colorClass = process.status === 'Allocated'
+                ? colorMap[index % colorMap.length]
+                : process.status === 'Failed' ? '' : '';
+            el.className = `block ${process.status === 'Allocated' ? 'allocated ' + colorClass : ''}`;
+            el.style.flexDirection = 'column';
+            el.style.gap = '4px';
+            el.innerHTML = `
+                <span style="font-weight:700;">P${index + 1}</span>
+                <span style="font-size:10px;">${process.size} KB</span>
+                <span style="font-size:9px;opacity:0.8;">${process.status}</span>
+            `;
+            if (process.status === 'Failed') {
+                el.style.borderColor = 'rgba(255,85,85,0.6)';
+                el.style.background = 'rgba(255,85,85,0.15)';
+                el.style.color = '#ff5555';
+            }
+            processBlocksContainer.appendChild(el);
         });
 
-        // Update memory blocks visualization
+        // --- Memory blocks ---
         const memoryContainer = document.getElementById('memoryVisualization');
         memoryContainer.innerHTML = '';
-        
+
         this.blocks.forEach((block, index) => {
-            const memoryBlock = document.createElement('div');
-            memoryBlock.className = `memory-block ${block.allocated ? 'allocated' : 'unallocated'}`;
-            
-            const blockSize = document.createElement('div');
-            blockSize.className = 'block-size';
-            blockSize.textContent = `${block.size} KB`;
-            
-            const blockInfo = document.createElement('div');
-            blockInfo.className = 'block-info';
-            
+            const el = document.createElement('div');
+            el.className = `block ${block.allocated ? 'allocated' : ''}`;
+            el.style.flexDirection = 'column';
+            el.style.gap = '4px';
+            el.style.minWidth = '110px';
+
             if (block.allocated) {
-                // Create a container for allocated processes
-                const allocatedProcesses = document.createElement('div');
-                allocatedProcesses.className = 'allocated-processes';
-                
-                // Add each allocated process as a tag
-                block.allocatedProcesses.forEach(proc => {
-                    const processTag = document.createElement('div');
-                    processTag.className = 'process-tag';
-                    processTag.textContent = `P${proc.processId} (${proc.size} KB)`;
-                    allocatedProcesses.appendChild(processTag);
-                });
-                
-                // Add remaining space info
-                const remainingInfo = document.createElement('div');
-                remainingInfo.className = 'remaining-info';
-                remainingInfo.textContent = `Remaining: ${block.remainingSpace} KB`;
-                
-                blockInfo.appendChild(allocatedProcesses);
-                blockInfo.appendChild(remainingInfo);
+                const procsText = block.allocatedProcesses.map(p => `P${p.processId}(${p.size}KB)`).join(', ');
+                el.innerHTML = `
+                    <span style="font-weight:700;font-size:10px;">Block ${index + 1}</span>
+                    <span style="font-size:10px;">${block.size} KB</span>
+                    <span style="font-size:9px;opacity:0.85;">${procsText}</span>
+                    <span style="font-size:9px;opacity:0.7;">Free: ${block.remainingSpace} KB</span>
+                `;
             } else {
-                blockInfo.textContent = 'Free';
+                el.innerHTML = `
+                    <span style="font-weight:700;font-size:10px;">Block ${index + 1}</span>
+                    <span style="font-size:10px;">${block.size} KB</span>
+                    <span style="font-size:9px;opacity:0.6;">Free</span>
+                `;
             }
-            
-            memoryBlock.appendChild(blockSize);
-            memoryBlock.appendChild(blockInfo);
-            memoryContainer.appendChild(memoryBlock);
+            memoryContainer.appendChild(el);
         });
 
-        // Update tables
         this.updateTables();
-        
-        // Update progress and stats
-        this.updateProgress();
         this.updateStats();
     }
 
     updateTables() {
-        // Update allocation table
         const allocationTable = document.getElementById('allocationTable');
         allocationTable.innerHTML = '';
-        
         this.blocks.forEach((block, index) => {
             const row = document.createElement('tr');
-            
-            // Create a list of allocated processes
-            let allocatedProcessesText = 'Free';
-            if (block.allocated && block.allocatedProcesses.length > 0) {
-                allocatedProcessesText = block.allocatedProcesses.map(proc => `P${proc.processId}`).join(', ');
-            }
-            
+            const allocatedText = block.allocated && block.allocatedProcesses.length > 0
+                ? block.allocatedProcesses.map(p => `P${p.processId}`).join(', ')
+                : 'Free';
             row.innerHTML = `
                 <td>Block ${index + 1}</td>
                 <td>${block.size} KB</td>
-                <td>${allocatedProcessesText}</td>
+                <td>${allocatedText}</td>
                 <td>${block.remainingSpace} KB ${block.allocated ? 'left' : 'available'}</td>
             `;
             allocationTable.appendChild(row);
         });
 
-        // Update process table
         const processTable = document.getElementById('processTable');
         processTable.innerHTML = '';
-        
         this.processes.forEach((process, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>P${index + 1}</td>
                 <td>${process.size} KB</td>
-                <td class="${process.status.toLowerCase()}">${process.status}</td>
+                <td style="color:${process.status === 'Allocated' ? '#50fa7b' : process.status === 'Failed' ? '#ff5555' : 'inherit'}">${process.status}</td>
                 <td>${process.allocatedBlock ? `Block ${process.allocatedBlock}` : 'N/A'}</td>
             `;
             processTable.appendChild(row);
         });
     }
 
-    updateProgress() {
-        const totalProcesses = this.processes.length;
-        const completedProcesses = this.processes.filter(p => p.status !== 'Pending').length;
-        const progress = (completedProcesses / totalProcesses) * 100;
-        
-        const progressFill = document.querySelector('.progress-fill');
-        const progressText = document.getElementById('progressText');
-        
-        progressFill.style.width = `${progress}%`;
-        progressText.textContent = `Allocation Progress: ${Math.round(progress)}%`;
-    }
-
     updateStats() {
-        const totalMemory = this.blocks.reduce((sum, block) => sum + block.size, 0);
+        const totalMemory = this.blocks.reduce((sum, b) => sum + b.size, 0);
         let allocatedMemory = 0;
-        let internalFragmentation = 0;
-        let externalFragmentation = 0;
-
-        // Calculate allocated memory and internal fragmentation
         this.blocks.forEach(block => {
             if (block.allocated) {
-                const usedSpace = block.allocatedProcesses.reduce((sum, proc) => sum + proc.size, 0);
-                allocatedMemory += usedSpace;
-                internalFragmentation += block.size - usedSpace; // Wasted space in allocated blocks
-            } else {
-                externalFragmentation += block.size; // Unallocated blocks contribute to external fragmentation
+                allocatedMemory += block.allocatedProcesses.reduce((sum, p) => sum + p.size, 0);
             }
         });
-        
-        document.getElementById('totalMemory').textContent = `${totalMemory} KB`;
-        document.getElementById('allocatedMemory').textContent = `${allocatedMemory} KB`;
-        document.getElementById('internalFragmentation').textContent = `${internalFragmentation} KB`;
-        document.getElementById('externalFragmentation').textContent = `${externalFragmentation} KB`;
+        const freeMemory = totalMemory - allocatedMemory;
+
+        document.getElementById('totalMemory').textContent = totalMemory ? `${totalMemory} KB` : '—';
+        document.getElementById('allocatedMemory').textContent = totalMemory ? `${allocatedMemory} KB` : '—';
+        document.getElementById('freeMemory').textContent = totalMemory ? `${freeMemory} KB` : '—';
     }
 }
 
-// Initialize memory manager
+// ---- Global state ----
 const memoryManager = new MemoryManager();
-
-// Add these variables at the top of the file
 let simulationInterval = null;
-let currentSpeed = 5;
+let currentSpeed = 2;
 let selectedAlgorithm = null;
 
-// UI Functions
+// ---- Logging ----
+function logMessage(msg, type = 'info') {
+    const log = document.getElementById('allocation-log');
+    if (!log) return;
+    const p = document.createElement('p');
+    p.textContent = `> ${msg}`;
+    if (type === 'success') p.style.color = '#50fa7b';
+    else if (type === 'error') p.style.color = '#ff5555';
+    else if (type === 'info') p.style.color = '#3ea6ff';
+    log.appendChild(p);
+    log.scrollTop = log.scrollHeight;
+}
+
+// ---- Input table ----
 function updateInputTable() {
     const numBlocks = parseInt(document.getElementById('numBlocks').value);
     const numProcesses = parseInt(document.getElementById('numProcesses').value);
     const maxRows = Math.max(numBlocks, numProcesses);
     const tableBody = document.getElementById('inputTableBody');
-    
+    if (!tableBody) return;
+
     tableBody.innerHTML = '';
-    
     for (let i = 0; i < maxRows; i++) {
         const row = document.createElement('tr');
-        
-        // Block columns
         if (i < numBlocks) {
-            row.innerHTML = `
-                <td>Block ${i + 1}</td>
-                <td><input type="number" id="block${i}" min="1" value="100" class="block-input"></td>
-            `;
+            row.innerHTML = `<td>Block ${i + 1}</td><td><input type="number" id="block${i}" min="1" value="100" class="block-input"></td>`;
         } else {
-            row.innerHTML = `
-                <td>-</td>
-                <td>-</td>
-            `;
+            row.innerHTML = `<td>-</td><td>-</td>`;
         }
-        
-        // Process columns
         if (i < numProcesses) {
-            row.innerHTML += `
-                <td>Process ${i + 1}</td>
-                <td><input type="number" id="process${i}" min="1" value="50" class="process-input"></td>
-            `;
+            row.innerHTML += `<td>Process ${i + 1}</td><td><input type="number" id="process${i}" min="1" value="50" class="process-input"></td>`;
         } else {
-            row.innerHTML += `
-                <td>-</td>
-                <td>-</td>
-            `;
+            row.innerHTML += `<td>-</td><td>-</td>`;
         }
-        
         tableBody.appendChild(row);
     }
 }
 
 function getBlockSizes() {
     const numBlocks = parseInt(document.getElementById('numBlocks').value);
-    const blockSizes = [];
-    for (let i = 0; i < numBlocks; i++) {
-        const input = document.getElementById(`block${i}`);
-        if (input) {
-            blockSizes.push(parseInt(input.value));
-        }
-    }
-    return blockSizes;
+    return Array.from({ length: numBlocks }, (_, i) => {
+        const el = document.getElementById(`block${i}`);
+        return el ? parseInt(el.value) || 100 : 100;
+    });
 }
 
 function getProcessSizes() {
     const numProcesses = parseInt(document.getElementById('numProcesses').value);
-    const processSizes = [];
-    for (let i = 0; i < numProcesses; i++) {
-        const input = document.getElementById(`process${i}`);
-        if (input) {
-            processSizes.push(parseInt(input.value));
-        }
-    }
-    return processSizes;
+    return Array.from({ length: numProcesses }, (_, i) => {
+        const el = document.getElementById(`process${i}`);
+        return el ? parseInt(el.value) || 50 : 50;
+    });
 }
 
+// ---- Generate random inputs ----
+function generateRandomInputs() {
+    const numBlocks = Math.floor(Math.random() * 6) + 3;
+    const numProcesses = Math.floor(Math.random() * 5) + 2;
+
+    document.getElementById('numBlocks').value = numBlocks;
+    document.getElementById('numProcesses').value = numProcesses;
+
+    updateInputTable();
+
+    for (let i = 0; i < numBlocks; i++) {
+        const el = document.getElementById(`block${i}`);
+        if (el) el.value = Math.floor(Math.random() * 451) + 50;
+    }
+    for (let i = 0; i < numProcesses; i++) {
+        const el = document.getElementById(`process${i}`);
+        if (el) el.value = Math.floor(Math.random() * 271) + 30;
+    }
+
+    resetVisualization();
+    logMessage('Random inputs generated. Select an algorithm to begin.', 'info');
+}
+
+// ---- Select algorithm ----
 function selectAlgorithm(algorithm) {
+    if (!algorithm) return;
     selectedAlgorithm = algorithm;
-    
-    // Initialize memory and processes
+
     const blockSizes = getBlockSizes();
     const processSizes = getProcessSizes();
-    
+
     memoryManager.initializeMemory(blockSizes);
     memoryManager.initializeProcesses(processSizes);
     memoryManager.currentStep = 0;
-    
-    document.getElementById('stepInfo').textContent = `Selected ${algorithm} algorithm. Click 'Start Simulation' or 'Next Step' to begin allocation.`;
-    document.getElementById('startButton').disabled = false;
-    document.getElementById('stepButton').disabled = false;
-    
-    memoryManager.updateVisualization();
+
+    document.getElementById('selectedAlgo').textContent = algorithm.toUpperCase();
+    document.getElementById('allocation-log').innerHTML = '';
+    logMessage(`Algorithm set to ${algorithm}. Click "Start Simulation" or "Next Step".`, 'info');
 }
 
+// ---- Step through ----
 function stepThroughAllocation() {
     if (!selectedAlgorithm) {
-        document.getElementById('stepInfo').textContent = 'Please select an algorithm first!';
+        logMessage('Please select an algorithm first!', 'error');
         return;
     }
-    
+
+    if (memoryManager.blocks.length === 0) {
+        logMessage('Click "Generate Inputs" first, then select an algorithm.', 'error');
+        return;
+    }
+
     const currentProcess = memoryManager.processes[memoryManager.currentStep];
-    if (!currentProcess || currentProcess.status !== 'Pending') {
+    if (!currentProcess) {
+        logMessage('All processes handled.', 'info');
         return;
     }
-    
+    if (currentProcess.status !== 'Pending') {
+        memoryManager.currentStep++;
+        return;
+    }
+
     memoryManager.allocateMemory(
         memoryManager.currentStep + 1,
         currentProcess.size,
         selectedAlgorithm
     );
-    
     memoryManager.currentStep++;
-    
+
     if (memoryManager.currentStep >= memoryManager.processes.length) {
-        document.getElementById('stepInfo').textContent = 'Allocation complete!';
-        return;
+        logMessage('Allocation complete!', 'info');
     }
-    
-    document.getElementById('stepInfo').textContent = `Step ${memoryManager.currentStep + 1}: Allocating Process ${memoryManager.currentStep + 1}`;
 }
 
 function isAllocationComplete() {
     return memoryManager.currentStep >= memoryManager.processes.length;
 }
 
+// ---- Start / pause simulation ----
 function startSimulation() {
     if (!selectedAlgorithm) {
-        document.getElementById('stepInfo').textContent = 'Please select an algorithm first!';
+        logMessage('Please select an algorithm first!', 'error');
         return;
     }
-    
+    if (memoryManager.blocks.length === 0) {
+        logMessage('Click "Generate Inputs" first, then select an algorithm.', 'error');
+        return;
+    }
+
     if (!simulationInterval) {
         simulationInterval = setInterval(() => {
             if (!isAllocationComplete()) {
@@ -485,109 +433,50 @@ function startSimulation() {
             } else {
                 clearInterval(simulationInterval);
                 simulationInterval = null;
-                document.getElementById('startButton').innerHTML = '<i class="fas fa-play"></i> Start Simulation';
+                document.getElementById('startButton').textContent = 'Start Simulation';
             }
         }, 1000 / currentSpeed);
-        document.getElementById('startButton').innerHTML = '<i class="fas fa-pause"></i> Pause Simulation';
+        document.getElementById('startButton').textContent = 'Pause Simulation';
     } else {
         clearInterval(simulationInterval);
         simulationInterval = null;
-        document.getElementById('startButton').innerHTML = '<i class="fas fa-play"></i> Start Simulation';
+        document.getElementById('startButton').textContent = 'Start Simulation';
     }
 }
 
-function updateSpeed(value) {
-    currentSpeed = value;
-    document.getElementById('speedValue').textContent = value + 'x';
-    
-    if (simulationInterval) {
-        clearInterval(simulationInterval);
-        simulationInterval = setInterval(() => {
-            if (!memoryManager.isAllocationComplete()) {
-                stepThroughAllocation();
-            } else {
-                clearInterval(simulationInterval);
-                simulationInterval = null;
-                document.getElementById('startButton').innerHTML = '<i class="fas fa-play"></i> Start Simulation';
-            }
-        }, 1000 / currentSpeed);
-    }
-}
-
+// ---- Reset ----
 function resetVisualization() {
     if (simulationInterval) {
         clearInterval(simulationInterval);
         simulationInterval = null;
     }
-    
     selectedAlgorithm = null;
-    document.getElementById('startButton').innerHTML = '<i class="fas fa-play"></i> Start Simulation';
-    document.getElementById('startButton').disabled = true;
-    document.getElementById('stepButton').disabled = true;
-    document.getElementById('stepInfo').textContent = 'Select an algorithm to begin';
-    
-    memoryManager.reset();
+    document.getElementById('startButton').textContent = 'Start Simulation';
+    document.getElementById('selectedAlgo').textContent = 'Select Algorithm';
+    document.getElementById('algorithmSelect').value = '';
+
+    const log = document.getElementById('allocation-log');
+    if (log) log.innerHTML = '';
+
+    memoryManager.blocks = [];
+    memoryManager.processes = [];
     memoryManager.currentStep = 0;
-    memoryManager.updateVisualization();
+    memoryManager.lastAllocationIndex = 0;
+
+    // Clear visuals
+    document.getElementById('processBlocks').innerHTML = '';
+    document.getElementById('memoryVisualization').innerHTML = '';
+    document.getElementById('allocationTable').innerHTML = '';
+    document.getElementById('processTable').innerHTML = '';
+    document.getElementById('totalMemory').textContent = '—';
+    document.getElementById('allocatedMemory').textContent = '—';
+    document.getElementById('freeMemory').textContent = '—';
 }
 
-function resetSimulation() {
-    const output = document.getElementById('output');
-    if (output) {
-        output.textContent = '';
-    }
-    const status = document.getElementById('status');
-    if (status) {
-        status.textContent = 'Simulation reset';
-    }
-    resetVisualization();
-    
-    // Reset input fields
-    updateInputTable();
-}
-
-function generateRandomInputs() {
-    // Generate random number of blocks (between 3 and 8)
-    const numBlocks = Math.floor(Math.random() * 6) + 3;
-    document.getElementById('numBlocks').value = numBlocks;
-
-    // Generate random number of processes (between 2 and 6)
-    const numProcesses = Math.floor(Math.random() * 5) + 2;
-    document.getElementById('numProcesses').value = numProcesses;
-
-    // Update the input table first
-    updateInputTable();
-
-    // Generate random block sizes (between 50 and 500 KB)
-    for (let i = 0; i < numBlocks; i++) {
-        const blockSize = Math.floor(Math.random() * 451) + 50; // 50 to 500
-        document.getElementById(`block${i}`).value = blockSize;
-    }
-
-    // Generate random process sizes (between 30 and 300 KB)
-    for (let i = 0; i < numProcesses; i++) {
-        const processSize = Math.floor(Math.random() * 271) + 30; // 30 to 300
-        document.getElementById(`process${i}`).value = processSize;
-    }
-
-    // Reset the simulation
-    resetVisualization();
-    document.getElementById('status').textContent = 'Random inputs generated. Select an algorithm to begin.';
-}
-
-// Add event listeners for input changes
+// ---- Init ----
 document.getElementById('numBlocks').addEventListener('change', updateInputTable);
 document.getElementById('numProcesses').addEventListener('change', updateInputTable);
 
-// Add event listener for speed slider
-document.addEventListener('DOMContentLoaded', function() {
-    const speedSlider = document.getElementById('speedSlider');
-    speedSlider.addEventListener('input', function() {
-        updateSpeed(this.value);
-    });
-});
-
-// Initialize the page
-window.onload = function() {
+window.onload = function () {
     updateInputTable();
-}; 
+};
