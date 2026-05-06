@@ -3,216 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Replacement Algorithms</title>
+    <title>Page Replacement Algorithms — OS Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <a href="../index.html" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>
-        <button class="how-to-use-btn" id="how-to-use-btn"><i class="fas fa-question"></i></button>
-        
-        <h1 class="page-title">Page Replacement Algorithms</h1>
-        
+<div class="container">
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="logo-wrap">
+            <div class="logo-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <span class="logo">OS <span>EXPLORER</span></span>
+        </div>
+        <nav>
+            <a href="../index.html" class="active">Home</a>
+            <a href="../about.html">About</a>
+        </nav>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>PAGE REPLACEMENT <span class="accent">ALGORITHMS</span></h1>
+            <p class="hero-sub">Explore MRU and Randomized page replacement strategies with advanced visualization and analysis tools.</p>
+        </div>
+    </section>
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
         <div class="theory-section">
-            <h2>Memory Management and Paging</h2>
-            <p>Paging is a memory management scheme that eliminates the need for contiguous allocation of physical memory. It avoids external fragmentation and allows processes to be split into smaller fixed-size pages.</p>
-
-            <h3>Key Concepts</h3>
-            <ul>
-                <li><strong>Page:</strong> Fixed-size block of instructions or data</li>
-                <li><strong>Frame:</strong> Fixed-size block of physical memory</li>
-                <li><strong>Page Table:</strong> Maps virtual pages to physical frames</li>
-                <li><strong>Page Fault:</strong> Occurs when a requested page is not in memory</li>
-                <li><strong>Page Hit:</strong> Occurs when a requested page is found in memory</li>
-            </ul>
-
-            <h3>Page Replacement Algorithms in Detail</h3>
+            <h2>Understanding Page Replacement</h2>
+            <p>A Page Replacement Algorithm is a technique employed by the OS to manage memory by selecting which page to replace in the main memory when it becomes full. The primary goal is to minimize page faults and optimize system performance.</p>
             
-            <h4>Most Recently Used (MRU)</h4>
-            <p>MRU replaces the page that was most recently accessed. This algorithm is based on the assumption that the most recently used page will not be needed again soon.</p>
-            <ul>
-                <li><strong>Implementation:</strong> Maintains a timestamp or counter for each page access</li>
-                <li><strong>Use Case:</strong> Effective for inverse locality of reference patterns</li>
-                <li><strong>Performance:</strong> Good for specific workloads where recent pages are unlikely to be reused</li>
-            </ul>
-
-            <h4>Random Replacement</h4>
-            <p>Randomly selects a page frame for replacement when a page fault occurs.</p>
-            <ul>
-                <li><strong>Implementation:</strong> Uses a random number generator to select victim frame</li>
-                <li><strong>Advantages:</strong> Simple implementation, no overhead for tracking page usage</li>
-                <li><strong>Performance:</strong> Can sometimes outperform complex algorithms by avoiding worst-case scenarios</li>
-            </ul>
-
-            <h3>Performance Metrics</h3>
-            <ul>
-                <li><strong>Page Hits:</strong> Number of times requested page is found in memory</li>
-                <li><strong>Page Faults:</strong> Number of times page must be loaded from secondary storage</li>
-                <li><strong>Hit Ratio:</strong> (Page Hits / Total Page References) × 100%</li>
-                <li><strong>Fault Ratio:</strong> (Page Faults / Total Page References) × 100%</li>
-            </ul>
-
-            <h3>Memory Access Patterns</h3>
-            <ul>
-                <li><strong>Temporal Locality:</strong> Recently accessed items are likely to be accessed again</li>
-                <li><strong>Spatial Locality:</strong> Items near recently accessed items are likely to be accessed</li>
-                <li><strong>Sequential Access:</strong> Pages are accessed in sequential order</li>
-                <li><strong>Random Access:</strong> No particular pattern in page access</li>
-            </ul>
-        </div>
-        
-        <div class="input-section">
-            <div class="form-group">
-                <label for="reference-string">Reference String (space-separated numbers):</label>
-                <input type="text" id="reference-string" placeholder="e.g., 7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1">
-            </div>
-            
-            <div class="form-group">
-                <label for="frame-size">Number of Frames:</label>
-                <input type="number" id="frame-size" min="1" max="10" value="3">
-            </div>
-            
-            <div class="form-group">
-                <label for="algorithm">Select Algorithm:</label>
-                <select id="algorithm">
-                    <option value="fifo">FIFO (First-In-First-Out)</option>
-                    <option value="lru">LRU (Least Recently Used)</option>
-                    <option value="lfu">LFU (Least Frequently Used)</option>
-                    <option value="mru">MRU (Most Recently Used)</option>
-                    <option value="random">Random Replacement</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <button id="simulate-btn">Simulate</button>
-                <button id="step-btn" disabled style="display: none;">Step</button>
-                <button id="reset-btn">Reset</button>
+            <h3>Algorithm Overview</h3>
+            <div class="algorithm-grid">
+                <div class="algo-card">
+                    <h4>MRU</h4>
+                    <p>The page which was most recently used is replaced.</p>
+                </div>
+                <div class="algo-card">
+                    <h4>Random</h4>
+                    <p>The page to replace is selected randomly.</p>
+                </div>
             </div>
         </div>
-        
-        <div class="simulation-container">
-            <div class="simulation-controls">
-                <h2>Simulation</h2>
-                <div class="speed-control" style="display: none;">
-                    <label for="speed">Speed:</label>
-                    <input type="range" id="speed" min="1" max="10" value="5">
+        <!-- VISUALIZER SECTION -->
+        <div class="visualizer-section">
+            <h2>PAGE REPLACEMENT VISUALIZER</h2>
+            
+            <div class="input-controls">
+                <div class="form-group">
+                    <label for="input_string">Enter the Stream of Pages:</label>
+                    <input type="text" id="input_string" placeholder="e.g., 7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="frame_size">Enter the Number of Frames:</label>
+                    <input id="frame_size" placeholder="1-10" type="number" name="frame" min="1" max="10" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="drop_down">Choose the Algorithm:</label>
+                    <select id="drop_down" name="algo" required>
+                        <option value="" disabled selected>Select your option</option>
+                        <option value="MRU">Most Recently Used</option>
+                        <option value="Random">Random</option>
+                    </select>
+                </div>
+                
+                <div class="button-group">
+                    <input id="btn1" type="button" onclick="visualize();" class="visualize-btn" value="VISUALIZE">
                 </div>
             </div>
+        </div>
+        <!-- RESULTS SECTION -->
+        <div class="results-section" id="SUM" style="display:none;">
+            <h2>VISUALIZATION AND SUMMARY</h2>
             
-            <div class="visualization">
-                <div class="reference-display">
-                    <h3>Reference String</h3>
-                    <div id="reference-display"></div>
-                </div>
-                
-                <div class="view-tabs">
-                    <button class="tab-button active" data-tab="table-view">Table View</button>
-                    <button class="tab-button" data-tab="step-view" style="display: none;">Step View</button>
-                </div>
-                
-                <div class="frames-display tab-content active" id="table-view">
-                    <h3>Simulation History</h3>
-                    <div id="frames-container"></div>
-                </div>
-                
-                <div class="frames-display tab-content" id="step-view">
-                    <h3>Current Step Details</h3>
-                    <div id="step-details"></div>
-                </div>
+            <div class="data-display">
+                <table id="tbl" class="results-table">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
             </div>
             
             <div class="statistics">
-                <h3>Statistics</h3>
                 <div class="stat-item">
-                    <span>Page Hits:</span>
-                    <span id="page-hits">0</span>
-                </div>
-                <div class="stat-item">
-                    <span>Page Faults:</span>
-                    <span id="page-faults">0</span>
+                    <span class="stat-label">Page Misses:</span>
+                    <span id="page_miss" class="stat-value">0</span>
                 </div>
                 <div class="stat-item">
-                    <span>Hit Ratio:</span>
-                    <span id="hit-ratio">0.00</span>
+                    <span class="stat-label">Page Hits:</span>
+                    <span id="page_hits" class="stat-value">0</span>
                 </div>
-            </div>
-        </div> 
-        
-        <!-- How to Use Modal -->
-        <div id="how-to-use-modal" class="modal">
-            <div class="modal-content">
-                <button class="modal-close" id="modal-close">&times;</button>
-                <h2>Page Replacement Algorithms Explained</h2>
-                
-                <div class="modal-section">
-                    <h3>Overview</h3>
-                    <p>Page replacement algorithms are used by operating systems to decide which memory pages to swap out when a page of memory needs to be allocated. This simulation demonstrates how different algorithms perform with various reference strings.</p>
+                <div class="stat-item">
+                    <span class="stat-label">Miss Rate:</span>
+                    <span id="miss_rate" class="stat-value">0%</span>
                 </div>
-                
-                <div class="modal-section">
-                    <h3>Available Algorithms</h3>
-                    
-                    <h4>1. First-In First-Out (FIFO)</h4>
-                    <p>The simplest page replacement algorithm. It replaces the oldest page in memory, regardless of how frequently or recently it was used.</p>
-                    <ul>
-                        <li><strong>Advantages:</strong> Simple to implement and understand</li>
-                        <li><strong>Disadvantages:</strong> Can lead to Bélády's anomaly (adding more frames can increase page faults)</li>
-                    </ul>
-                    
-                    <h4>2. Least Recently Used (LRU)</h4>
-                    <p>Replaces the page that hasn't been used for the longest period of time. This often performs better than FIFO because it takes temporal locality into account.</p>
-                    <ul>
-                        <li><strong>Advantages:</strong> Good performance for most workloads due to temporal locality</li>
-                        <li><strong>Disadvantages:</strong> Requires keeping track of when each page was last accessed</li>
-                    </ul>
-                    
-                    <h4>3. Most Recently Used (MRU)</h4>
-                    <p>Replaces the page that has been most recently accessed. This can be effective for certain access patterns where recently used pages are less likely to be needed again soon.</p>
-                    <ul>
-                        <li><strong>Advantages:</strong> Works well for certain specialized workloads with specific access patterns</li>
-                        <li><strong>Disadvantages:</strong> Generally performs worse than LRU for most common workloads</li>
-                    </ul>
-                    
-                    <h4>4. Least Frequently Used (LFU)</h4>
-                    <p>Replaces the page that has been accessed the least number of times. This can be helpful for pages that are accessed frequently in bursts.</p>
-                    <ul>
-                        <li><strong>Advantages:</strong> Works well when access patterns don't change much</li>
-                        <li><strong>Disadvantages:</strong> Doesn't consider recency, older pages may stay in memory indefinitely</li>
-                    </ul>
-                    
-                    <h4>5. Random Replacement</h4>
-                    <p>Randomly selects a page to replace. While simple, it can sometimes outperform more sophisticated algorithms for certain workloads.</p>
-                    <ul>
-                        <li><strong>Advantages:</strong> Very simple to implement, no overhead for tracking page usage</li>
-                        <li><strong>Disadvantages:</strong> Unpredictable performance, typically worse than LRU or FIFO</li>
-                    </ul>
-                </div>
-                
-                <div class="modal-section">
-                    <h3>How to Use This Simulator</h3>
-                    <ol>
-                        <li>Enter a reference string (a sequence of page numbers separated by spaces)</li>
-                        <li>Set the number of frames (physical memory slots)</li>
-                        <li>Select an algorithm from the dropdown menu</li>
-                        <li>Click "Start Simulation" to see how the algorithm performs</li>
-                        <li>Use the speed control to adjust the animation pace</li>
-                        <li>View the results in both visual and table formats</li>
-                    </ol>
-                </div>
-                
-                <div class="modal-section">
-                    <h3>Understanding the Results</h3>
-                    <p><strong>Page Hit:</strong> When a requested page is already in memory (colored in green)</p>
-                    <p><strong>Page Fault:</strong> When a requested page is not in memory and must be loaded (colored in red)</p>
-                    <p><strong>Hit Ratio:</strong> The percentage of page accesses that resulted in hits (higher is better)</p>
-                    <p><strong>Fault Ratio:</strong> The percentage of page accesses that resulted in faults (lower is better)</p>
+                <div class="stat-item">
+                    <span class="stat-label">Hit Rate:</span>
+                    <span id="hit_rate" class="stat-value">0%</span>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
+
+    <footer>
+        <div class="footer-left">OS Explorer · Operating Systems Laboratory Project</div>
+        <div class="footer-right">
+            <a href="../index.html">Home</a>
+            <a href="../about.html">Team</a>
+        </div>
+    </footer>
+
+</div>
     
     <script src="script.js"></script>
-    <script src="modal.js"></script>
 </body>
 </html> 

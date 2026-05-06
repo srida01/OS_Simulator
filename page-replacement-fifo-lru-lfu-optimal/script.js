@@ -35,7 +35,7 @@ function visualize() {
 	for (let o = 0; o < numberOfFrames; o++) {
 		temp[o] = -1;
 	}
-	if (dropDown=="FIFO"||dropDown=="Optimal"||dropDown=="LRU"||dropDown=="MRU"||dropDown=="LFU"||dropDown=="MFU"||dropDown=="Random") {
+	if (dropDown=="FIFO"||dropDown=="Optimal"||dropDown=="LRU"||dropDown=="LFU") {
 		var row = table.insertRow(0);
 		for (let j = 0; j <= (numberOfFrames + 1); j++) {
 			var cell = row.insertCell(j);
