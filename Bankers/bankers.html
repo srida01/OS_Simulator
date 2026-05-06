@@ -3,11 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://rsms.me/">
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Banker's Algorithm Demonstration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+      :root {
+        --bg:            #0d1017;
+        --bg2:           #111520;
+        --surface:       #161b27;
+        --border:        rgba(82, 170, 255, 0.18);
+        --border-bright: rgba(82, 170, 255, 0.45);
+        --accent:        #60b8ff;
+        --accent-dim:    rgba(96, 184, 255, 0.15);
+        --accent2:       #60b8ff;
+        --purple:        #a78bfa;
+        --text:          #eef2f7;
+        --muted:         #8fa4bc;
+        --dim:           rgba(96, 183, 255, 0.803);
+        --mono:  'IBM Plex Mono', monospace;
+        --sans:  'IBM Plex Sans', sans-serif;
+        --display: 'Bebas Neue', sans-serif;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--mono);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: '';
+        position: fixed; inset: 0;
+        background-image:
+          linear-gradient(rgba(96,184,255,0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(96,184,255,0.06) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none; z-index: 0;
+      }
+
+      .container {
+        max-width: 1280px; margin: 0 auto;
+        padding: 0 32px; position: relative; z-index: 1;
+      }
+    </style>
 </head>
 <body>
     <div class="container">
