@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPU Scheduling Visualizer</title>
+    <link rel="stylesheet" href="CPU-1.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>CPU Scheduling Visualizer</h1>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('fcfsTab', this)">First Come First Serve</button>
+            <button class="tab" onclick="switchTab('rrTab', this)">Round Robin</button>
+        </div>
+
+        <!-- FCFS Tab -->
+        <div id="fcfsTab" class="tab-content active-tab">
+            <h2>First Come First Serve</h2>
+            <div class="algo-info">
+                <h3>Definition</h3>
+                <p>FCFS executes processes in arrival order, running each to completion.</p>
+                <h3>Advantages</h3>
+                <ul>
+                    <li>Simple to implement</li>
+                    <li>No starvation</li>
+                </ul>
+                <h3>Disadvantages</h3>
+                <ul>
+                    <li>Convoy effect</li>
+                    <li>Poor average waiting time</li>
+                </ul>
+            </div>
+            <form id="fcfsForm" onsubmit="runFCFS(event)">
+                <div class="inputs">
+                    <input type="text" id="fcfsPid" placeholder="Process ID" required />
+                    <input type="number" id="fcfsArrival" placeholder="Arrival Time" required />
+                    <input type="number" id="fcfsBurst" placeholder="Burst Time" required />
+                    <button type="button" class="add-btn" onclick="addProcess('fcfs')">Add Process</button>
+                </div>
+                <button type="submit" class="run-btn">Run FCFS</button>
+            </form>
+            <div id="fcfsProcessList" class="process-list"></div>
+            <div id="fcfsGanttChart" class="gantt"></div>
+            <div id="fcfsResultTable"></div>
+            <div class="avg-times">
+                <p>Average Waiting Time: <span id="fcfsAvgWT">—</span></p>
+                <p>Average Turnaround Time: <span id="fcfsAvgTAT">—</span></p>
+            </div>
+        </div>
+
+        <!-- RR Tab -->
+        <div id="rrTab" class="tab-content">
+            <h2>Round Robin</h2>
+            <div class="algo-info">
+                <h3>Definition</h3>
+                <p>RR assigns each process a fixed time quantum; if unfinished, it rejoins the ready queue.</p>
+                <h3>Advantages</h3>
+                <ul>
+                    <li>Fair time-sharing</li>
+                    <li>Good response time</li>
+                </ul>
+                <h3>Disadvantages</h3>
+                <ul>
+                    <li>High context-switch overhead</li>
+                    <li>Quantum choice affects performance</li>
+                </ul>
+            </div>
+            <form id="rrForm" onsubmit="runRR(event)">
+                <div class="inputs">
+                    <input type="text" id="rrPid" placeholder="Process ID" required />
+                    <input type="number" id="rrArrival" placeholder="Arrival Time" required />
+                    <input type="number" id="rrBurst" placeholder="Burst Time" required />
+                    <input type="number" id="rrQuantum" placeholder="Time Quantum" required />
+                    <button type="button" class="add-btn" onclick="addProcess('rr')">Add Process</button>
+                </div>
+                <button type="submit" class="run-btn">Run Round Robin</button>
+            </form>
+            <div id="rrProcessList" class="process-list"></div>
+            <div id="rrGanttChart" class="gantt"></div>
+            <div id="rrResultTable"></div>
+            <div class="avg-times">
+                <p>Average Waiting Time: <span id="rrAvgWT">—</span></p>
+                <p>Average Turnaround Time: <span id="rrAvgTAT">—</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="CPU-1.js"></script>
+</body>
+
+</html>

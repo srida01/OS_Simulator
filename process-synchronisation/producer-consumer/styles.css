@@ -1,0 +1,85 @@
+body,html {
+    margin: 0;
+    padding: 10;
+    font-family: 'Poppins', sans-serif;
+    background: url('../background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #000000;
+  }
+
+  .container-2 {
+    background: rgba(255, 255, 255, 0.2);
+    min-height: 100vh;
+    padding: 40px;
+  }
+  
+  #canvas {
+    cursor: pointer;
+  }
+  
+  #canvas-container {
+    text-align: center;
+    flex: 50%;
+  }
+  
+  #options-apply {
+    margin-left: 0;
+  }
+  
+  .container {
+    padding: 10px 10px 0 10px;
+    flex: 50%;
+  }
+  
+  .btn {
+    -webkit-box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
+    padding: .84rem 2.14rem;
+    font-size: .81rem;
+    -webkit-transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
+    -o-transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
+    margin: .375rem;
+    border: 0;
+    -webkit-border-radius: .125rem;
+    border-radius: .125rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: normal;
+    word-wrap: break-word;
+    display: inline-block;
+    font-weight: 400;
+    color: #212529;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: transparent;
+    line-height: 1.5;
+  }
+  
+  .btn:active, .btn:focus, .btn:hover {
+    -webkit-box-shadow: 0 5px 11px 0 rgba(0,0,0,.18), 0 4px 15px 0 rgba(0,0,0,.15);
+    box-shadow: 0 5px 11px 0 rgba(0,0,0,.18), 0 4px 15px 0 rgba(0,0,0,.15);
+    outline: 0;
+  }
+  
+  .btn-primary {
+    padding: 10px;
+    background-color: #4285f4!important;
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background-color: #5a95f5;
+    border-color: #0062cc;
+    color: #fff;
+  }
+  
+  .btn-preset {
+    text-decoration: none;
+    
+  }

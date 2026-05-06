@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OS Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      height: 100%;
+      color: #fff;
+    }
+
+    body {
+      background: url('../landing.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: -1;
+    }
+
+    .container {
+      min-height: 100vh;
+      padding: 0 40px;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .navbar nav a {
+      color: #ffffff;
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .navbar nav a:hover {
+      color: #00e0ff;
+    }
+
+    .hero {
+      text-align: center;
+      margin: 60px 0 40px;
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      margin-bottom: 15px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: #dcdcdc;
+      margin-bottom: 30px;
+    }
+
+    .algorithm-cards {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin: 40px 0;
+    }
+
+    .algorithm-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 30px;
+      width: 350px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+
+    .algorithm-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .algorithm-card h3 {
+      color: #00e0ff;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+
+    .algorithm-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .algorithm-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .algorithm-list li:last-child {
+      border-bottom: none;
+    }
+
+    .card-button {
+      background: #00e0ff;
+      color: #121228;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    .card-button:hover {
+      background: #00b8d4;
+      transform: translateY(-2px);
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 800px;
+      margin: 40px auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
+    }
+
+    .info-box h3 {
+      color: #00e0ff;
+      margin-top: 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      color: #dcdcdc;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 20px;
+      }
+      .algorithm-card {
+        width: 100%;
+      }
+      .hero h1 {
+        font-size: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="navbar">
+      <div class="logo">OS Explorer</div>
+      <nav>
+        <a href="../index.html">Home</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>CPU Scheduling Algorithms</h1>
+      <p>Explore various CPU scheduling algorithms and understand their impact on system performance</p>
+    </section>
+
+    <div class="algorithm-cards">
+      <div class="algorithm-card" onclick="window.location.href='CPU-1.html'">
+        <h3>Basic Scheduling</h3>
+        <ul class="algorithm-list">
+          <li>First Come First Serve (FCFS)</li>
+          <li>Round Robin (RR)</li>
+        </ul>
+        <p>Fundamental scheduling algorithms that form the basis of CPU management in operating systems.</p>
+        <button class="card-button">Explore Basic Schedulers</button>
+      </div>
+
+      <div class="algorithm-card" onclick="window.location.href='CPU-2.html'">
+        <h3>Priority-Based Scheduling</h3>
+        <ul class="algorithm-list">
+          <li>Shortest Job First (SJF)</li>
+          <li>Priority Scheduling</li>
+          <li>Shortest Remaining Job First (SRJF)</li>
+        </ul>
+        <p>Advanced scheduling algorithms that optimize system metrics based on job characteristics.</p>
+        <button class="card-button">Explore Priority Schedulers</button>
+      </div>
+    </div>
+
+    <section class="info-box">
+      <h3>About CPU Scheduling</h3>
+      <p>CPU scheduling is a critical component of operating system design that determines which processes get CPU time and in what order. Effective scheduling algorithms help optimize system metrics like throughput, waiting time, and response time.</p>
+      
+      <p>This simulator allows you to visualize and compare different CPU scheduling algorithms to better understand their behavior and performance characteristics under various workloads.</p>
+    </section>
+  </div>
+
+  <footer>
+    &copy; 2025 OS Explorer | CS257: Operating Systems Laboratory
+  </footer>
+
+  <script>
+    // Simple script to make the entire card clickable
+    document.querySelectorAll('.algorithm-card').forEach(card => {
+      card.addEventListener('click', function() {
+        const href = this.getAttribute('onclick').split("'")[1];
+        window.location.href = href;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Allocation Algorithms</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>
+        
+        <section class="main-content">
+            <h1>File Allocation Algorithms</h1>
+            <p class="description">
+                File allocation methods determine how files are physically stored on disk.
+                Each strategy offers unique tradeoffs between performance, efficiency, and complexity.
+            </p>
+
+            <div class="algorithm-selector">
+                <button data-algo="contiguous" class="algo-btn active">Contiguous</button>
+                <button data-algo="linked" class="algo-btn">Linked</button>
+                <button data-algo="indexed" class="algo-btn">Indexed</button>
+                <button data-algo="extents" class="algo-btn">Extents-based</button>
+            </div>
+
+            <div class="algorithm-description">
+                <div id="contiguous-desc" class="algo-desc active">
+                    <h2>Contiguous Allocation</h2>
+                    <p>Files are stored in consecutive blocks on disk, requiring a starting block address and length.</p>
+                    
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Advantages</h3>
+                            <ul>
+                                <li>Simple implementation</li>
+                                <li>Fast direct access</li>
+                                <li>Excellent sequential read performance</li>
+                                <li>Minimal disk seek time</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Disadvantages</h3>
+                            <ul>
+                                <li>External fragmentation</li>
+                                <li>Difficult file growth</li>
+                                <li>Requires pre-allocation of space</li>
+                                <li>Need for compaction</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="linked-desc" class="algo-desc">
+                    <h2>Linked Allocation</h2>
+                    <p>Each block contains a pointer to the next block in the file chain, forming a linked list structure.</p>
+                    
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Advantages</h3>
+                            <ul>
+                                <li>No external fragmentation</li>
+                                <li>Files can grow dynamically</li>
+                                <li>No need for compaction</li>
+                                <li>Efficient use of disk space</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Disadvantages</h3>
+                            <ul>
+                                <li>Slower random access</li>
+                                <li>Pointer overhead in each block</li>
+                                <li>Reliability issues (pointer corruption)</li>
+                                <li>Not suitable for applications requiring direct access</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="indexed-desc" class="algo-desc">
+                    <h2>Indexed Allocation</h2>
+                    <p>Uses a dedicated index block containing pointers to all data blocks of the file.</p>
+                    
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Advantages</h3>
+                            <ul>
+                                <li>Supports direct access</li>
+                                <li>No external fragmentation</li>
+                                <li>Dynamic file growth</li>
+                                <li>Better for random access than linked allocation</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Disadvantages</h3>
+                            <ul>
+                                <li>Index block overhead</li>
+                                <li>Potential index size limitations</li>
+                                <li>Multiple index blocks needed for large files</li>
+                                <li>Slightly more complex implementation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="extents-desc" class="algo-desc">
+                    <h2>Extents-based Allocation</h2>
+                    <p>Uses multiple contiguous segments (extents) for a single file, with each extent defined by a starting block and length.</p>
+                    
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h3><i class="fas fa-check-circle"></i> Advantages</h3>
+                            <ul>
+                                <li>Efficient space utilization</li>
+                                <li>Good sequential access within extents</li>
+                                <li>Less external fragmentation than pure contiguous</li>
+                                <li>Simpler than index-based approaches</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3><i class="fas fa-times-circle"></i> Disadvantages</h3>
+                            <ul>
+                                <li>More complex than single contiguous allocation</li>
+                                <li>Some metadata overhead for extent mapping</li>
+                                <li>Direct access performance varies by extent</li>
+                                <li>File growth may require new extents</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="flex-container">
+                    <div class="card">
+                        <h2><i class="fas fa-file-circle-plus"></i> Add New File</h2>
+                        <div class="input-group">
+                            <label for="file-name">File Name</label>
+                            <input type="text" id="file-name" placeholder="Enter file name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="file-size">File Size (blocks)</label>
+                            <input type="number" id="file-size" min="1" max="10" value="3">
+                        </div>
+                        <div class="button-group">
+                            <button id="allocate-btn" class="primary-btn"><i class="fas fa-plus"></i> Add File</button>
+                            <button id="reset-btn" class="secondary-btn"><i class="fas fa-redo"></i> Reset Disk</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2><i class="fas fa-folder-open"></i> Current Files</h2>
+                        <div id="file-list" class="file-list">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-hard-drive"></i> Disk Blocks Visualization</h2>
+                    <div class="disk-visual" id="disk-blocks"></div>
+                    <div class="disk-info">
+                        <span id="free-blocks-count"><i class="fas fa-info-circle"></i> <span id="blocks-count-text">0 of 30 blocks free</span></span>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <span class="legend-color index"></span>
+                                <span>Index</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color extent-1"></span>
+                                <span>Extent 1</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color extent-2"></span>
+                                <span>Extent 2</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color free"></span>
+                                <span>Free</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>About File Allocation Algorithms</h2>
+                <p>
+                    File allocation algorithms are essential for file systems to manage disk storage.
+                    Three main strategies are:
+                </p>
+                <ul>
+                    <li><strong>Contiguous Allocation:</strong> Files are stored in adjacent blocks, providing fast sequential access but potentially causing external fragmentation.</li>
+                    <li><strong>Linked Allocation:</strong> Each block points to the next block in the file, eliminating external fragmentation but introducing pointer overhead.</li>
+                    <li><strong>Indexed Allocation:</strong> A special index block contains pointers to all blocks of a file, allowing efficient direct access at the cost of an additional index block.</li>
+                </ul>
+                <p>
+                    This visualization demonstrates how each algorithm allocates and manages file blocks on disk.
+                </p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MFT Simulation — OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:            #0f1115;
+      --bg2:           #121212;
+      --surface:       #1a1d23;
+      --border:        rgba(62, 166, 255, 0.12);
+      --border-bright: rgba(62, 166, 255, 0.35);
+      --accent:        #3ea6ff;
+      --accent2:       #00c2ff;
+      --purple:        #a78bfa;
+      --text:          #e6e6e6;
+      --muted:         #5a6472;
+      --dim:           #272b34;
+      --mono:  'IBM Plex Mono', monospace;
+      --sans:  'IBM Plex Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(62,166,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(62,166,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .container {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 32px; position: relative; z-index: 1;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+    }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--accent); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+    .logo { font-family: var(--display); font-size: 24px; letter-spacing: 2px; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--accent); }
+
+    nav { display: flex; align-items: center; gap: 8px; }
+    nav a {
+      color: var(--muted); text-decoration: none;
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid transparent; border-radius: 4px;
+      transition: all 0.2s;
+    }
+    nav a:hover, nav a.active {
+      color: var(--accent);
+      border-color: var(--border-bright);
+      background: rgba(62,166,255,0.05);
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      padding: 50px 0 36px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .breadcrumb {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb span { color: var(--dim); }
+
+    .page-header h1 {
+      font-family: var(--display);
+      font-size: 52px; line-height: 0.95;
+      letter-spacing: 3px; color: var(--text); margin-bottom: 10px;
+    }
+    .page-header h1 .accent { color: var(--accent); }
+    .page-header p {
+      font-family: var(--sans); font-size: 13px;
+      color: var(--muted); line-height: 1.7;
+    }
+
+    hr.divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* MAIN LAYOUT */
+    .sim-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 48px 0 80px;
+      animation: fadeUp 0.5s ease 0.15s both;
+    }
+
+    /* CONTROL PANEL */
+    .control-panel {
+      background: var(--bg2);
+      padding: 28px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    .panel-section {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-section:last-child { border-bottom: none; }
+
+    .panel-label {
+      font-family: var(--mono); font-size: 9px; color: var(--muted);
+      letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 16px;
+    }
+
+    .field-label {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text); margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      font-family: var(--mono); font-size: 13px;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--border-bright);
+      background: rgba(62,166,255,0.04);
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+    input[type="number"]::placeholder { color: var(--dim); }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      width: 100%; justify-content: center;
+      background: rgba(62,166,255,0.08); border: 1px solid var(--border);
+      border-radius: 4px; padding: 10px 16px;
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(62,166,255,0.15);
+      border-color: var(--border-bright);
+    }
+    .btn-primary {
+      background: var(--accent); color: #0f1115;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .btn-primary:hover {
+      background: var(--accent2); border-color: var(--accent2);
+    }
+
+    /* VISUALIZATION PANEL */
+    .viz-panel {
+      background: var(--bg2);
+      padding: 28px;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+    .viz-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    }
+    .viz-title {
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .viz-badge {
+      font-family: var(--mono); font-size: 9px; color: var(--accent);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 10px; border: 1px solid var(--border);
+      border-radius: 20px; background: rgba(62,166,255,0.06);
+    }
+
+    /* Memory blocks */
+    #memory-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-end;
+      min-height: 100px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .memory-block {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 56px;
+      background: var(--dim);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .memory-block.allocated {
+      background: rgba(62, 166, 255, 0.15);
+      border-color: var(--border-bright);
+      color: var(--accent);
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%   { box-shadow: 0 0 0 0 rgba(62,166,255,0.4); }
+      70%  { box-shadow: 0 0 0 6px rgba(62,166,255,0); }
+      100% { box-shadow: 0 0 0 0 rgba(62,166,255,0); }
+    }
+
+    /* Log */
+    .log-wrap {
+      display: flex; flex-direction: column; gap: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      flex: 1;
+    }
+    .log-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .terminal-dot.red    { background: #ff5f57; }
+    .terminal-dot.yellow { background: #febc2e; }
+    .terminal-dot.green  { background: #28c840; }
+    .log-title {
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      margin-left: auto; letter-spacing: 0.1em;
+    }
+
+    #allocation-log {
+      padding: 14px 16px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-family: var(--mono); font-size: 12px;
+    }
+    #allocation-log p {
+      color: var(--muted);
+      margin: 4px 0;
+      line-height: 1.7;
+    }
+    #allocation-log p::before {
+      content: '$ ';
+      color: var(--accent);
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border); padding: 28px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); text-decoration: none; transition: color 0.2s;
+    }
+    .footer-right a:hover { color: var(--accent); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .sim-layout { grid-template-columns: 1fr; }
+      .page-header h1 { font-size: 38px; }
+    }
+    @media (max-width: 600px) {
+      .container { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header class="navbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <a href="../index.html" class="logo">OS <span>EXPLORER</span></a>
+    </div>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+    </nav>
+  </header>
+
+  <section class="page-header">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="MVFT.html">Memory Management</a>
+      <span>/</span>
+      <span>MFT Simulation</span>
+    </div>
+    <h1>MFT <span class="accent">SIMULATION</span></h1>
+    <p>Multiprogramming with Fixed number of Tasks — fixed-size partitions, first-fit allocation, internal fragmentation tracking.</p>
+  </section>
+
+  <hr class="divider">
+
+  <div class="sim-layout">
+
+    <!-- CONTROL PANEL -->
+    <div class="control-panel">
+
+      <div class="panel-section">
+        <div class="panel-label">Step 1 · Initialize</div>
+        <div class="field-label">Total Memory Size</div>
+        <input type="number" id="total-memory-size" min="1" placeholder="e.g. 1000">
+        <div class="field-label">Number of Partitions</div>
+        <input type="number" id="partitions" min="1" placeholder="e.g. 4">
+        <button onclick="initializeMemory()" class="btn btn-primary">Initialize Memory</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">Step 2 · Allocate</div>
+        <div class="field-label">Process Size</div>
+        <input type="number" id="process-size" min="1" placeholder="e.g. 200">
+        <button onclick="allocateProcess()" class="btn">Allocate Process</button>
+      </div>
+
+    </div>
+
+    <!-- VISUALIZATION PANEL -->
+    <div class="viz-panel">
+
+      <div class="viz-header">
+        <span class="viz-title">Memory Map</span>
+        <span class="viz-badge">MFT · Fixed Partitions</span>
+      </div>
+
+      <div id="memory-container">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--dim);margin:auto;">Initialize memory to begin →</span>
+      </div>
+
+      <div class="log-wrap">
+        <div class="log-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+          <span class="log-title">allocation-log ~ mft</span>
+        </div>
+        <div id="allocation-log"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">OS Explorer · MFT Simulation</div>
+    <div class="footer-right">
+      <a href="../index.html">Home</a>
+      <a href="MVFT.html">Memory</a>
+      <a href="MVT.html">MVT</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  var totalMemorySize = 0;
+  var memoryBlocks = [];
+
+  function initializeMemory() {
+    totalMemorySize = parseInt(document.getElementById("total-memory-size").value);
+    var nop = parseInt(document.getElementById("partitions").value);
+
+    if (isNaN(totalMemorySize) || isNaN(nop) || totalMemorySize <= 0 || nop <= 0) {
+      alert("Please enter valid numbers for memory size and partitions.");
+      return;
+    }
+
+    var memoryContainer = document.getElementById("memory-container");
+    memoryContainer.innerHTML = "";
+    memoryBlocks = [];
+
+    var blockSize = Math.floor(totalMemorySize / nop);
+    for (var i = 0; i < nop; i++) {
+      var memoryBlock = document.createElement("div");
+      memoryBlock.className = "memory-block";
+      memoryBlock.style.width = Math.min(200, Math.max(60, blockSize * 2)) + "px";
+      memoryBlock.innerHTML = blockSize;
+      memoryBlock.dataset.allocated = "false";
+      memoryBlock.dataset.originalSize = blockSize;
+
+      memoryContainer.appendChild(memoryBlock);
+      memoryBlocks.push(memoryBlock);
+    }
+
+    document.getElementById("allocation-log").innerHTML =
+      "<p>Memory initialized: " + nop + " partitions × " + blockSize + " units</p>";
+  }
+
+  function allocateProcess() {
+    var processSize = parseInt(document.getElementById("process-size").value);
+    var allocationLog = document.getElementById("allocation-log");
+
+    if (isNaN(processSize) || processSize <= 0) {
+      alert("Please enter a valid process size.");
+      return;
+    }
+
+    if (memoryBlocks.length === 0) {
+      allocationLog.innerHTML += "<p>Initialize memory first.</p>";
+      return;
+    }
+
+    var allocated = false;
+
+    for (var i = 0; i < memoryBlocks.length; i++) {
+      if (memoryBlocks[i].dataset.allocated === "false" &&
+          parseInt(memoryBlocks[i].dataset.originalSize) >= processSize) {
+
+        memoryBlocks[i].innerHTML = processSize;
+        memoryBlocks[i].classList.add("allocated");
+        memoryBlocks[i].dataset.allocated = "true";
+
+        allocated = true;
+        allocationLog.innerHTML +=
+          "<p>P[size=" + processSize + "] → block " + (i + 1) +
+          " (internal frag: " + (parseInt(memoryBlocks[i].dataset.originalSize) - processSize) + ")</p>";
+        break;
+      }
+    }
+
+    if (!allocated) {
+      allocationLog.innerHTML +=
+        "<p>No free block for process of size " + processSize + "</p>";
+    }
+
+    allocationLog.scrollTop = allocationLog.scrollHeight;
+  }
+</script>
+</body>
+</html>

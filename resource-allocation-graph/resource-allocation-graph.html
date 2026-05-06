@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resource Allocation Graph Simulation</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="resource-allocation-graph.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="navbar">
+            <div class="logo">OS Explorer</div>
+            <nav>
+                <a href="../index.html">Home</a>
+                <a href="../about.html">About</a>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <h1>Resource Allocation Graph</h1>
+            <p>Visualize process-resource relationships and detect deadlocks</p>
+        </section>
+
+        <section class="simulation-section">
+            <div class="controls-panel">
+                <div class="controls-group">
+                    <h3>Add Elements</h3>
+                    <div class="element-controls">
+                        <button class="btn" id="add-process-btn">Add Process</button>
+                        <button class="btn" id="add-resource-btn">Add Resource</button>
+                    </div>
+                </div>
+                
+                <div class="controls-group">
+                    <h3>Create Edges</h3>
+                    <div class="edge-controls">
+                        <select id="from-select">
+                            <option value="">Select Source</option>
+                        </select>
+                        <select id="to-select">
+                            <option value="">Select Target</option>
+                        </select>
+                        <button class="btn" id="add-edge-btn">Add Edge</button>
+                    </div>
+                </div>
+                
+                <div class="controls-group">
+                    <h3>Actions</h3>
+                    <div class="action-controls">
+                        <button class="btn" id="detect-deadlock-btn">Detect Deadlock</button>
+                        <button class="btn" id="reset-btn">Reset Graph</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="graph-container">
+                <div class="graph" id="rag-graph"></div>
+                <div class="status-panel" id="status-panel">
+                    <div class="status-heading">Status</div>
+                    <div class="status-content" id="status-content">
+                        Create a Resource Allocation Graph by adding processes and resources, then connect them with edges.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="explanation">
+                <h2>About Resource Allocation Graphs</h2>
+                <p>A Resource Allocation Graph (RAG) is a directed graph used to detect deadlocks in operating systems. It visually represents the relationships between processes and resources.</p>
+                
+                <div class="explanation-grid">
+                    <div class="explanation-item">
+                        <h3>Graph Elements</h3>
+                        <ul>
+                            <li><strong>Processes:</strong> Represented as circles</li>
+                            <li><strong>Resources:</strong> Represented as squares</li>
+                            <li><strong>Request Edge:</strong> Process → Resource (wants to acquire)</li>
+                            <li><strong>Assignment Edge:</strong> Resource → Process (already allocated)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="explanation-item">
+                        <h3>Deadlock Detection</h3>
+                        <p>A deadlock exists in the system if and only if the resource allocation graph contains a cycle.</p>
+                        <p>When a cycle is detected, it indicates that a set of processes are each waiting for resources held by another process in the set, creating a circular wait condition.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="resource-allocation-graph.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>

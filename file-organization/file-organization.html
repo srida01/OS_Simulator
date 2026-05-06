@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Organization Simulation</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="file-organization.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="navbar">
+            <div class="logo">OS Explorer</div>
+            <nav>
+                <a href="../index.html">Home</a>
+                <a href="../about.html">About</a>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <h1>File Organization Techniques</h1>
+            <p>Interactive simulation of file organization structures</p>
+        </section>
+
+        <section class="organization-selector">
+            <button class="org-btn active" id="multi-level-btn">Multi-level Hierarchical</button>
+            <button class="org-btn" id="single-level-btn">Single-level Directory</button>
+        </section>
+
+        <section class="simulation-section">
+            <div class="controls">
+                <input type="text" id="new-item-name" placeholder="Enter name">
+                <button class="btn" id="add-folder-btn">Add Folder</button>
+                <button class="btn" id="add-file-btn">Add File</button>
+                <button class="btn" id="delete-btn">Delete Selected</button>
+            </div>
+            
+            <!-- Multi-level File Tree (default view) -->
+            <div class="file-tree active" id="multi-level-tree">
+                <div class="folder open" data-name="root">
+                    root
+                    <div class="children">
+                        <div class="folder" data-name="home">
+                            home
+                            <div class="children">
+                                <div class="folder" data-name="user">
+                                    user
+                                    <div class="children">
+                                        <div class="file" data-name="document.txt">document.txt</div>
+                                        <div class="file" data-name="image.jpg">image.jpg</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="folder" data-name="etc">
+                            etc
+                            <div class="children">
+                                <div class="file" data-name="config.conf">config.conf</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Single-level File Tree (initially hidden) -->
+            <div class="file-tree" id="single-level-tree" style="display: none;">
+                <div class="folder open" data-name="root">
+                    root
+                    <div class="children">
+                        <div class="file" data-name="file1.txt">file1.txt</div>
+                        <div class="file" data-name="file2.txt">file2.txt</div>
+                        <div class="file" data-name="image1.jpg">image1.jpg</div>
+                        <div class="file" data-name="document.pdf">document.pdf</div>
+                        <div class="file" data-name="spreadsheet.xlsx">spreadsheet.xlsx</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="explanation" id="multi-level-explanation">
+                <h2>Multi-level Hierarchical File System</h2>
+                <p>A hierarchical file system organizes files into a tree structure, with directories (folders) containing files and other directories. This approach provides a logical organization scheme that mirrors real-world organization.</p>
+                <h3>Key Characteristics:</h3>
+                <ul>
+                    <li><strong>Tree Structure:</strong> Files and directories form a tree with the root at the top</li>
+                    <li><strong>Nested Directories:</strong> Directories can contain subdirectories to any depth</li>
+                    <li><strong>Path Navigation:</strong> Files are accessed through paths like /root/home/user/file.txt</li>
+                    <li><strong>Efficient Organization:</strong> Good for organizing large numbers of files</li>
+                </ul>
+                <p><strong>Examples:</strong> Unix/Linux file system, Windows NTFS, macOS HFS+/APFS</p>
+            </div>
+            
+            <div class="explanation" id="single-level-explanation" style="display: none;">
+                <h2>Single-level Directory File System</h2>
+                <p>A single-level directory system places all files in one directory, creating a flat structure with no hierarchy. All files must have unique names within this single directory.</p>
+                <h3>Key Characteristics:</h3>
+                <ul>
+                    <li><strong>Flat Structure:</strong> No subdirectories, all files in one location</li>
+                    <li><strong>Simple Navigation:</strong> Direct access to all files</li>
+                    <li><strong>Naming Constraints:</strong> Every file must have a unique name</li>
+                    <li><strong>Limited Organization:</strong> Becomes unwieldy with many files</li>
+                </ul>
+                <p><strong>Examples:</strong> Early operating systems like MS-DOS in its simplest usage, some embedded systems</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="file-organization.js"></script>
+    
+</body>
+
+</html>
