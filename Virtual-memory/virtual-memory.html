@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS Simulator — Virtual Memory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+  </header>
+  <div class="container">
+  <!-- HERO (always visible, outside tabs) -->
+  <div class="hero">
+    <h1><span class="accent">Virtual</span> Memory</h1>
+    <p>Interactive simulation of <strong>Demand Paging</strong> strategies and <strong>Thrashing</strong> behaviour — visualize how the OS manages memory under pressure.</p>
+  </div>
+
+  <!-- TABS (moved below hero, matching I/O Techniques style) -->
+  <div class="tabs-bar">
+    <button class="tab active" onclick="switchTab('dp')">
+      <span class="tab-icon">📄</span> Demand Paging
+    </button>
+    <button class="tab" onclick="switchTab('th')">
+      <span class="tab-icon">⚡</span> Thrashing
+    </button>
+  </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       DEMAND PAGING
+  ═══════════════════════════════════════════ -->
+  <div id="dp" class="page active">
+
+    <!-- Config + Stats -->
+    <div class="row">
+      <div class="card flex2">
+        <div class="card-title">Configuration</div>
+        <div class="ctrl-row">
+          <div class="ctrl-group">
+            <label>Frames</label>
+            <input type="number" id="dp-frames" value="3" min="1" max="8" style="width:70px">
+          </div>
+          <div class="ctrl-group">
+            <label>Algorithm</label>
+            <select id="dp-algo">
+              <option value="fifo">FIFO</option>
+              <option value="lru">LRU</option>
+              <option value="optimal">Optimal</option>
+            </select>
+          </div>
+          <div class="ctrl-group" style="flex:1; min-width:200px">
+            <label>Reference String (space-separated)</label>
+            <input type="text" id="dp-refstr" value="7 0 1 2 0 3 0 4 2 3 0 3 2 1" style="width:100%">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="dpInit()">Initialize</button>
+          <button class="btn ghost" onclick="dpStep()">Step →</button>
+          <button class="btn ghost" id="dp-autoBtn" onclick="dpToggleAuto()">Auto Run</button>
+          <button class="btn ghost" onclick="dpReset()">Reset</button>
+          <button class="btn ghost" onclick="dpLoadDemo()">Load Demo</button>
+        </div>
+      </div>
+      <div class="card flex1">
+        <div class="card-title">Statistics</div>
+        <div class="stats-row">
+          <div class="stat"><div class="stat-val blue" id="dp-total">0</div><div class="stat-lbl">Refs</div></div>
+          <div class="stat"><div class="stat-val green" id="dp-hits">0</div><div class="stat-lbl">Hits</div></div>
+          <div class="stat"><div class="stat-val red" id="dp-faults">0</div><div class="stat-lbl">Faults</div></div>
+          <div class="stat"><div class="stat-val blue" id="dp-ratio">—</div><div class="stat-lbl">Hit Rate</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ref string + Frames -->
+    <div class="row">
+      <div class="card flex1">
+        <div class="card-title">Reference String</div>
+        <div class="ref-string" id="dp-refview"></div>
+      </div>
+      <div class="card flex1">
+        <div class="card-title">Physical Frames</div>
+        <div class="frames-grid" id="dp-framesview"></div>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div class="card">
+      <div class="card-title">Execution Log</div>
+      <div class="log" id="dp-log">
+        <span class="info">Ready. Configure above and click Initialize, then Step or Auto Run.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       THRASHING
+  ═══════════════════════════════════════════ -->
+  <div id="th" class="page">
+
+    <!-- Config + Metrics -->
+    <div class="row">
+      <div class="card flex2">
+        <div class="card-title">Simulation Config</div>
+        <div class="ctrl-row">
+          <div class="ctrl-group">
+            <label>Physical Frames</label>
+            <input type="number" id="th-frames" value="20" min="5" max="60" style="width:90px">
+          </div>
+          <div class="ctrl-group">
+            <label>Processes</label>
+            <input type="number" id="th-procs" value="4" min="1" max="8" style="width:80px">
+          </div>
+          <div class="ctrl-group">
+            <label>Working Set / Proc</label>
+            <input type="number" id="th-ws" value="6" min="2" max="20" style="width:90px">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="thInit()">Start Simulation</button>
+          <button class="btn ghost" onclick="thAddProc()">+ Add Process</button>
+          <button class="btn ghost danger" onclick="thRemoveProc()">− Remove Process</button>
+          <button class="btn ghost" onclick="thStop()">Stop</button>
+        </div>
+      </div>
+      <div class="card flex1">
+        <div class="card-title">System Metrics</div>
+        <div class="stats-row">
+          <div class="stat"><div class="stat-val blue" id="th-cpu">—</div><div class="stat-lbl">CPU Util</div></div>
+          <div class="stat"><div class="stat-val red"  id="th-pf">—</div><div class="stat-lbl">Faults/s</div></div>
+          <div class="stat"><div class="stat-val blue" id="th-mem">—</div><div class="stat-lbl">Mem Used</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Processes + CPU Chart -->
+    <div class="row">
+      <div class="card flex1">
+        <div class="card-title">Process States</div>
+        <div class="process-list" id="th-proclist">
+          <div style="color:var(--muted);font-size:13px;font-family:var(--mono)">Start simulation to see processes.</div>
+        </div>
+      </div>
+      <div class="card flex1">
+        <div class="card-title">CPU Utilization History</div>
+        <div class="cpu-chart" id="th-cpuchart">
+          <div style="color:var(--muted);font-family:var(--mono);font-size:12px;align-self:center;width:100%;text-align:center">No data yet.</div>
+        </div>
+        <div class="chart-axis">
+          <span>Time →</span>
+          <span id="th-chartmax">100%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Memory Map -->
+    <div class="card">
+      <div class="card-title">Physical Memory Map <span style="font-weight:400;color:var(--muted)">(each block = 1 frame)</span></div>
+      <div class="mem-map" id="th-memmap"></div>
+      <div class="mem-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Allocated (running)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Thrashing (blocked)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(96,184,255,0.08);border:1px solid var(--border)"></div>Free</div>
+      </div>
+      <div class="thrash-indicator normal" id="th-indicator" style="display:none"></div>
+    </div>
+  </div>
+
+</div><!-- end .app -->
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algorithm Detail — OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./disk-style.css">
+  <style>
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+    .back-link svg { transition: transform 0.2s; }
+    .back-link:hover svg { transform: translateX(-3px); }
+
+    /* ── DETAIL HERO ── */
+    .detail-hero {
+      padding: 52px 0 44px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .detail-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .detail-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-bright);
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .detail-category {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 14px;
+    }
+    .detail-hero h1 {
+      font-family: var(--display);
+      font-size: 80px;
+      letter-spacing: 4px;
+      line-height: 1;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .detail-hero h1 span { color: var(--accent); }
+    .detail-fullname {
+      font-family: var(--sans);
+      font-size: 18px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    .detail-desc {
+      font-family: var(--sans);
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.85;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 56px;
+      animation: fadeUp 0.5s ease 0.05s both;
+    }
+    .stat-block {
+      flex: 1;
+      padding: 24px 28px;
+      border-right: 1px solid var(--border);
+      background: var(--bg2);
+      transition: background 0.2s;
+    }
+    .stat-block:last-child { border-right: none; }
+    .stat-block:hover { background: var(--surface); }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(96,184,255,0.6);
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: var(--display);
+      font-size: 28px;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+    }
+    .stat-note {
+      font-family: var(--sans);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      margin-bottom: 56px;
+      animation: fadeUp 0.5s ease 0.1s both;
+    }
+    .how-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 28px;
+    }
+    .how-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      padding: 22px 28px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      transition: background 0.2s, border-left-color 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .how-step:last-child { border-bottom: none; }
+    .how-step:hover {
+      background: var(--surface);
+      border-left-color: var(--accent);
+    }
+    .step-num {
+      font-family: var(--display);
+      font-size: 32px;
+      letter-spacing: 1px;
+      color: var(--accent);
+      opacity: 0.5;
+      line-height: 1;
+      flex-shrink: 0;
+      width: 40px;
+    }
+    .step-content {}
+    .step-title {
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+    .step-desc {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── PROS / CONS ── */
+    .proscons-section {
+      margin-bottom: 56px;
+      animation: fadeUp 0.5s ease 0.15s both;
+    }
+    .proscons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 28px;
+    }
+    .pros-panel, .cons-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .pros-panel { border-top: 2px solid #4ade80; }
+    .cons-panel { border-top: 2px solid #f87171; }
+
+    .pc-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .pc-icon {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .pros-panel .pc-icon { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+    .cons-panel .pc-icon { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+    .pc-title {
+      font-family: var(--display);
+      font-size: 20px;
+      letter-spacing: 2px;
+    }
+    .pros-panel .pc-title { color: #4ade80; }
+    .cons-panel .pc-title { color: #f87171; }
+
+    .pc-body {
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pc-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--dim);
+      font-family: var(--sans);
+      font-size: 13px;
+      color: #b8cfe4;
+      line-height: 1.5;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .pros-panel .pc-item:hover { background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.25); color: var(--text); }
+    .cons-panel .pc-item:hover { background: rgba(248,113,113,0.07); border-color: rgba(248,113,113,0.25); color: var(--text); }
+    .pc-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .pros-panel .pc-dot { background: #4ade80; }
+    .cons-panel .pc-dot { background: #f87171; }
+
+    /* ── COMPARISON CHIPS ── */
+    .compare-section {
+      margin-bottom: 56px;
+      animation: fadeUp 0.5s ease 0.2s both;
+    }
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 28px;
+    }
+    .compare-chip {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 16px;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .compare-chip:hover { background: var(--surface); border-color: var(--border-bright); }
+    .chip-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(96,184,255,0.55);
+      margin-bottom: 8px;
+    }
+    .chip-val {
+      font-family: var(--display);
+      font-size: 22px;
+      letter-spacing: 1px;
+      color: var(--text);
+    }
+    .chip-sub {
+      font-family: var(--sans);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    /* rating dot row */
+    .chip-dots {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 8px;
+    }
+    .chip-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border-bright);
+    }
+    .chip-dot.on { background: var(--accent); }
+
+    /* ── NOT FOUND ── */
+    .not-found {
+      text-align: center;
+      padding: 80px 0;
+    }
+    .not-found h2 {
+      font-family: var(--display);
+      font-size: 48px;
+      color: var(--accent);
+      letter-spacing: 3px;
+      margin-bottom: 12px;
+    }
+    .not-found p { font-family: var(--sans); color: var(--muted); }
+
+    @media (max-width: 700px) {
+      .detail-hero h1 { font-size: 52px; }
+      .proscons-grid { grid-template-columns: 1fr; }
+      .stats-row { flex-direction: column; }
+      .stat-block { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-block:last-child { border-bottom: none; }
+      .terms-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+          <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+          <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+        </svg>
+      </div>
+      <a href="../index.html" class="logo">OS <span>Explorer</span></a>
+    </div>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../about.html">Team</a>
+      <a href="./disk.html" class="active">Disk Scheduling</a>
+    </nav>
+  </header>
+
+  <!-- DYNAMIC CONTENT injected here -->
+  <div id="detail-root"></div>
+
+  <footer>
+    <div class="footer-left">OS Explorer · Operating Systems Laboratory Project · Module by Neha Kamath — 241CS240</div>
+    <div class="footer-right">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">Team</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+const ALGOS = {
+  fcfs: {
+    abbr: "FCFS",
+    name: "First Come First Serve",
+    category: "Basic · Queue-based",
+    tag: "Module · Disk Scheduling",
+    desc: "FCFS is the simplest disk scheduling algorithm. Requests are placed in a queue and served strictly in the order they arrive, regardless of the current head position or direction. It makes no optimisation decisions whatsoever, making it easy to implement and reason about, but often inefficient in practice.",
+    steps: [
+      { title: "Accept request", desc: "Each new I/O request is appended to the end of the FIFO request queue as it arrives." },
+      { title: "Pick next", desc: "The scheduler dequeues the front-most request — the one that waited longest." },
+      { title: "Move head", desc: "The disk arm moves directly to the requested cylinder, regardless of distance." },
+      { title: "Service request", desc: "The read/write operation is performed; total seek distance is accumulated." },
+      { title: "Repeat", desc: "Steps 2–4 repeat until the queue is empty." }
+    ],
+    pros: [
+      "Extremely simple to implement — no sorting or tracking required.",
+      "Every request is guaranteed to be serviced eventually; no starvation.",
+      "Fair in the sense that arrival order is strictly respected.",
+      "Low algorithmic overhead — O(n) with no per-cycle re-sorting."
+    ],
+    cons: [
+      "Does not optimise head movement — the arm may zigzag wildly across the disk.",
+      "High average seek time compared to all other algorithms.",
+      "Poor throughput under heavy I/O workloads.",
+      "Not suitable for real-time systems where latency bounds matter."
+    ],
+    stats: {
+      starvation: "None", throughput: "Low", fairness: "High"
+    }
+  },
+  sstf: {
+    abbr: "SSTF",
+    name: "Shortest Seek Time First",
+    category: "Greedy · Proximity-based",
+    tag: "Module · Disk Scheduling",
+    desc: "SSTF always picks the pending request closest to the current head position, regardless of direction. It is a greedy algorithm that aggressively minimises immediate seek distance. While average seek time is much lower than FCFS, requests far from the head can be indefinitely postponed if closer requests keep arriving.",
+    steps: [
+      { title: "Maintain request set", desc: "All pending requests are held in a set (not necessarily ordered by arrival)." },
+      { title: "Compute distances", desc: "For each pending request, compute |current_head − cylinder|." },
+      { title: "Select minimum", desc: "The request with the smallest computed distance is selected next." },
+      { title: "Move and service", desc: "Head moves to that cylinder and the request is fulfilled." },
+      { title: "Repeat", desc: "Distance computation repeats after each service step." }
+    ],
+    pros: [
+      "Significantly lower average seek time than FCFS.",
+      "High throughput when requests are clustered near the current head.",
+      "Simple greedy logic — easy to understand and implement.",
+      "Adapts naturally to current head position with each step."
+    ],
+    cons: [
+      "Can cause starvation: requests far from the head may never be served.",
+      "Does not consider direction, leading to unpredictable head movement.",
+      "Response time variance is high — some requests wait much longer than others.",
+      "Not ideal for workloads with uniformly distributed cylinder requests."
+    ],
+    stats: {
+      starvation: "Possible", throughput: "Medium-High", fairness: "Low"
+    }
+  },
+  scan: {
+    abbr: "SCAN",
+    name: "Elevator Algorithm",
+    category: "Sweep · Directional",
+    tag: "Module · Disk Scheduling",
+    desc: "SCAN moves the disk arm in one direction, servicing all requests it encounters along the way. When it reaches the last cylinder (or the boundary), it reverses direction and services requests on the return sweep. Its behaviour mirrors that of an elevator, giving it the popular nickname.",
+    steps: [
+      { title: "Choose initial direction", desc: "The arm begins moving either towards higher or lower cylinder numbers." },
+      { title: "Service along the way", desc: "Every pending request the arm passes over is serviced immediately." },
+      { title: "Reach boundary", desc: "The arm travels to the disk's physical boundary (cylinder 0 or max) before reversing." },
+      { title: "Reverse direction", desc: "The arm turns around and begins sweeping in the opposite direction." },
+      { title: "Repeat", desc: "Sweeping continues bi-directionally until all requests are serviced." }
+    ],
+    pros: [
+      "No starvation — every request will eventually be reached by the sweeping arm.",
+      "Lower average seek time than FCFS and SSTF under heavy loads.",
+      "Predictable and bounded worst-case wait time.",
+      "Provides decent throughput across a wide variety of workloads."
+    ],
+    cons: [
+      "Requests just serviced may have to wait nearly a full sweep before being re-serviced.",
+      "Cylinders near the edges are visited less frequently than the centre.",
+      "Travels to the disk boundary even when no requests exist there (unlike LOOK).",
+      "Direction tracking adds slight implementation complexity."
+    ],
+    stats: {
+      starvation: "None", throughput: "High", fairness: "Medium"
+    }
+  },
+  cscan: {
+    abbr: "C-SCAN",
+    name: "Circular SCAN",
+    category: "Circular · Uniform Wait",
+    tag: "Module · Disk Scheduling",
+    desc: "C-SCAN is a variant of SCAN that provides more uniform wait times. The arm moves in one direction, servicing requests as it goes. When it hits the last cylinder, it immediately jumps back to the first cylinder without servicing any requests along the way, then resumes sweeping in the same direction.",
+    steps: [
+      { title: "Move in one direction", desc: "The arm sweeps from low to high (or high to low) cylinder numbers, servicing requests." },
+      { title: "Reach the end", desc: "The arm reaches the final cylinder in that direction." },
+      { title: "Jump to start", desc: "The arm jumps to the opposite end of the disk without servicing any requests during transit." },
+      { title: "Resume sweep", desc: "Servicing resumes from the new starting position in the same original direction." },
+      { title: "Repeat", desc: "The cycle continues until all requests are fulfilled." }
+    ],
+    pros: [
+      "More uniform wait times than SCAN — requests at either end are treated equally.",
+      "Eliminates the bias towards cylinders near the centre of the disk.",
+      "No starvation — all requests are guaranteed service.",
+      "Predictable service intervals make it suitable for real-time scheduling."
+    ],
+    cons: [
+      "The return jump adds seek distance even though no requests are served during it.",
+      "Total head movement is higher than SCAN for similar request distributions.",
+      "The fixed jump means short-distance requests beyond the boundary are missed.",
+      "Slightly more complex state management than SCAN."
+    ],
+    stats: {
+      starvation: "None", throughput: "High", fairness: "High"
+    }
+  },
+  look: {
+    abbr: "LOOK",
+    name: "Modified SCAN",
+    category: "Optimised · Adaptive",
+    tag: "Module · Disk Scheduling",
+    desc: "LOOK is an improved version of SCAN. Instead of always travelling to the physical disk boundary, the arm reverses direction as soon as there are no more pending requests ahead of it. This eliminates unnecessary travel to the edge of the disk, reducing total seek distance.",
+    steps: [
+      { title: "Choose direction", desc: "Begin sweeping towards either higher or lower cylinders." },
+      { title: "Service along the path", desc: "Service each pending request encountered in the current direction." },
+      { title: "Look ahead", desc: "Before continuing, check whether any requests still exist beyond the current position in this direction." },
+      { title: "Reverse if none", desc: "If no more requests lie ahead, immediately reverse direction — no travel to the boundary." },
+      { title: "Continue", desc: "Sweep back, servicing requests in the reverse direction; look ahead again before reversing." }
+    ],
+    pros: [
+      "Avoids unnecessary travel to disk boundaries — lower total seek distance than SCAN.",
+      "No starvation — all requests are guaranteed eventual service.",
+      "Better throughput than SCAN in sparse request distributions.",
+      "Simple modification over SCAN with significant efficiency gains."
+    ],
+    cons: [
+      "Requests near the turnaround point may experience slightly longer waits.",
+      "Requires looking ahead at the request queue, adding minor overhead.",
+      "In heavy uniform workloads, behaviour approaches SCAN anyway.",
+      "Still not as cache-locality-aware as priority-based algorithms."
+    ],
+    stats: {
+      starvation: "None", throughput: "High", fairness: "Medium-High"
+    }
+  },
+  clook: {
+    abbr: "C-LOOK",
+    name: "Circular LOOK",
+    category: "Circular · Optimised",
+    tag: "Module · Disk Scheduling",
+    desc: "C-LOOK combines the uniform wait-time advantage of C-SCAN with the efficiency improvement of LOOK. The arm sweeps outward servicing requests until the highest-numbered pending request is reached, then jumps directly to the lowest-numbered pending request (not the disk boundary) and resumes sweeping.",
+    steps: [
+      { title: "Sweep outward", desc: "Move in one direction, servicing all requests along the way." },
+      { title: "Reach last request", desc: "Stop at the highest-numbered pending request — do not travel to the disk edge." },
+      { title: "Jump to lowest", desc: "Jump directly to the lowest-numbered pending request without servicing anything en route." },
+      { title: "Resume sweep", desc: "Service requests in the same outward direction from the new position." },
+      { title: "Repeat", desc: "Continue until all requests are serviced." }
+    ],
+    pros: [
+      "Eliminates unnecessary travel to disk boundaries — lowest total head movement among circular variants.",
+      "More uniform wait times than LOOK — no directional bias.",
+      "No starvation guaranteed.",
+      "Efficient jump is shorter than C-SCAN's full boundary-to-boundary jump."
+    ],
+    cons: [
+      "The inter-end jump still adds overhead, even if shorter than C-SCAN's.",
+      "More complex to implement than LOOK or SCAN.",
+      "In best-case uniform loads, advantage over LOOK is marginal.",
+      "Jump logic requires tracking both minimum and maximum pending cylinders."
+    ],
+    stats: {
+      starvation: "None", throughput: "Very High", fairness: "High"
+    }
+  },
+  lifo: {
+    abbr: "LIFO",
+    name: "Last In First Out",
+    category: "Stack · Recency-based",
+    tag: "Module · Disk Scheduling",
+    desc: "LIFO processes the most recently arrived request first, treating the request queue like a stack. This can be beneficial when recently requested data is likely to be nearby the current head position, providing cache-like locality. However, it severely risks starvation for older requests.",
+    steps: [
+      { title: "Push to stack", desc: "Each arriving I/O request is pushed onto the top of the request stack." },
+      { title: "Pop top", desc: "The most recently pushed request is popped and scheduled next." },
+      { title: "Move head", desc: "The arm moves to the cylinder of the popped request." },
+      { title: "Service", desc: "The read/write operation is performed." },
+      { title: "Repeat", desc: "New arrivals pre-empt older requests at the bottom of the stack." }
+    ],
+    pros: [
+      "Can exploit temporal locality — recent requests often relate to nearby data.",
+      "Very fast response time for newly arriving requests.",
+      "Simple stack-based implementation.",
+      "Useful in scenarios where the most recent job is the most critical."
+    ],
+    cons: [
+      "Severe starvation risk — older requests at the bottom may never be served.",
+      "Not suitable for fairness-critical or general-purpose I/O systems.",
+      "Average wait time is extremely high for non-recent requests.",
+      "Total seek distance is unpredictable and often suboptimal."
+    ],
+    stats: {
+      starvation: "Severe", throughput: "Low-Med", fairness: "Very Low"
+    }
+  },
+  rss: {
+    abbr: "RSS",
+    name: "Random Seek Scheduling",
+    category: "Stochastic · Baseline",
+    tag: "Module · Disk Scheduling",
+    desc: "RSS selects the next disk request uniformly at random from the pending queue. It is not a practical scheduling algorithm — it is used as a probabilistic baseline in simulation and analysis. By comparing any real algorithm's performance against RSS, engineers can measure the gain that intelligent scheduling provides.",
+    steps: [
+      { title: "Collect all requests", desc: "All pending I/O requests are placed in a pool." },
+      { title: "Sample randomly", desc: "A request is selected uniformly at random from the pool." },
+      { title: "Move head", desc: "The disk arm moves to the randomly selected cylinder." },
+      { title: "Service request", desc: "The read/write operation is performed." },
+      { title: "Repeat", desc: "Another random selection is made from the remaining pool." }
+    ],
+    pros: [
+      "Useful as a statistical baseline to benchmark other algorithms against.",
+      "Prevents any single deterministic pattern from being exploited (adversarial workloads).",
+      "Trivially simple to implement and reason about probabilistically.",
+      "No starvation in expectation — every request has a non-zero probability of selection."
+    ],
+    cons: [
+      "No seek optimisation whatsoever — worst expected performance.",
+      "Extremely high variance in response time — unpredictable for real systems.",
+      "Never used in production disk scheduling.",
+      "Total seek distance approaches the worst-case upper bound."
+    ],
+    stats: {
+      starvation: "Probabilistic", throughput: "Very Low", fairness: "Medium"
+    }
+  }
+};
+
+// ── RENDER HELPERS ───────────────────────────────────────────────────────────
+function renderAlgo(key) {
+  const d = ALGOS[key];
+  if (!d) {
+    document.getElementById('detail-root').innerHTML = `
+      <div class="not-found">
+        <h2>404</h2>
+        <p>Algorithm "<strong>${key}</strong>" not found. <a href="./disk.html" style="color:var(--accent)">Go back</a>.</p>
+      </div>`;
+    return;
+  }
+
+  document.title = `${d.abbr} — OS Explorer`;
+
+  const stepsHTML = d.steps.map((s, i) => `
+    <div class="how-step">
+      <div class="step-num">0${i + 1}</div>
+      <div class="step-content">
+        <div class="step-title">${s.title}</div>
+        <div class="step-desc">${s.desc}</div>
+      </div>
+    </div>`).join('');
+
+  const prosHTML = d.pros.map(p => `
+    <div class="pc-item"><span class="pc-dot"></span>${p}</div>`).join('');
+
+  const consHTML = d.cons.map(c => `
+    <div class="pc-item"><span class="pc-dot"></span>${c}</div>`).join('');
+
+  document.getElementById('detail-root').innerHTML = `
+    <section class="detail-hero">
+      <a href="./disk.html" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Disk Scheduling
+      </a>
+      <div class="detail-badge-row">
+        <span class="detail-tag">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          ${d.tag}
+        </span>
+        <span class="detail-category">${d.category}</span>
+      </div>
+      <h1>${d.abbr.replace(/-/g, '-<span>').replace(/(?<=[A-Z])\s/g, '</span> ') /* keep it simple */ }</h1>
+      <div class="detail-fullname">${d.name}</div>
+      <p class="detail-desc">${d.desc}</p>
+    </section>
+
+    <div class="stats-row">
+      <div class="stat-block">
+        <div class="stat-label">Starvation Risk</div>
+        <div class="stat-value" style="font-size:20px;margin-top:4px">${d.stats.starvation}</div>
+        <div class="stat-note">for pending requests</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Throughput</div>
+        <div class="stat-value" style="font-size:20px;margin-top:4px">${d.stats.throughput}</div>
+        <div class="stat-note">relative to other algorithms</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Fairness</div>
+        <div class="stat-value" style="font-size:20px;margin-top:4px">${d.stats.fairness}</div>
+        <div class="stat-note">across all pending requests</div>
+      </div>
+    </div>
+
+    <section class="how-section">
+      <h2 class="section-heading">How It <span>Works</span></h2>
+      <p class="section-sub">// step-by-step execution of the ${d.abbr} scheduling algorithm</p>
+      <div class="how-steps">${stepsHTML}</div>
+    </section>
+
+    <section class="proscons-section">
+      <h2 class="section-heading">Pros &amp; <span>Cons</span></h2>
+      <p class="section-sub">// advantages and disadvantages of ${d.abbr}</p>
+      <div class="proscons-grid">
+        <div class="pros-panel">
+          <div class="pc-header">
+            <div class="pc-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="pc-title">Advantages</div>
+          </div>
+          <div class="pc-body">${prosHTML}</div>
+        </div>
+        <div class="cons-panel">
+          <div class="pc-header">
+            <div class="pc-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <div class="pc-title">Disadvantages</div>
+          </div>
+          <div class="pc-body">${consHTML}</div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+(function () {
+  const hash = (window.location.hash || '#fcfs').replace('#', '').toLowerCase();
+  renderAlgo(hash);
+  window.addEventListener('hashchange', () => {
+    const key = window.location.hash.replace('#', '').toLowerCase();
+    renderAlgo(key);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interrupts - OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="keyboard.css">
+
+</head>
+<body>
+  <div class="container">
+    <header class="navbar">
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <a href="../index.html" class="logo">OS <span>EXPLORER</span></a>
+      </div>
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
+        <a href="index.html" class="active">Interrupts</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="page-tag">MODULE · INTERRUPTS</div>
+      <h1>Keyboard <span>Interrupt</span> Visualization</h1>
+      <p>Watch a keypress move through hardware, the interrupt controller, CPU, OS, and ISR.</p>
+    </section>
+    
+    <div class="visualization">
+      <!-- Status Bar -->
+      <div class="status-bar">System Status: <span id="systemStatus">Normal</span></div>
+
+      <!-- Directional flow lines -->
+      <svg class="flow-lines" viewBox="0 0 1180 840" aria-hidden="true">
+        <defs>
+          <marker id="flowArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L8,3 z"></path>
+          </marker>
+          <marker id="flowArrowCpu" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L8,3 z"></path>
+          </marker>
+          <marker id="flowArrowMemory" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L8,3 z"></path>
+          </marker>
+        </defs>
+        <path class="flow-path" d="M170 190 L170 260"></path>
+        <path class="flow-path" d="M290 318 L390 318"></path>
+        <path class="flow-path" d="M650 318 C730 318 740 166 820 166"></path>
+        <path class="flow-path" d="M914 246 L914 385 L780 385 L780 430"></path>
+        <path class="flow-path cpu-flow" d="M1025 246 C1025 290 1038 320 1060 348"></path>
+        <path class="flow-path memory-flow" d="M642 505 C510 505 470 612 340 612"></path>
+        <path class="flow-path memory-flow" d="M320 690 C395 690 442 708 520 708"></path>
+        <path class="flow-path memory-flow" d="M710 708 C780 664 780 600 780 580"></path>
+        <path class="flow-path cpu-flow" d="M998 444 C1050 494 1048 612 1048 656"></path>
+      </svg>
+      
+      <!-- Components -->
+      <div class="component keyboard" id="keyboard">
+        <h3>Keyboard</h3>
+        <p>Input Device</p>
+        <div class="key" id="key">A</div>
+      </div>
+      
+      <div class="component circuit" id="circuit">
+        <h3>Keyboard Controller</h3>
+        <p>Manages signal</p>
+      </div>
+      
+      <div class="component interrupt-controller" id="interruptController">
+        <h3>Interrupt Controller</h3>
+        <p>Prioritizes & routes interrupts</p>
+        <p id="irqNumber">IRQ #1</p>
+      </div>
+      
+      <div class="component cpu" id="cpu">
+        <h3>CPU</h3>
+        <p id="cpuStatus">Executing Current Process</p>
+        <div class="register-display">
+          <div class="register-row">
+            <span class="register">PC: 0x8042</span>
+            <span class="register">SP: 0xF7A0</span>
+          </div>
+          <div class="register-row">
+            <span class="register">IP: 0x7F21</span>
+            <span class="register" id="interruptFlag">IF: 1</span>
+          </div>
+          <div class="register-row">
+            <span class="register">AX: 0x00</span>
+            <span class="register">BX: 0xFF</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="component memory" id="memory">
+        <h3>Memory</h3>
+        <p>RAM</p>
+        <div class="vector-table" id="vectorTable">
+          <h3>Interrupt Vector Table</h3>
+          <p>Maps IRQs to handlers</p>
+        </div>
+        <div class="vector-entry" id="vectorEntry">0x01: 0x8C20
+IRQ1 - Keyboard
+Handler</div>
+      </div>
+      
+      <div class="component os" id="os">
+        <h3>Operating System</h3>
+        <p>Manages hardware & processes</p>
+      </div>
+      
+      <div class="component process" id="process">
+        <h3>User Process</h3>
+        <p>Running Application</p>
+      </div>
+      
+      <div class="component isr" id="isr">
+        <h3>Interrupt Service Routine</h3>
+        <p>Keyboard Handler</p>
+      </div>
+      
+      <div class="process-stack" id="processStack">
+        Process Stack
+        <div id="stackContent">PC: 0x8042
+Flags: 0x202</div>
+      </div>
+      
+      <div class="code-snippet" id="isrCode">void keyboard_isr() {
+  uint8_t scancode = in(0x60);
+  keypress_handler(scancode);
+  send_eoi(1);
+}</div>
+      
+      <!-- Signal and data -->
+      <div class="signal" id="signal"></div>
+      <div class="data-packet" id="dataPacket">0xA</div>
+      
+      <!-- CPU details -->
+      <div class="cpu-details" id="cpuDetails"></div>
+      
+      <!-- Progress bar -->
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+    
+    <div class="step-info" id="stepInfo">
+      Press the key to start the interrupt process visualization.
+    </div>
+    
+    <div class="controls">
+      <button class="button" id="startButton">Press Keyboard Key</button>
+      <button class="button" id="resetButton">Reset</button>
+    </div>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #81a1c1;"></span> Keyboard
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #88c0d0;"></span> Controller
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #5e81ac;"></span> Interrupt Controller
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #a3be8c;"></span> CPU
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #bf616a;"></span> OS
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #d08770;"></span> Vector Table
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #b48ead;"></span> ISR
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background-color: #ebcb8b;"></span> User Process
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-left">OS Explorer - Operating Systems Laboratory Project</div>
+      <div class="footer-right">
+        <a href="../index.html">Home</a>
+        <a href="../about.html">Team</a>
+      </div>
+    </footer>
+  </div>
+<script src="keyboard.js"></script>
+</body>
+</html>

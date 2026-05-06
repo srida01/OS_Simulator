@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I/O Techniques Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+<div class="container">
+
+  <button class="back-btn" onclick="history.back()">← Back</button>
+
+  <h1>I/O <span class="hl">Techniques</span></h1>
+  <p class="subtitle">Interactive simulation of <em>Buffering</em> strategies and <em>Direct Memory Access (DMA)</em> transfer — visualize how the OS manages I/O operations.</p>
+
+  <!-- TABS -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('buf',this)">⬛ &nbsp;Buffering</button>
+    <button class="tab-btn" onclick="switchTab('dma',this)">⚡ &nbsp;DMA Transfer</button>
+  </nav>
+
+  <!-- ══════════════ BUFFERING TAB ══════════════ -->
+  <div id="tab-buf" class="tab-pane active">
+
+    <div class="card">
+      <div class="card-title">Configuration</div>
+      <div class="ctrl-row">
+        <div class="ctrl-grp">
+          <div class="ctrl-lbl">Buffer Type</div>
+          <div class="type-sel">
+            <button class="type-btn active" onclick="setBufType('single',this)">Single</button>
+            <button class="type-btn" onclick="setBufType('double',this)">Double</button>
+            <button class="type-btn" onclick="setBufType('circular',this)">Circular</button>
+          </div>
+        </div>
+        <div class="ctrl-grp">
+          <div class="ctrl-lbl">Buffer Size <span class="range-val" id="bsz-v">8</span></div>
+          <input type="range" id="bsz" min="4" max="12" value="8" style="width:130px"
+            oninput="document.getElementById('bsz-v').textContent=this.value;rebuildBuf()">
+        </div>
+        <div class="ctrl-grp">
+          <div class="ctrl-lbl">Speed <span class="range-val" id="bsp-v">×2</span></div>
+          <input type="range" id="bsp" min="1" max="5" value="3" style="width:120px"
+            oninput="updateBufSpeed(this.value)">
+        </div>
+        <div class="ctrl-grp">
+          <div class="ctrl-lbl">Actions</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="btn-brun" onclick="toggleBufRun()">▶ Run</button>
+            <button class="btn btn-ghost" onclick="bufStep()">Step</button>
+            <button class="btn btn-ghost btn-danger" onclick="resetBuf()" style="color:var(--red);border-color:rgba(255,95,87,.3)">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Simulation</div>
+      <div id="buf-viz" style="padding:8px 0"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Operation Log</div>
+      <div class="log-box" id="buf-log"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Theory</div>
+      <div class="theory-grid">
+        <div class="theory-item">
+          <h4>Single Buffer</h4>
+          <p>One shared buffer. Producer fills it, then waits for the consumer to empty it. Simple but inefficient — both agents cannot work simultaneously.</p>
+        </div>
+        <div class="theory-item">
+          <h4>Double Buffer</h4>
+          <p>Two buffers alternate roles. Producer fills Buf A while consumer drains Buf B, then they swap. Eliminates wait time, enabling true parallel operation.</p>
+        </div>
+        <div class="theory-item">
+          <h4>Circular Buffer</h4>
+          <p>A ring of N slots with write (head) and read (tail) pointers. Full when head+1 = tail; empty when head = tail. Efficient for streaming I/O pipelines.</p>
+        </div>
+        <div class="theory-item">
+          <h4>Why Buffering?</h4>
+          <p>I/O devices are orders of magnitude slower than the CPU. Buffering decouples them, absorbing speed mismatches and improving overall system throughput.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ DMA TAB ══════════════ -->
+  <div id="tab-dma" class="tab-pane">
+
+    <div class="card">
+      <div class="card-title">Configuration</div>
+      <div class="ctrl-row">
+        <div class="ctrl-grp">
+          <div class="ctrl-lbl">Data Blocks <span class="range-val" id="dblk-v">8</span></div>
+          <input type="range" id="dblk" min="4" max="16" value="8" step="2" style="width:130px"
+            oninput="document.getElementById('dblk-v').textContent=this.value">
+        </div>
+        <div class="ctrl-grp">
+          <div class="ctrl-lbl">Speed <span class="range-val" id="dspd-v">Normal</span></div>
+          <input type="range" id="dspd" min="1" max="3" value="2" style="width:120px"
+            oninput="updateDmaSpeed(this.value)">
+        </div>
+        <div class="ctrl-grp">
+          <div class="ctrl-lbl">Actions</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="btn-drun" onclick="startDma()">▶ Start DMA</button>
+            <button class="btn btn-ghost" id="btn-dstep" onclick="stepDma()">Step</button>
+            <button class="btn btn-ghost btn-danger" onclick="resetDma()" style="color:var(--red);border-color:rgba(255,95,87,.3)">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dma-tab-layout">
+      <!-- Left: diagram -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title">Architecture</div>
+        <div class="dma-svg-wrap" id="dma-viz"></div>
+        <div id="xfer-area" style="display:none;margin-top:16px">
+          <div class="xfer-row">
+            <span class="xfer-lbl">Transfer Progress</span>
+            <span class="xfer-pct" id="xfer-pct">0%</span>
+          </div>
+          <div class="xfer-track"><div class="xfer-fill" id="xfer-fill"></div></div>
+        </div>
+      </div>
+      <!-- Right: phases + log -->
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div class="card" style="margin-bottom:0">
+          <div class="card-title">DMA Phases</div>
+          <div class="phase-list" id="dma-phases"></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="card-title">Event Log</div>
+          <div class="log-box" id="dma-log" style="height:190px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <div class="card-title">How DMA Works</div>
+      <div class="theory-grid">
+        <div class="theory-item">
+          <h4>Phase 1 — Programming</h4>
+          <p>CPU writes the source address, destination address, byte count, and transfer direction into the DMA controller's registers via I/O instructions.</p>
+        </div>
+        <div class="theory-item">
+          <h4>Phase 2 — Bus Arbitration</h4>
+          <p>DMA controller asserts the HOLD signal. CPU finishes its current bus cycle, then asserts HLDA (Hold Acknowledge) and releases the system bus.</p>
+        </div>
+        <div class="theory-item">
+          <h4>Phase 3 — Data Transfer</h4>
+          <p>DMA acts as bus master, reading from the I/O device and writing directly to main memory — entirely without CPU involvement. Throughput is maximized.</p>
+        </div>
+        <div class="theory-item">
+          <h4>Phase 4 — Interrupt</h4>
+          <p>When transfer completes, DMA fires an IRQ. CPU regains bus control, handles the interrupt, and resumes normal execution with data now in RAM.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HELP BUTTON -->
+<button class="help-btn" onclick="document.getElementById('hlp').classList.add('open')" title="How to use">?</button>
+
+<!-- MODAL -->
+<div class="modal" id="hlp" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('hlp').classList.remove('open')">✕</button>
+    <h2>HOW TO USE</h2>
+    <h3>Buffering Simulator</h3>
+    <ul>
+      <li>Choose <strong>Single</strong>, <strong>Double</strong>, or <strong>Circular</strong> buffer mode using the selector.</li>
+      <li>Adjust buffer size (4–12 slots) and simulation speed with the sliders.</li>
+      <li>Press <strong>Run</strong> for continuous simulation or <strong>Step</strong> for one operation at a time.</li>
+      <li>Blue cells are producer writes; green flashes are consumer reads. Amber = waiting.</li>
+      <li>In <strong>Double</strong> mode, watch both buffers work simultaneously — no idle time!</li>
+      <li>In <strong>Circular</strong> mode, W = write head, R = read tail. The ring wraps automatically.</li>
+    </ul>
+    <h3>DMA Simulator</h3>
+    <ul>
+      <li>Set the number of data blocks to transfer and the playback speed.</li>
+      <li>Press <strong>Start DMA</strong> to run through all phases automatically.</li>
+      <li>Use <strong>Step</strong> to advance one DMA phase at a time and read each event in detail.</li>
+      <li>Notice the CPU turns <span style="color:var(--amber)">SUSPENDED</span> during the actual transfer — it's free for other work.</li>
+      <li>The progress bar shows real-time transfer completion during Phase 3.</li>
+    </ul>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

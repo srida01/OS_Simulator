@@ -28,7 +28,7 @@
     </div>
     <nav>
       <a href="../index.html">Home</a>
-      <a href="../about.html">About</a>
+      <a href="../about.html">Team</a>
       <a href="#" class="active">Disk Scheduling</a>
     </nav>
   </header>
@@ -43,37 +43,38 @@
     </div>
     <h1>Disk <span>Scheduling</span></h1>
     <p>
-      Disk scheduling, also known as I/O scheduling, is the technique used by operating systems to determine the
-      order in which block I/O operations are serviced by storage devices.
-      It schedules disk operations to minimize seek time, maximise throughput
-      and optimize overall performance and resource utilization.
+      Disk scheduling is the technique used by operating systems to determine the
+      sequence in which block I/O operations are dispatched to storage volumes.
+      Also known as I/O scheduling, it orchestrates the order of disk operations
+      to optimize performance and resource utilization.
     </p>
   </section>
 
   <!-- ── KEY TERMS ── -->
   <section class="terms-section">
     <h2 class="section-heading">Key <span>Terms</span></h2>
+    <p class="section-sub">// important concepts related to disk scheduling algorithms</p>
 
     <div class="terms-grid">
       <div class="term-card">
         <div class="term-title">Seek Time</div>
-        <div class="term-body">The time taken by the disk arm to locate the required cylinder on the disk. The algorithm that minimizes seek time is generally considered to be more efficient.</div>
+        <div class="term-body">The time taken by the disk arm to locate the required cylinder on disk. The algorithm minimising seek time is generally considered more efficient.</div>
       </div>
       <div class="term-card">
         <div class="term-title">Rotational Latency</div>
-        <div class="term-body">Time for the required disk block to rotate under the read/write head. Minimising rotational latency directly contributes to lower access time.</div>
+        <div class="term-body">Time for the required disk block to rotate under the read/write head. Minimising this contributes directly to lower access time.</div>
       </div>
       <div class="term-card">
         <div class="term-title">Transfer Time</div>
-        <div class="term-body">The actual time taken to transfer data between the disk and main memory once the head is in the correct position.</div>
+        <div class="term-body">Time taken to actually transfer data between the disk and main memory once the head is positioned correctly.</div>
       </div>
       <div class="term-card">
         <div class="term-title">Disk Access Time</div>
-        <div class="term-body">Total disk access time = Seek Time + Rotational Latency + Transfer Time. It is the primary metric used to compare various scheduling algorithms.</div>
+        <div class="term-body">Total time = Seek Time + Rotational Latency + Transfer Time. The primary metric used to compare scheduling algorithms.</div>
       </div>
       <div class="term-card">
         <div class="term-title">Disk Response Time</div>
-        <div class="term-body">The average waiting time of all requests in the queue. A lower response time indicates a more fair and responsive scheduling policy.</div>
+        <div class="term-body">Average waiting time of all requests in the queue. Lower response time indicates a fairer, more responsive scheduling policy.</div>
       </div>
     </div>
   </section>
@@ -81,9 +82,10 @@
   <!-- ── ALGORITHMS ── -->
   <section class="algo-section">
     <h2 class="section-heading">Scheduling <span>Algorithms</span></h2>
+    <p class="section-sub">// select an algorithm below and visualise its behaviour interactively</p>
 
     <div class="algo-grid">
-      <div class="algo-card">
+      <a href="./algo-detail.html#fcfs" class="algo-card">
         <div class="algo-card-header">
           <span class="algo-tag">FCFS</span>
           <span class="algo-badge">Basic</span>
@@ -91,21 +93,23 @@
         <div class="algo-card-body">
           <div class="algo-name">First Come First Serve</div>
           <div class="algo-desc">Requests are served in the order they arrive. Simple to implement but does not optimise head movement, leading to high seek times under heavy load.</div>
+          <div class="algo-learn">Learn more <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
-      </div>
+      </a>
 
-      <div class="algo-card">
+      <a href="./algo-detail.html#sstf" class="algo-card">
         <div class="algo-card-header">
           <span class="algo-tag">SSTF</span>
           <span class="algo-badge">Greedy</span>
         </div>
         <div class="algo-card-body">
           <div class="algo-name">Shortest Seek Time First</div>
-          <div class="algo-desc">Prioritises the request closest to the current head position. Reduces average seek time compared to FCFS but may cause starvation for requests farther away from the head's position.</div>
+          <div class="algo-desc">Prioritises the request closest to the current head position. Reduces average seek time compared to FCFS but may cause starvation for far requests.</div>
+          <div class="algo-learn">Learn more <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
-      </div>
+      </a>
 
-      <div class="algo-card">
+      <a href="./algo-detail.html#scan" class="algo-card">
         <div class="algo-card-header">
           <span class="algo-tag">SCAN</span>
           <span class="algo-badge">Sweep</span>
@@ -113,10 +117,11 @@
         <div class="algo-card-body">
           <div class="algo-name">Elevator Algorithm</div>
           <div class="algo-desc">The arm sweeps in one direction servicing all requests, then reverses. Behaviour mirrors an elevator — hence the nickname.</div>
+          <div class="algo-learn">Learn more <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
-      </div>
+      </a>
 
-      <div class="algo-card">
+      <a href="./algo-detail.html#cscan" class="algo-card">
         <div class="algo-card-header">
           <span class="algo-tag">C-SCAN</span>
           <span class="algo-badge">Circular</span>
@@ -124,10 +129,11 @@
         <div class="algo-card-body">
           <div class="algo-name">Circular SCAN</div>
           <div class="algo-desc">Like SCAN, but after reaching the last cylinder the head jumps back to the first without servicing any requests, then sweeps again for uniform wait times.</div>
+          <div class="algo-learn">Learn more <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
-      </div>
+      </a>
 
-      <div class="algo-card">
+      <a href="./algo-detail.html#look" class="algo-card">
         <div class="algo-card-header">
           <span class="algo-tag">LOOK</span>
           <span class="algo-badge">Optimised</span>
@@ -135,10 +141,11 @@
         <div class="algo-card-body">
           <div class="algo-name">Modified SCAN</div>
           <div class="algo-desc">Like SCAN but the arm reverses direction as soon as there are no more requests ahead, avoiding unnecessary travel to the disk edge.</div>
+          <div class="algo-learn">Learn more <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
-      </div>
+      </a>
 
-      <div class="algo-card">
+      <a href="./algo-detail.html#clook" class="algo-card">
         <div class="algo-card-header">
           <span class="algo-tag">C-LOOK</span>
           <span class="algo-badge">Circular</span>
@@ -146,10 +153,11 @@
         <div class="algo-card-body">
           <div class="algo-name">Circular LOOK</div>
           <div class="algo-desc">The arm services requests outward until the highest request, then jumps to the lowest without servicing, combining LOOK efficiency with C-SCAN fairness.</div>
+          <div class="algo-learn">Learn more <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
-      </div>
+      </a>
 
-      <div class="algo-card">
+      <a href="./algo-detail.html#lifo" class="algo-card">
         <div class="algo-card-header">
           <span class="algo-tag">LIFO</span>
           <span class="algo-badge">Stack</span>
@@ -157,10 +165,11 @@
         <div class="algo-card-body">
           <div class="algo-name">Last In First Out</div>
           <div class="algo-desc">The most recently arrived request is serviced first. Useful for certain cache-locality scenarios but can cause starvation of older requests.</div>
+          <div class="algo-learn">Learn more <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
-      </div>
+      </a>
 
-      <div class="algo-card">
+      <a href="./algo-detail.html#rss" class="algo-card">
         <div class="algo-card-header">
           <span class="algo-tag">RSS</span>
           <span class="algo-badge">Stochastic</span>
@@ -168,8 +177,9 @@
         <div class="algo-card-body">
           <div class="algo-name">Random Seek Scheduling</div>
           <div class="algo-desc">Picks the next request at random. Used in simulation and analysis to model stochastic environments and establish baseline comparisons.</div>
+          <div class="algo-learn">Learn more <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
-      </div>
+      </a>
     </div>
   </section>
 
@@ -184,6 +194,7 @@
         </div>
         <div>
           <div class="controls-panel-title">Simulator</div>
+          <div class="controls-panel-sub">// configure inputs and plot the disk head movement</div>
         </div>
       </div>
 
@@ -246,7 +257,7 @@
 
   <!-- ── FOOTER ── -->
   <footer>
-    <div class="footer-left">OS Explorer · Operating Systems Laboratory Project · Module by Neha Kamath — 241CS240</div>
+    <div class="footer-left">OS Explorer · Operating Systems Laboratory Project · Module by Vaibhavi Nagaraja Nayak — 231CS262</div>
     <div class="footer-right">
       <a href="../index.html">Home</a>
       <a href="../about.html">Team</a>

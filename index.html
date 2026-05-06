@@ -200,7 +200,8 @@
     .card:nth-child(9)  { animation-delay:.45s } .card:nth-child(10) { animation-delay:.50s }
     .card:nth-child(11) { animation-delay:.55s } .card:nth-child(12) { animation-delay:.60s }
     .card:nth-child(13) { animation-delay:.65s } .card:nth-child(14) { animation-delay:.70s }
-    .card:nth-child(15) { animation-delay:.75s }
+    .card:nth-child(15) { animation-delay:.75s } .card:nth-child(16) { animation-delay:.80s }
+    .card:nth-child(17) { animation-delay:.85s }
 
     .card-num {
       font-family: var(--mono); font-size: 10px; color: var(--dim);
@@ -298,7 +299,7 @@
       <h1>OPERATING<br><span class="accent">SYSTEMS</span><br>LAB</h1>
       <p class="hero-sub">A hands-on environment to visualize and experiment with core OS concepts — from process scheduling to memory management, disk I/O, and beyond.</p>
       <div class="hero-stats">
-        <div class="stat"><div class="stat-n">15</div><div class="stat-label">Modules</div></div>
+        <div class="stat"><div class="stat-n">19</div><div class="stat-label">Modules</div></div>
         <div class="stat"><div class="stat-n">10</div><div class="stat-label">Contributors</div></div>
       </div>
     </div>
@@ -322,9 +323,11 @@
           <div class="t-output t-ok">✓ Process Sync        [Reader-Writer, Dining Phil]</div>
           <div class="t-output t-ok">✓ File Systems        [Allocation, Organization]</div>
           <div class="t-output t-ok">✓ Disk Scheduling     [SCAN, SSTF, FCFS]</div>
+          <div class="t-output t-ok">✓ Booting             [Firmware, Kernel, Startup]</div>
+          <div class="t-output t-ok">✓ Interrupts          [Keyboard, IRQ, ISR]</div>
           <div class="t-output">──────────────────────────────</div>
           <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">status</span></div>
-          <div class="t-output t-warn">15 modules ready · All systems operational</div>
+          <div class="t-output t-warn">19 modules ready · All systems operational</div>
           <div class="t-line"><span class="t-prompt">$</span><span class="cursor"></span></div>
         </div>
       </div>
@@ -337,7 +340,7 @@
   <section class="modules-section">
     <div class="section-header">
       <h2>SIMULATION MODULES</h2>
-      <span class="counter">15 modules</span>
+      <span class="counter">17 modules</span>
     </div>
 
     <div class="modules-grid">
@@ -475,6 +478,42 @@
         <p>Simulate synchronization in distributed systems with the Firing Squad model.</p>
         <a href="FiringSquad/FiringSquad.html" class="card-badge">▶ Launch</a>
         <a href="FiringSquad/FiringSquad.html" class="card-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+      </div>
+
+      <div class="card cat-cpu">
+        <div class="card-num">MODULE 16 · BOOT PROCESS</div>
+        <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M5.5 5.5a9 9 0 1 0 13 0"/></svg></div>
+        <h3>BOOTING</h3>
+        <p>Trace the startup path from firmware initialization to kernel loading and system handoff.</p>
+        <a href="booting/index.html" class="card-badge">▶ Launch</a>
+        <a href="booting/index.html" class="card-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+      </div>
+
+      <div class="card cat-io">
+        <div class="card-num">MODULE 17 · INTERRUPTS</div>
+        <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></div>
+        <h3>INTERRUPTS</h3>
+        <p>Visualize keyboard IRQ handling through the controller, CPU, OS, vector table, and ISR.</p>
+        <a href="interrupts/index.html" class="card-badge">▶ Launch</a>
+        <a href="interrupts/index.html" class="card-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+      </div>
+
+      <div class="card cat-cpu">
+        <div class="card-num">MODULE 18 · VIRTUAL MEMORY</div>
+        <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M5.5 5.5a9 9 0 1 0 13 0"/></svg></div>
+        <h3>VIRTUAL MEMORY</h3>
+        <p>Simulate virtual memory management in operating systems.</p>
+        <a href="Virtual-memory/virtual-memory.html" class="card-badge">▶ Launch</a>
+        <a href="Virtual-memory/virtual-memory.html" class="card-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
+      </div>
+
+      <div class="card cat-cpu">
+        <div class="card-num">MODULE 19 · I/O SYSTEM MANAGEMENT</div>
+        <div class="card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M5.5 5.5a9 9 0 1 0 13 0"/></svg></div>
+        <h3>I/O SYSTEM MANAGEMENT</h3>
+        <p>Simulate I/O system management in operating systems.</p>
+        <a href="io-management/io-management.html" class="card-badge">▶ Launch</a>
+        <a href="io-management/io-management.html" class="card-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg></a>
       </div>
 
     </div>
