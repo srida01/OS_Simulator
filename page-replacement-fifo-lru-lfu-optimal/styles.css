@@ -1,0 +1,103 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    font-family: Inter, sans-serif;
+	background-color: #006666;
+    color: #0066cc;
+}
+
+.logo {
+	border-radius: 12px;
+	margin: 20px;
+	margin-left: 4%;
+	padding: 16px 10px 4px 10px;
+	background: #000000;
+	color: #ffffff;
+	text-align: center;
+	font: 24px 'Outfit', sans-serif;
+	justify-content: center;
+	font-weight: bolder;
+	cursor: pointer;
+}
+
+.logo:hover {
+	color: #6600cc;
+}
+
+.navbar {
+    display: flex;
+	background-color: #0099cc;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+}
+
+.navbar nav a {
+    font-size: 20px;
+    color: #000000;
+    margin-right: 30px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.navbar nav a:hover {
+    color: #ffffff;
+}
+
+.container {
+    background: #0099cc;
+    padding: 20px 20px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
+.func {
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	background-color: #333333;
+	color: #ffcc00;
+	margin: 20px;
+	border-radius: 12px;
+    padding: 20px 20px;
+}
+.column {
+	float: left;
+	padding: 15px;
+}
+
+.column1 {
+	float: left;
+	width: 95px;
+	padding: 15px;
+	margin: 10px
+}
+
+.row:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+#tbl{
+	color: #ffcc00;
+}
+
+.button {
+	color: #0f0d0e;
+	border: none;
+	padding: 10px 20px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	margin: 4px 2px;
+	cursor: pointer;
+	transition-duration: 0.5s;
+	font-family: 'Outfit', sans-serif;
+	font-weight: 550;
+}

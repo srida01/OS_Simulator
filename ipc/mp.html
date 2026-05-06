@@ -1,0 +1,594 @@
+pc/mp.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Message Passing Simulation - Operating Systems Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <style>
+    :root {
+      --primary-color: #0072ff;
+      --secondary-color: #00c6ff;
+      --accent-color: #ff6b6b;
+      --text-light: #ffffff;
+      --text-dark: #222;
+      --text-muted: #666;
+      --bg-light: #f8fafc;
+      --bg-dark: #1a202c;
+      --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+      background-attachment: fixed;
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    /* Add subtle pattern overlay like index page */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.5;
+    }
+    
+    nav {
+      background: rgba(205, 195, 195, 0.4);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      height: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 5%;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      letter-spacing: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo i {
+      margin-right: 8px;
+    }
+    
+    .logo:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+    
+    nav a {
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      text-transform: uppercase;
+      position: relative;
+    }
+    
+    nav ul a::after {
+      content: '';
+      position: absolute;
+      bottom: 5px;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: white;
+      transform: translateX(-50%);
+      transition: var(--transition);
+    }
+    
+    nav ul a:hover::after {
+      width: 60%;
+    }
+    
+    nav ul a:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .container-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 100px 20px 40px;
+    }
+    
+    .simulation-container {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      padding: 40px;
+      width: 100%;
+      max-width: 900px;
+    }
+    
+    .header-title {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+    }
+    
+    .explanation {
+      background-color: rgba(0, 114, 255, 0.05);
+      border-left: 4px solid var(--primary-color);
+      padding: 1.2rem;
+      border-radius: var(--radius-sm);
+      margin: 1.5rem 0;
+    }
+    
+    .process-container {
+      background: white;
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .process-header {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--primary-color);
+    }
+    
+    .message-box {
+      border: 2px solid var(--primary-color);
+      border-radius: var(--radius-sm);
+      padding: 15px;
+      margin: 15px 0;
+      background: #f8fafc;
+      transition: var(--transition);
+      animation: fadeIn 0.5s ease-in-out forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message-box:hover {
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-2px);
+    }
+    
+    .btn-os {
+      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      margin-top: 10px;
+      transition: var(--transition);
+    }
+    
+    .btn-os:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+      font-family: 'Outfit', sans-serif;
+    }
+    
+    .message-log {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 15px;
+      background: white;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      margin-top: 20px;
+    }
+    
+    .kernel-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      height: 200px;
+      margin: 30px 0;
+    }
+    
+    .process-box {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      position: absolute;
+      z-index: 2;
+    }
+    
+    .process-a {
+      background: linear-gradient(135deg, #ff6b6b, #ee0979);
+      left: 50px;
+    }
+    
+    .process-b {
+      background: linear-gradient(135deg, #8e2de2, #4a00e0);
+      right: 50px;
+    }
+    
+    .kernel-box {
+      width: 160px;
+      height: 120px;
+      background: linear-gradient(135deg, #373b44, #4286f4);
+      border-radius: var(--radius-sm);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      z-index: 1;
+    }
+    
+    .message-path {
+      position: absolute;
+      height: 2px;
+      background-color: var(--primary-color);
+      z-index: 0;
+    }
+    
+    .path-a-kernel {
+      width: 100px;
+      left: 110px;
+      top: 60px;
+    }
+    
+    .path-kernel-b {
+      width: 100px;
+      right: 110px;
+      top: 60px;
+    }
+    
+    .message-icon {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background-color: var(--accent-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      box-shadow: var(--shadow-sm);
+      opacity: 0;
+      z-index: 3;
+    }
+    
+    .animate-a-to-kernel {
+      animation: moveAToKernel 1.5s ease-in-out;
+    }
+    
+    .animate-kernel-to-b {
+      animation: moveKernelToB 1.5s ease-in-out;
+    }
+    
+    .animate-b-to-kernel {
+      animation: moveBToKernel 1.5s ease-in-out;
+    }
+    
+    .animate-kernel-to-a {
+      animation: moveKernelToA 1.5s ease-in-out;
+    }
+    
+    @keyframes moveAToKernel {
+      0% { opacity: 1; left: 110px; }
+      100% { opacity: 1; left: 210px; }
+    }
+    
+    @keyframes moveKernelToB {
+      0% { opacity: 1; left: 290px; }
+      100% { opacity: 1; left: 390px; }
+    }
+    
+    @keyframes moveBToKernel {
+      0% { opacity: 1; right: 110px; }
+      100% { opacity: 1; right: 210px; }
+    }
+    
+    @keyframes moveKernelToA {
+      0% { opacity: 1; right: 290px; }
+      100% { opacity: 1; right: 390px; }
+    }
+    
+    .footer-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+    }
+    
+    .footer-nav a {
+      padding: 10px 20px;
+      background-color: white;
+      color: var(--primary-color);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .footer-nav a:hover {
+      background-color: var(--primary-color);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .arrow-left::before {
+      content: "\f060";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+    }
+    
+    .arrow-right::after {
+      content: "\f061";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+    }
+    
+    @media (max-width: 768px) {
+      .simulation-container {
+        padding: 20px;
+      }
+      
+      .header-title {
+        font-size: 2rem;
+      }
+      
+      .kernel-visual {
+        flex-direction: column;
+        height: 360px;
+      }
+      
+      .process-box {
+        position: relative;
+        margin: 15px 0;
+        left: auto;
+        right: auto;
+      }
+      
+      .kernel-box {
+        position: relative;
+        left: auto;
+        transform: none;
+        margin: 15px 0;
+      }
+      
+      .message-path, .message-icon {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body style="background-image: url('../landing.jpeg'); background-size: cover; background-position: center;">
+  <nav>
+    <a href="../index.html" class="logo"><i class="fas fa-microchip"></i> OS VISUALIZER</a>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="ipc.html">IPC</a></li>
+    </ul>
+  </nav>
+
+  <div class="container-wrapper">
+    <div class="simulation-container">
+      <h1 class="header-title">Message Passing Through Kernel</h1>
+      
+      <div class="explanation">
+        <h4><i class="fas fa-info-circle"></i> How it works</h4>
+        <p>Message passing is an IPC mechanism where processes communicate by exchanging messages. The operating system kernel acts as an intermediary that handles message delivery between processes. This approach provides better isolation compared to shared memory but introduces some overhead.</p>
+      </div>
+      
+      <div class="kernel-visual">
+        <div class="process-box process-a">Process A</div>
+        <div class="kernel-box">Kernel</div>
+        <div class="process-box process-b">Process B</div>
+        
+        <div class="message-path path-a-kernel"></div>
+        <div class="message-path path-kernel-b"></div>
+        
+        <div id="message-icon" class="message-icon">
+          <i class="fas fa-envelope-open-text"></i>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <div class="process-container">
+            <h2 class="process-header">Process A</h2>
+            <div class="form-group">
+              <input id="processAInput" type="text" class="form-control" placeholder="Enter a message" />
+              <button onclick="sendMessage('processAInput', 'Process B')" class="btn btn-os w-100">Send to Process B</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="process-container">
+            <h2 class="process-header">Process B</h2>
+            <div class="form-group">
+              <input id="processBInput" type="text" class="form-control" placeholder="Enter a message" />
+              <button onclick="sendMessage('processBInput', 'Process A')" class="btn btn-os w-100">Send to Process A</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="message-log">
+        <h3><i class="fas fa-history"></i> Message Log</h3>
+        <div id="messageLog"></div>
+      </div>
+      
+      <div class="footer-nav">
+        <a href="ipc.html" class="arrow-left">Back to IPC</a>
+        <a href="shared.html" class="arrow-right">Shared Memory Simulation</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    const kernel = {
+      // Method to send a message with animation
+      sendMessage: function (sender, receiver, message) {
+        if (message.trim() === '') {
+          alert('Please enter a message first!');
+          return;
+        }
+        
+        const messageIcon = document.getElementById('message-icon');
+        
+        // Animate based on sender and receiver
+        if (sender === 'Process A' && receiver === 'Process B') {
+          // First animate from A to Kernel
+          messageIcon.className = 'message-icon animate-a-to-kernel';
+          
+          // After first animation, animate from Kernel to B
+          setTimeout(() => {
+            messageIcon.className = 'message-icon animate-kernel-to-b';
+            
+            // After both animations complete, log the message
+            setTimeout(() => {
+              this.logMessage(sender, receiver, message);
+            }, 1500);
+          }, 1500);
+        } else {
+          // B to A animation
+          messageIcon.className = 'message-icon animate-b-to-kernel';
+          
+          // After first animation, animate from Kernel to A
+          setTimeout(() => {
+            messageIcon.className = 'message-icon animate-kernel-to-a';
+            
+            // After both animations complete, log the message
+            setTimeout(() => {
+              this.logMessage(sender, receiver, message);
+            }, 1500);
+          }, 1500);
+        }
+      },
+      
+      // Log the message in the message log
+      logMessage: function(sender, receiver, message) {
+        const messageLog = document.getElementById('messageLog');
+        const messageBox = document.createElement('div');
+        messageBox.className = 'message-box';
+        
+        const time = new Date().toLocaleTimeString();
+        messageBox.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>${sender} → ${receiver}</strong>
+            <span class="text-muted"><small>${time}</small></span>
+          </div>
+          <div class="message-content">${message}</div>
+        `;
+        
+        messageLog.prepend(messageBox);
+      }
+    };
+
+    // Function to send a message from one process to another
+    function sendMessage(inputId, receiver) {
+      const inputElement = document.getElementById(inputId);
+      const sender = inputId.includes('processA') ? 'Process A' : 'Process B';
+      const message = inputElement.value;
+      
+      kernel.sendMessage(sender, receiver, message);
+      
+      // Clear the input field
+      inputElement.value = '';
+    }
+    
+    // Add event listener for Enter key
+    document.getElementById('processAInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage('processAInput', 'Process B');
+      }
+    });
+    
+    document.getElementById('processBInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage('processBInput', 'Process A');
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js" integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ" crossorigin="anonymous"></script>
+</body>
+</html>

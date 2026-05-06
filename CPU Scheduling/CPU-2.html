@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OS Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="CPU-2.css">
+</head>
+<body>
+  <div class="container">
+    <header class="navbar">
+      <div class="logo">OS Explorer</div>
+      <nav>
+        <a href="../index.html">Home</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>CPU Scheduling Simulator</h1>
+      <p>A visual simulation of various CPU scheduling algorithms in operating systems</p>
+    </section>
+
+    <section class="simulation-panel">
+      <div class="algo-tabs">
+        <div class="algo-tab active" data-algo="sjf">SJF</div>
+        <div class="algo-tab" data-algo="priority">Priority</div>
+        <div class="algo-tab" data-algo="srjf">SRJF</div>
+      </div>
+
+      <div class="algorithm-description">
+        <h3>Shortest Job First (SJF)</h3>
+        <p>A non-preemptive scheduling algorithm that selects the process with the smallest execution time first.</p>
+      </div>
+
+      <div class="input-section">
+        <div class="process-input">
+          <div class="input-group">
+            <label for="process-id">Process ID</label>
+            <input type="text" id="process-id" placeholder="P5">
+          </div>
+          <div class="input-group">
+            <label for="arrival-time">Arrival Time</label>
+            <input type="number" id="arrival-time" min="0" value="0">
+          </div>
+          <div class="input-group">
+            <label for="burst-time">Burst Time</label>
+            <input type="number" id="burst-time" min="1" value="4">
+          </div>
+          <div class="input-group">
+            <label for="priority">Priority</label>
+            <input type="number" id="priority" min="1" value="1">
+          </div>
+          <div class="input-group">
+            <button id="add-process-btn" class="add-process-btn">Add Process</button>
+          </div>
+        </div>
+
+        <table class="process-table">
+          <thead>
+            <tr>
+              <th>Process ID</th>
+              <th>Arrival Time</th>
+              <th>Burst Time</th>
+              <th>Priority</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="process-table-body">
+            <tr>
+              <td>P1</td>
+              <td>0</td>
+              <td>5</td>
+              <td>2</td>
+              <td><button class="delete-btn" data-id="P1">Delete</button></td>
+            </tr>
+            <tr>
+              <td>P2</td>
+              <td>1</td>
+              <td>3</td>
+              <td>1</td>
+              <td><button class="delete-btn" data-id="P2">Delete</button></td>
+            </tr>
+            <tr>
+              <td>P3</td>
+              <td>2</td>
+              <td>8</td>
+              <td>4</td>
+              <td><button class="delete-btn" data-id="P3">Delete</button></td>
+            </tr>
+            <tr>
+              <td>P4</td>
+              <td>3</td>
+              <td>2</td>
+              <td>3</td>
+              <td><button class="delete-btn" data-id="P4">Delete</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="controls">
+          <button id="simulate-btn" class="simulate-btn">Run Simulation</button>
+        </div>
+      </div>
+
+      <div class="process-colors" id="process-colors">
+        <!-- Process colors will be displayed here -->
+      </div>
+
+      <div id="sjf-container" class="algorithm-container active">
+        <h3>Shortest Job First (SJF) Scheduling</h3>
+        <div id="sjf-gantt" class="gantt-chart"></div>
+        <div class="metrics">
+          <div class="metric-card">
+            <div>Average Turnaround Time</div>
+            <div class="metric-value" id="sjf-avg-tat">0.0</div>
+          </div>
+          <div class="metric-card">
+            <div>Average Waiting Time</div>
+            <div class="metric-value" id="sjf-avg-wt">0.0</div>
+          </div>
+        </div>
+        <table id="sjf-results" class="process-table">
+          <thead>
+            <tr>
+              <th>Process ID</th>
+              <th>Arrival Time</th>
+              <th>Burst Time</th>
+              <th>Completion Time</th>
+              <th>Turnaround Time</th>
+              <th>Waiting Time</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <div id="priority-container" class="algorithm-container">
+        <h3>Priority Scheduling</h3>
+        <div id="priority-gantt" class="gantt-chart"></div>
+        <div class="metrics">
+          <div class="metric-card">
+            <div>Average Turnaround Time</div>
+            <div class="metric-value" id="priority-avg-tat">0.0</div>
+          </div>
+          <div class="metric-card">
+            <div>Average Waiting Time</div>
+            <div class="metric-value" id="priority-avg-wt">0.0</div>
+          </div>
+        </div>
+        <table id="priority-results" class="process-table">
+          <thead>
+            <tr>
+              <th>Process ID</th>
+              <th>Arrival Time</th>
+              <th>Burst Time</th>
+              <th>Priority</th>
+              <th>Completion Time</th>
+              <th>Turnaround Time</th>
+              <th>Waiting Time</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <div id="srjf-container" class="algorithm-container">
+        <h3>Shortest Remaining Job First (SRJF) Scheduling</h3>
+        <div id="srjf-gantt" class="gantt-chart"></div>
+        <div class="metrics">
+          <div class="metric-card">
+            <div>Average Turnaround Time</div>
+            <div class="metric-value" id="srjf-avg-tat">0.0</div>
+          </div>
+          <div class="metric-card">
+            <div>Average Waiting Time</div>
+            <div class="metric-value" id="srjf-avg-wt">0.0</div>
+          </div>
+        </div>
+        <table id="srjf-results" class="process-table">
+          <thead>
+            <tr>
+              <th>Process ID</th>
+              <th>Arrival Time</th>
+              <th>Burst Time</th>
+              <th>Completion Time</th>
+              <th>Turnaround Time</th>
+              <th>Waiting Time</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="info-box">
+      <h3>About CPU Scheduling Algorithms</h3>
+      <p>CPU scheduling is the process of determining which process in the ready queue will be allocated the CPU for execution. The primary objective is to maximize CPU utilization and throughput while minimizing turnaround time, waiting time, and response time.</p>
+      
+      <h4>Algorithms Implemented:</h4>
+      <ul>
+        <li><strong>Shortest Job First (SJF)</strong>: A non-preemptive scheduling algorithm that selects the process with the smallest execution time first.</li>
+        <li><strong>Priority Scheduling</strong>: Processes are scheduled based on priority. Lower numbers typically indicate higher priority.</li>
+        <li><strong>Shortest Remaining Time First (SRJF)</strong>: Preemptive version of SJF where the process with the smallest remaining time is selected for execution.</li>
+      </ul>
+    </section>
+  </div>
+
+  <footer>
+    &copy; 2025 OS Explorer | CS257: Operating Systems Laboratory
+  </footer>
+  <script src="CPU-2.js"></script>
+  </body>
+  </html>

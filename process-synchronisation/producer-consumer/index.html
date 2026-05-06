@@ -1,0 +1,64 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Producer-Consumer simulation</title>
+  <meta name="description" content="Producer-Consumer problem visualization">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container-2">
+  <div style="display: flex;">  
+  
+  <div class="container">
+    <h1>Producer-Consumer Problem</h1>
+    <table>
+      <tr>
+        <td>Producing delay min</td>
+        <td><input id="prod-delay-min" type="number" min="200" step="100" class="form-control form-control-sm"></td>
+      </tr>
+
+      <tr>
+        <td>Producing delay max</td>
+        <td><input id="prod-delay-max" type="number" min="200" step="100" class="form-control form-control-sm"></td>
+      </tr>
+
+      <tr>
+        <td>Consuming delay min</td>
+        <td><input id="cons-delay-min" type="number" min="200" step="100" class="form-control form-control-sm"></td>
+      </tr>
+
+      <tr>
+        <td>Consuming delay max</td>
+        <td><input id="cons-delay-max" type="number" min="200" step="100" class="form-control form-control-sm"></td>
+      </tr>
+
+      <tr>
+        <td>Produce chunks</td>
+        <td><input id="chunks-count" type="number" min="1" class="form-control form-control-sm"></td>
+      </tr>
+
+      <tr>
+        <td>Queue capacity</td>
+        <td><input id="queue-cap" type="number" min="1" max="6" class="form-control form-control-sm"></td>
+      </tr>
+    </table>
+
+    <button id="options-apply" class="btn btn-primary">Apply</button> ...or use preset: <a href="javascript: void 0" id="preset-fpsc" class="btn-preset">Fast&rarr;Slow</a> / <a href="javascript: void 0" id="preset-spfc" class="btn-preset">Slow&rarr;Fast</a> / <a href="javascript: void 0" id="preset-random" class="btn-preset">Random</a>
+  </div>
+
+  <div id="canvas-container" style="width: 50%; float: right;">
+    <canvas id="canvas"></canvas>
+  </div>
+  </div>
+  </div>
+
+  <script src="model.js"></script>
+  <script src="page.js"></script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shared Memory Simulation - Operating Systems Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <style>
+    :root {
+      --primary-color: #0072ff;
+      --secondary-color: #00c6ff;
+      --accent-color: #ff6b6b;
+      --text-light: #ffffff;
+      --text-dark: #222;
+      --text-muted: #666;
+      --bg-light: #f8fafc;
+      --bg-dark: #1a202c;
+      --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+      background-attachment: fixed;
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    /* Add subtle pattern overlay like index page */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.5;
+    }
+    
+    nav {
+      background: rgba(205, 195, 195, 0.4);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      height: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 5%;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      letter-spacing: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo i {
+      margin-right: 8px;
+    }
+    
+    .logo:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+    
+    nav a {
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      text-transform: uppercase;
+      position: relative;
+    }
+    
+    nav ul a::after {
+      content: '';
+      position: absolute;
+      bottom: 5px;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: white;
+      transform: translateX(-50%);
+      transition: var(--transition);
+    }
+    
+    nav ul a:hover::after {
+      width: 60%;
+    }
+    
+    nav ul a:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 120px auto 40px;
+      padding: 2rem;
+      background: rgba(235, 224, 224, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 2rem;
+      color: var(--primary-color);
+      text-align: center;
+    }
+    
+    .process-container {
+      background: white;
+      border-radius: var(--radius-sm);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-control {
+      margin-bottom: 1rem;
+      border-radius: var(--radius-sm);
+      padding: 0.8rem;
+    }
+    
+    .btn {
+      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-weight: 500;
+      transition: var(--transition);
+      margin-bottom: 1rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+    
+    .shared-memory {
+      background: #f8fafc;
+      border-left: 4px solid var(--primary-color);
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    
+    .shared-memory:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .memory-visualization {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2rem 0;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .process-box {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b6b, #ee0979);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .process-b {
+      background: linear-gradient(135deg, #8e2de2, #4a00e0);
+    }
+    
+    .memory-region {
+      width: 200px;
+      height: 80px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1rem;
+      text-align: center;
+      padding: 1rem;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+    }
+    
+    .memory-region:hover {
+      transform: scale(1.05);
+    }
+    
+    .explanation {
+      background: rgba(0, 114, 255, 0.05);
+      border-left: 4px solid var(--primary-color);
+      padding: 1.5rem;
+      border-radius: var(--radius-sm);
+      margin: 2rem 0;
+    }
+    
+    .explanation h3 {
+      color: var(--primary-color);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        margin-top: 100px;
+        padding: 1.5rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .memory-visualization {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body style="background-image: url('../landing.jpeg'); background-size: cover; background-position: center;">
+  <nav>
+    <a href="../index.html" class="logo"><i class="fas fa-microchip"></i> OS VISUALIZER</a>
+    <ul>
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="ipc.html">IPC</a></li>
+    </ul>
+  </nav>
+  
+  <div class="container">
+    <h1>IPC Through Shared Memory</h1>
+    
+    <div class="explanation">
+      <h3><i class="fas fa-info-circle"></i> How Shared Memory Works</h3>
+      <p>Shared memory is one of the fastest IPC mechanisms because processes can directly access a common memory region without involving the kernel for each data transfer. In this simulation:</p>
+      <ul>
+        <li>Process A writes data to the shared memory region</li>
+        <li>Process B reads data from the same memory region</li>
+        <li>The data is immediately available without any copying or kernel mediation</li>
+      </ul>
+    </div>
+    
+    <div class="memory-visualization">
+      <div class="process-box">Process A</div>
+      <div class="memory-region" id="memory-display">Shared Memory</div>
+      <div class="process-box process-b">Process B</div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6">
+        <div class="process-container">
+          <h2>Process A</h2>
+          <input id="processAInput" type="text" class="form-control" placeholder="Enter a message" />
+          <button onclick="writeToSharedMemory('processAInput')" class="btn btn-primary">Write to Shared Memory</button>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="process-container">
+          <h2>Process B</h2>
+          <button onclick="readFromSharedMemory()" class="btn btn-primary">Read from Shared Memory</button>
+          <div id="sharedMemoryLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    // Shared memory object
+    var shared = [];
+    var i = 0;
+
+    const sharedMemory = {
+      data: '',
+
+      writeToMemory: function(data) {
+        shared[i] = data;
+        i++;
+        this.data = data;
+        
+        // Update visual representation
+        const memoryDisplay = document.getElementById('memory-display');
+        if (data) {
+          memoryDisplay.innerHTML = `"${data}"`;
+          
+          // Animation effect
+          memoryDisplay.style.boxShadow = '0 0 20px rgba(0, 114, 255, 0.8)';
+          setTimeout(() => {
+            memoryDisplay.style.boxShadow = 'var(--shadow-md)';
+          }, 500);
+        }
+      },
+      
+      readFromMemory: function() {
+        return this.data;
+      }
+    };
+
+    // Function to write data to shared memory
+    function writeToSharedMemory(inputId) {
+      const input = document.getElementById(inputId);
+      const data = input.value;
+      
+      if (data.trim() === '') {
+        alert("Please enter some data to write to shared memory!");
+        return;
+      }
+      
+      sharedMemory.writeToMemory(data);
+      input.value = '';
+      
+      // Visual feedback for Process A
+      const processA = document.querySelector('.process-box');
+      processA.style.boxShadow = '0 0 15px rgba(238, 9, 121, 0.8)';
+      setTimeout(() => {
+        processA.style.boxShadow = 'var(--shadow-sm)';
+      }, 500);
+    }
+
+    // Function to read data from shared memory
+    function readFromSharedMemory() {
+      const data = sharedMemory.readFromMemory();
+      
+      if (!data) {
+        alert("No data in shared memory! Process A needs to write something first.");
+        return;
+      }
+      
+      const sharedMemoryLog = document.getElementById('sharedMemoryLog');
+      const messageBox = document.createElement('div');
+      messageBox.className = 'shared-memory';
+      messageBox.innerHTML = `<strong>Data read:</strong> ${data}`;
+      sharedMemoryLog.prepend(messageBox);
+      
+      // Visual feedback for Process B
+      const processB = document.querySelector('.process-box.process-b');
+      processB.style.boxShadow = '0 0 15px rgba(74, 0, 224, 0.8)';
+      setTimeout(() => {
+        processB.style.boxShadow = 'var(--shadow-sm)';
+      }, 500);
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js" integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ" crossorigin="anonymous"></script>
+</body>
+</html>
