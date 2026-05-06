@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booting - OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1017;
+      --bg2: #111520;
+      --surface: #161b27;
+      --border: rgba(82, 170, 255, 0.18);
+      --border-bright: rgba(82, 170, 255, 0.45);
+      --accent: #60b8ff;
+      --accent-soft: rgba(96, 184, 255, 0.15);
+      --line: var(--border);
+      --text: #eef2f7;
+      --muted: #8fa4bc;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: var(--mono);
+    }
+    
+    html {
+      min-height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(96,184,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(96,184,255,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 0 32px 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+      margin-bottom: 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--accent); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent); background: var(--accent-soft);
+    }
+
+    .logo {
+      color: var(--text);
+      font-family: var(--display);
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-decoration: none;
+    }
+    .logo span { color: var(--accent); }
+
+    nav { display: flex; align-items: center; gap: 8px; }
+
+    .navbar nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .navbar nav a:hover,
+    .navbar nav a.active {
+      color: var(--accent);
+      border-color: var(--border-bright);
+      background: rgba(96,184,255,0.05);
+    }
+    
+    .boot-container {
+      border-radius: 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 36px;
+    }
+    
+    .title {
+      color: var(--text);
+      font-family: var(--display);
+      font-size: 52px;
+      font-weight: 400;
+      letter-spacing: 3px;
+      line-height: 1;
+    }
+    
+    .subtitle {
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.8;
+      margin-top: 8px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .btn {
+      background: rgba(96,184,255,0.08);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+      background: rgba(96,184,255,0.15);
+      border-color: var(--border-bright);
+    }
+    
+    .btn-primary {
+      background: var(--accent-soft);
+      color: var(--text);
+      border-color: var(--border-bright);
+    }
+    
+    .btn-primary:hover {
+      background: rgba(96,184,255,0.22);
+    }
+    
+    .stages {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .stage {
+      position: relative;
+      padding-left: 20px;
+      margin-left: 16px;
+      border-left: 2px solid var(--border);
+      padding-bottom: 20px;
+      opacity: 0.4;
+      transition: opacity 0.5s ease;
+    }
+    
+    .stage:last-child {
+      border-left: none;
+    }
+    
+    .stage.active {
+      opacity: 1;
+    }
+    
+    .stage-indicator {
+      position: absolute;
+      left: -9px;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .stage.active .stage-indicator {
+      background-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+    
+    .stage.completed .stage-indicator::after {
+      content: "";
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent);
+    }
+    
+    .stage-title {
+      font-size: 16px;
+      font-family: var(--display);
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    
+    .stage.active .stage-title {
+      color: #ffffff;
+    }
+    
+    .stage-desc {
+      font-size: 14px;
+      font-family: var(--sans);
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 580px;
+    }
+    
+    .progress-bar {
+      height: 4px;
+      background-color: var(--surface);
+      border-radius: 2px;
+      margin: 40px 0 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-family: var(--mono);
+      color: var(--muted);
+    }
+    
+    .visual-container {
+      height: 120px;
+      margin: 30px 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .boot-animation {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .boot-icon {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .boot-circle {
+      position: absolute;
+      border: 3px solid var(--accent-soft);
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1s linear infinite;
+    }
+    
+    .boot-logo {
+      width: 40px;
+      height: 40px;
+      background-color: #ffffff;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z'/%3E%3C/svg%3E") no-repeat center center;
+      mask-size: contain;
+    }
+    
+    .terminal {
+      display: none;
+      width: 100%;
+      height: 100%;
+      background-color: #0a0d13;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: #a0a0a0;
+      overflow: hidden;
+    }
+    
+    .terminal-content {
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    .log-line {
+      margin: 2px 0;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    
+    .log-line.show {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.2s ease;
+    }
+    
+    .highlight {
+      color: var(--accent);
+    }
+    
+    .success {
+      color: #2ecc71;
+    }
+    
+    .warning {
+      color: #f39c12;
+    }
+    
+    .error {
+      color: #e74c3c;
+    }
+    
+    .kernel-loading {
+      display: none;
+      width: 100%;
+      height: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+    
+    .kernel-logo {
+      width: 80px;
+      height: 80px;
+      background-color: var(--accent);
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17.5 12a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0zM12 7.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zm7.5 8.5L16 19.5 16 16l3.5-3.5L16 9V5.5l3.5 3.5L23 5.5v3l-3.5 3.5L23 15.5v3l-3.5-2.5zM8 19.5L4.5 16 1 18.5v-3L4.5 12 1 8.5v-3L4.5 8 8 4.5v3L4.5 11 8 14.5v5z'/%3E%3C/svg%3E") no-repeat center center;
+      mask-size: contain;
+    }
+    
+    .kernel-text {
+      font-size: 18px;
+      font-weight: 500;
+      color: #ffffff;
+    }
+    
+    .loading-dots {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+    
+    .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    .desktop-loading {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .desktop-bg {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: linear-gradient(135deg, #101522, #161b27);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .taskbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 36px;
+      background-color: rgba(20, 20, 30, 0.8);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+    }
+    
+    .start-btn {
+      width: 24px;
+      height: 24px;
+      background-color: var(--accent);
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z'/%3E%3C/svg%3E") no-repeat center center;
+      mask-size: contain;
+      margin-right: 16px;
+    }
+    
+    .desktop-icons {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 60px);
+      gap: 16px;
+    }
+    
+    .desktop-icon {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+    
+    .icon {
+      width: 32px;
+      height: 32px;
+      background-color: var(--accent);
+    }
+    
+    .icon-label {
+      font-size: 10px;
+      color: white;
+      text-align: center;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .icon-1 {
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E") no-repeat center center;
+      mask-size: contain;
+    }
+    
+    .icon-2 {
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z'/%3E%3C/svg%3E") no-repeat center center;
+      mask-size: contain;
+    }
+    
+    .icon-3 {
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z'/%3E%3C/svg%3E") no-repeat center center;
+      mask-size: contain;
+    }
+    
+    .icon-4 {
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") no-repeat center center;
+      mask-size: contain;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(0.5); opacity: 0.5; }
+      50% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0 0;
+      margin-top: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); text-decoration: none; transition: color 0.2s;
+    }
+    .footer-right a:hover { color: var(--accent); }
+
+    @media (max-width: 760px) {
+      .container {
+        padding: 0 16px 36px;
+      }
+
+      .navbar,
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .navbar nav a {
+        padding: 8px 10px;
+      }
+
+      .title {
+        font-size: 42px;
+      }
+
+      .boot-container {
+        padding: 24px;
+      }
+
+      footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="navbar">
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <a href="../index.html" class="logo">OS <span>EXPLORER</span></a>
+      </div>
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
+        <a href="index.html" class="active">Booting</a>
+      </nav>
+    </header>
+
+    <div class="boot-container">
+      <div class="header">
+        <div>
+          <h1 class="title">OS Boot Visualization</h1>
+          <p class="subtitle">Modern boot sequence demonstration</p>
+        </div>
+        <div class="controls">
+          <button id="restartBtn" class="btn">Restart</button>
+          <button id="startBtn" class="btn btn-primary">Start Boot</button>
+        </div>
+      </div>
+      
+      <div class="visual-container">
+        <div id="bootAnimation" class="boot-animation">
+          <div class="boot-icon">
+            <div class="boot-circle"></div>
+            <div class="boot-logo"></div>
+          </div>
+        </div>
+        
+        <div id="terminal" class="terminal">
+          <div class="terminal-content" id="terminalContent">
+            <!-- Terminal logs will be dynamically inserted here -->
+          </div>
+        </div>
+        
+        <div id="kernelLoading" class="kernel-loading">
+          <div class="kernel-logo"></div>
+          <div class="kernel-text">Loading Kernel</div>
+          <div class="loading-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+        
+        <div id="desktopLoading" class="desktop-loading">
+          <div class="desktop-bg">
+            <div class="desktop-icons">
+              <div class="desktop-icon">
+                <div class="icon icon-1"></div>
+                <div class="icon-label">Files</div>
+              </div>
+              <div class="desktop-icon">
+                <div class="icon icon-2"></div>
+                <div class="icon-label">Terminal</div>
+              </div>
+              <div class="desktop-icon">
+                <div class="icon icon-3"></div>
+                <div class="icon-label">Security</div>
+              </div>
+              <div class="desktop-icon">
+                <div class="icon icon-4"></div>
+                <div class="icon-label">Search</div>
+              </div>
+            </div>
+            <div class="taskbar">
+              <div class="start-btn"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="progress-bar">
+        <div class="progress" id="progressBar"></div>
+      </div>
+      
+      <div class="progress-info">
+        <div id="currentStage">Ready to start</div>
+        <div id="progressPercentage">0%</div>
+      </div>
+      
+      <div class="stages">
+        <div class="stage" data-stage="1">
+          <div class="stage-indicator"></div>
+          <h3 class="stage-title">Power-On Self-Test (POST)</h3>
+          <p class="stage-desc">Hardware initialization and basic system integrity checks. Verifies CPU, memory, and essential peripherals are functioning properly.</p>
+        </div>
+        
+        <div class="stage" data-stage="2">
+          <div class="stage-indicator"></div>
+          <h3 class="stage-title">BIOS/UEFI Initialization</h3>
+          <p class="stage-desc">System firmware loads, initializes hardware components, and prepares the environment for the bootloader.</p>
+        </div>
+        
+        <div class="stage" data-stage="3">
+          <div class="stage-indicator"></div>
+          <h3 class="stage-title">Bootloader Stage</h3>
+          <p class="stage-desc">GRUB/bootloader locates and loads the kernel image, prepares initial RAM disk and kernel parameters.</p>
+        </div>
+        
+        <div class="stage" data-stage="4">
+          <div class="stage-indicator"></div>
+          <h3 class="stage-title">Kernel Initialization</h3>
+          <p class="stage-desc">OS kernel loads into memory and initializes. Hardware detection, driver loading, and memory management systems are set up.</p>
+        </div>
+        
+        <div class="stage" data-stage="5">
+          <div class="stage-indicator"></div>
+          <h3 class="stage-title">System Services</h3>
+          <p class="stage-desc">Init system/systemd starts essential system services, mounts file systems, and initializes networking components.</p>
+        </div>
+        
+        <div class="stage" data-stage="6">
+          <div class="stage-indicator"></div>
+          <h3 class="stage-title">User Interface</h3>
+          <p class="stage-desc">Display server initializes, login manager loads, and desktop environment starts. System is ready for user interaction.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-left">OS Explorer - Operating Systems Laboratory Project</div>
+      <div class="footer-right">
+        <a href="../index.html">Home</a>
+        <a href="../about.html">Team</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Boot visualization logic
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const currentStage = document.getElementById('currentStage');
+    const stages = document.querySelectorAll('.stage');
+    const bootAnimation = document.getElementById('bootAnimation');
+    const terminal = document.getElementById('terminal');
+    const terminalContent = document.getElementById('terminalContent');
+    const kernelLoading = document.getElementById('kernelLoading');
+    const desktopLoading = document.getElementById('desktopLoading');
+    
+    let isRunning = false;
+    let currentStageNum = 0;
+    let progressValue = 0;
+    let bootInterval;
+    
+    // Terminal logs for each stage
+    const terminalLogs = [
+      // POST stage logs
+      [
+        "Starting Power-On Self-Test...",
+        "CPU: Intel Core i7-12700K @ 3.60GHz",
+        "Testing system memory...",
+        "Memory Check: 32768MB OK",
+        "Initializing primary storage controller...",
+        "NVMe SSD detected: 1TB Samsung 980 PRO",
+        "POST completed successfully."
+      ],
+      // BIOS/UEFI stage logs
+      [
+        "UEFI Firmware v3.21 initializing...",
+        "Detecting hardware components...",
+        "CPU: 12 cores, 20 threads",
+        "Initializing memory controllers...",
+        "Loading hardware profiles...",
+        "Checking boot devices...",
+        "Boot device priority set: NVMe SSD",
+        "UEFI secure boot: Enabled",
+        "Firmware initialization complete."
+      ],
+      // Bootloader stage logs
+      [
+        "GRUB bootloader v2.06 starting...",
+        "Reading boot configuration...",
+        "Loading kernel image: /boot/vmlinuz-6.2.0",
+        "Loading initramfs: /boot/initrd.img-6.2.0",
+        "Setting kernel parameters...",
+        "Preparing to boot OS kernel...",
+        "Transferring control to kernel..."
+      ],
+      // Kernel stage logs
+      [
+        "Booting Linux kernel 6.2.0...",
+        "Kernel command line: ro quiet splash",
+        "CPU: 12 cores online",
+        "Memory: 32768MB available",
+        "Initializing kernel memory allocator...",
+        "Detecting hardware devices...",
+        "Loading essential drivers...",
+        "Mounting root filesystem...",
+        "Starting init process..."
+      ],
+      // System services stage logs
+      [
+        "systemd v253 initializing as PID 1",
+        "Starting udev device manager...",
+        "Starting network services...",
+        "Starting system logger...",
+        "Mounting all filesystems...",
+        "Starting firewall service...",
+        "Starting hardware acceleration services...",
+        "Starting system authentication service...",
+        "System services initialization complete."
+      ],
+      // User interface stage logs
+      [
+        "Starting display server...",
+        "Initializing GPU drivers...",
+        "Loading desktop environment...",
+        "Starting user session services...",
+        "Initializing audio subsystem...",
+        "Starting system tray applications...",
+        "Loading user preferences...",
+        "Desktop environment ready.",
+        "Login screen initialized."
+      ]
+    ];
+    
+    // Start the boot visualization
+    startBtn.addEventListener('click', function() {
+      if (!isRunning) {
+        startBoot();
+        startBtn.textContent = 'Running...';
+        startBtn.disabled = true;
+      }
+    });
+    
+    // Restart the visualization
+    restartBtn.addEventListener('click', function() {
+      resetBoot();
+      startBtn.textContent = 'Start Boot';
+      startBtn.disabled = false;
+    });
+    
+    // Function to start the boot sequence
+    function startBoot() {
+      isRunning = true;
+      bootInterval = setInterval(updateBoot, 100);
+      showStage(1);
+    }
+    
+    // Reset boot visualization
+    function resetBoot() {
+      clearInterval(bootInterval);
+      isRunning = false;
+      currentStageNum = 0;
+      progressValue = 0;
+      
+      // Reset UI elements
+      progressBar.style.width = '0%';
+      progressPercentage.textContent = '0%';
+      currentStage.textContent = 'Ready to start';
+      
+      // Reset stages
+      stages.forEach(stage => {
+        stage.classList.remove('active', 'completed');
+      });
+      
+      // Reset visual elements
+      bootAnimation.style.display = 'flex';
+      terminal.style.display = 'none';
+      kernelLoading.style.display = 'none';
+      desktopLoading.style.display = 'none';
+      
+      // Clear terminal content
+      terminalContent.innerHTML = '';
+      
+      // Reset desktop icons
+      const desktopIcons = document.querySelectorAll('.desktop-icon');
+      desktopIcons.forEach(icon => {
+        icon.style.opacity = '0';
+        icon.style.transform = 'translateY(10px)';
+      });
+    }
+    
+    // Update boot progress
+    function updateBoot() {
+      progressValue += 0.5;
+      
+      if (progressValue <= 100) {
+        progressBar.style.width = progressValue + '%';
+        progressPercentage.textContent = Math.floor(progressValue) + '%';
+        
+        // Stage transitions
+        if (progressValue >= 16.6 && currentStageNum < 2) {
+          showStage(2);
+        } else if (progressValue >= 33.2 && currentStageNum < 3) {
+          showStage(3);
+        } else if (progressValue >= 49.8 && currentStageNum < 4) {
+          showStage(4);
+        } else if (progressValue >= 66.4 && currentStageNum < 5) {
+          showStage(5);
+        } else if (progressValue >= 83 && currentStageNum < 6) {
+          showStage(6);
+        } else if (progressValue >= 100) {
+          completeProcess();
+        }
+      }
+    }
+    
+    // Show specific stage
+    function showStage(stageNum) {
+      currentStageNum = stageNum;
+      
+      // Update stages UI
+      stages.forEach(stage => {
+        const stageId = parseInt(stage.dataset.stage);
+        
+        if (stageId < stageNum) {
+          stage.classList.remove('active');
+          stage.classList.add('completed');
+        } else if (stageId === stageNum) {
+          stage.classList.add('active');
+          stage.classList.remove('completed');
+        } else {
+          stage.classList.remove('active', 'completed');
+        }
+      });
+      
+      // Update current stage text
+      const currentStageName = document.querySelector(`.stage[data-stage="${stageNum}"] .stage-title`).textContent;
+      currentStage.textContent = `Stage ${stageNum}: ${currentStageName}`;
+      
+      // Update visuals based on stage
+      updateVisuals(stageNum);
+      
+      // Show terminal logs for this stage
+      showTerminalLogs(stageNum - 1);
+    }
+    
+    // Update visual components based on boot stage
+    function updateVisuals(stage) {
+      switch(stage) {
+        case 1: // POST
+        case 2: // BIOS/UEFI
+          bootAnimation.style.display = 'flex';
+          terminal.style.display = 'none';
+          kernelLoading.style.display = 'none';
+          desktopLoading.style.display = 'none';
+          break;
+        case 3: // Bootloader
+        case 4: // Kernel Init (early)
+          bootAnimation.style.display = 'none';
+          terminal.style.display = 'block';
+          kernelLoading.style.display = 'none';
+          desktopLoading.style.display = 'none';
+          break;
+        case 5: // System Services
+          bootAnimation.style.display = 'none';
+          terminal.style.display = 'none';
+          kernelLoading.style.display = 'flex';
+          desktopLoading.style.display = 'none';
+          break;
+        case 6: // User Interface
+          bootAnimation.style.display = 'none';
+          terminal.style.display = 'none';
+          kernelLoading.style.display = 'none';
+          desktopLoading.style.display = 'block';
+          
+          // Animate desktop icons appearing
+          setTimeout(() => {
+            const desktopIcons = document.querySelectorAll('.desktop-icon');
+            desktopIcons.forEach((icon, index) => {
+              setTimeout(() => {
+                icon.style.opacity = '1';
+                icon.style.transform = 'translateY(0)';
+              }, index * 150);
+            });
+          }, 500);
+          break;
+      }
+    }
+    
+    // Show terminal logs for a specific stage
+    function showTerminalLogs(stageIndex) {
+      if (stageIndex >= 0 && stageIndex < terminalLogs.length) {
+        // Clear previous logs if changing stages
+        if (stageIndex === 0 || stageIndex === 2) {
+          terminalContent.innerHTML = '';
+        }
+        
+        const logs = terminalLogs[stageIndex];
+        
+        logs.forEach((log, index) => {
+          const logElement = document.createElement('div');
+          logElement.classList.add('log-line');
+          
+         // Add styling based on content (continued)
+         if (log.includes('OK') || log.includes('complete') || log.includes('successfully')) {
+            logElement.classList.add('success');
+          } else if (log.includes('warning')) {
+            logElement.classList.add('warning');
+          } else if (log.includes('error')) {
+            logElement.classList.add('error');
+          } else if (log.startsWith('Starting') || log.includes('Initializing') || log.includes('Loading')) {
+            logElement.classList.add('highlight');
+          }
+          
+          logElement.textContent = log;
+          terminalContent.appendChild(logElement);
+          
+          // Animate logs appearing with delay
+          setTimeout(() => {
+            logElement.classList.add('show');
+          }, index * 150);
+        });
+      }
+    }
+    
+    // Complete the boot process
+    function completeProcess() {
+      clearInterval(bootInterval);
+      isRunning = false;
+      startBtn.textContent = 'Complete';
+      
+      // Mark all stages as completed
+      stages.forEach(stage => {
+        stage.classList.remove('active');
+        stage.classList.add('completed');
+      });
+      
+      setTimeout(() => {
+        // Enable restart button
+        startBtn.disabled = true;
+        restartBtn.focus();
+      }, 1000);
+    }
+    
+    // Initialize with reset
+    resetBoot();
+  </script>
+</body>
+</html>
