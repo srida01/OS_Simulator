@@ -1,99 +1,474 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Resource Allocation Graph Simulation</title>
-    <link rel="stylesheet" href="../styles.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="resource-allocation-graph.css">
+    <title>Resource Allocation Graph — OS Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:            #0d1017;
+            --bg2:           #111520;
+            --surface:       #161b27;
+            --border:        rgba(82, 170, 255, 0.18);
+            --border-bright: rgba(82, 170, 255, 0.45);
+            --accent:        #60b8ff;
+            --accent-dim:    rgba(96, 184, 255, 0.15);
+            --purple:        #a78bfa;
+            --text:          #eef2f7;
+            --muted:         #8fa4bc;
+            --dim:           rgba(96, 183, 255, 0.803);
+            --success:       #3fb950;
+            --warn:          #f5a623;
+            --danger:        #f85149;
+            --mono:  'IBM Plex Mono', monospace;
+            --sans:  'IBM Plex Sans', sans-serif;
+            --display: 'Bebas Neue', sans-serif;
+        }
+
+        html, body {
+            width: 100%; min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(96,184,255,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(96,184,255,0.06) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .page-wrap {
+            max-width: 1280px; margin: 0 auto;
+            padding: 0 32px; position: relative; z-index: 1;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar-os {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 24px 0; border-bottom: 1px solid var(--border);
+            margin-bottom: 48px;
+        }
+        .logo-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon {
+            width: 36px; height: 36px;
+            border: 1.5px solid var(--accent); border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent);
+        }
+        .logo { font-family: var(--display); font-size: 24px; letter-spacing: 2px; color: var(--text); }
+        .logo span { color: var(--accent); }
+
+        nav.os-nav { display: flex; align-items: center; gap: 8px; }
+        nav.os-nav a {
+            color: var(--muted); text-decoration: none;
+            font-family: var(--mono); font-size: 11px;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 8px 16px; border: 1px solid transparent; border-radius: 4px;
+            transition: all 0.2s;
+        }
+        nav.os-nav a:hover, nav.os-nav a.active {
+            color: var(--accent);
+            border-color: var(--border-bright);
+            background: rgba(96,184,255,0.05);
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header { margin-bottom: 40px; animation: fadeUp 0.5s ease both; }
+        .breadcrumb-os {
+            font-family: var(--mono); font-size: 11px; color: var(--muted);
+            letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
+        }
+        .breadcrumb-os a { color: var(--accent); text-decoration: none; }
+        .breadcrumb-os a:hover { text-decoration: underline; }
+        .page-header h1 {
+            font-family: var(--display); font-size: 64px;
+            letter-spacing: 4px; line-height: 0.95; color: var(--text);
+        }
+        .page-header h1 .accent { color: var(--accent); }
+        .page-header .module-tag {
+            display: inline-flex; align-items: center; gap: 8px;
+            margin-top: 16px;
+            background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.25);
+            border-radius: 4px; padding: 6px 14px;
+            font-family: var(--mono); font-size: 10px;
+            letter-spacing: 0.14em; text-transform: uppercase; color: var(--purple);
+        }
+
+        /* ── PANELS ── */
+        .panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+            animation: fadeUp 0.5s ease both;
+        }
+        .panel-header {
+            background: var(--surface); padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-title {
+            font-family: var(--mono); font-size: 11px;
+            color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase;
+        }
+        .panel-body { padding: 20px; }
+
+        /* ── CONTROLS ── */
+        .controls-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px; margin-bottom: 20px;
+            animation: fadeUp 0.5s ease 0.05s both;
+        }
+        .controls-group {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 18px 20px;
+            position: relative; overflow: hidden;
+        }
+        .controls-group::after {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--accent) 0%, transparent 70%);
+        }
+        .controls-group h3 {
+            font-family: var(--mono); font-size: 10px; font-weight: 500;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 14px;
+        }
+        .btn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        .btn {
+            background: rgba(96,184,255,0.08);
+            color: var(--accent); border: 1px solid var(--border-bright);
+            padding: 7px 16px; border-radius: 4px;
+            font-family: var(--mono); font-size: 11px; font-weight: 500;
+            letter-spacing: 0.06em; cursor: pointer; white-space: nowrap;
+            transition: background .15s, box-shadow .15s, color .15s;
+        }
+        .btn:hover {
+            background: rgba(96,184,255,0.18);
+            box-shadow: 0 0 16px rgba(96,184,255,0.15);
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-danger {
+            color: var(--danger); border-color: rgba(248,81,73,0.35);
+            background: rgba(248,81,73,0.08);
+        }
+        .btn-danger:hover {
+            background: rgba(248,81,73,0.18);
+            box-shadow: 0 0 16px rgba(248,81,73,0.2);
+        }
+
+        select {
+            background: var(--surface); color: var(--text);
+            border: 1px solid var(--border); border-radius: 4px;
+            font-family: var(--mono); font-size: 11px;
+            padding: 7px 28px 7px 10px; flex: 1; min-width: 110px;
+            outline: none; cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2360b8ff'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            transition: border-color .2s;
+        }
+        select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(96,184,255,0.15); }
+        select option { background: var(--surface); }
+
+        /* ── WORKSPACE ── */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 16px; margin-bottom: 24px;
+            animation: fadeUp 0.5s ease 0.1s both;
+        }
+
+        #rag-graph {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-height: 500px;
+            position: relative; overflow: hidden;
+            background-image:
+                linear-gradient(rgba(96,184,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(96,184,255,0.04) 1px, transparent 1px);
+            background-size: 32px 32px;
+            background-color: var(--bg2);
+        }
+        .graph-watermark {
+            position: absolute; bottom: 12px; right: 14px;
+            font-size: 10px; color: rgba(96,184,255,0.2);
+            letter-spacing: 0.1em; pointer-events: none; user-select: none;
+            font-family: var(--mono);
+        }
+
+        /* ── STATUS PANEL ── */
+        .status-panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .status-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 20px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .status-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 6px var(--success);
+            flex-shrink: 0;
+        }
+        .status-title {
+            font-family: var(--mono); font-size: 11px;
+            letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+        }
+        .status-body {
+            padding: 16px; flex: 1;
+            font-size: 11px; line-height: 1.9; color: var(--muted);
+            font-family: var(--mono);
+        }
+        .status-body::before { content: '> '; color: var(--accent); }
+        .status-legend { padding: 0 16px 16px; }
+        .legend-item {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 11px; color: var(--muted);
+            margin-bottom: 8px; font-family: var(--mono);
+        }
+        .legend-circle {
+            width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+            border: 2px solid rgba(167,139,250,0.5);
+            background: rgba(167,139,250,0.08);
+        }
+        .legend-square {
+            width: 20px; height: 20px; border-radius: 3px; flex-shrink: 0;
+            border: 2px solid var(--border-bright);
+            background: var(--accent-dim);
+        }
+
+        /* ── NODES ── */
+        .node {
+            position: absolute; z-index: 5;
+            display: flex; align-items: center; justify-content: center;
+            width: 52px; height: 52px;
+            font-family: var(--mono); font-size: 13px; font-weight: 700;
+            cursor: move; user-select: none;
+            transition: filter .15s;
+        }
+        .node:hover { filter: brightness(1.2); }
+
+        .process {
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #2d1f50, #1a1030);
+            border: 2px solid rgba(167,139,250,0.5);
+            color: var(--purple);
+            box-shadow: 0 0 12px rgba(167,139,250,0.25), inset 0 0 12px rgba(167,139,250,0.06);
+        }
+        .resource {
+            border-radius: 6px;
+            background: linear-gradient(135deg, #0d1d30, #111927);
+            border: 2px solid var(--border-bright);
+            color: var(--accent);
+            box-shadow: 0 0 12px rgba(96,184,255,0.2), inset 0 0 12px rgba(96,184,255,0.06);
+        }
+        .highlight { animation: pulse 1.6s ease-in-out infinite; }
+        .highlight.process {
+            border-color: var(--warn) !important;
+            color: var(--warn) !important;
+            box-shadow: 0 0 20px rgba(245,166,35,0.4), inset 0 0 12px rgba(245,166,35,0.08) !important;
+        }
+        .highlight.resource {
+            border-color: var(--warn) !important;
+            color: var(--warn) !important;
+            box-shadow: 0 0 20px rgba(245,166,35,0.4), inset 0 0 12px rgba(245,166,35,0.08) !important;
+        }
+        @keyframes pulse {
+            0%,100% { transform: scale(1); }
+            50%      { transform: scale(1.08); }
+        }
+
+        /* ── EXPLANATION ── */
+        .explanation {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 28px 32px;
+            animation: fadeUp 0.5s ease 0.15s both;
+            margin-bottom: 48px;
+        }
+        .explanation h2 {
+            font-family: var(--display); font-size: 32px;
+            letter-spacing: 2px; color: var(--text); margin-bottom: 10px;
+        }
+        .explanation > p {
+            font-family: var(--sans); font-size: 13px;
+            color: var(--muted); line-height: 1.8; margin-bottom: 24px;
+        }
+        .explanation-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+        }
+        .explanation-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px; padding: 18px;
+        }
+        .explanation-item h3 {
+            font-family: var(--mono); font-size: 10px; font-weight: 500;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--accent); margin-bottom: 10px;
+        }
+        .explanation-item p,
+        .explanation-item li {
+            font-family: var(--sans); font-size: 13px;
+            color: var(--muted); line-height: 1.8;
+        }
+        .explanation ul { padding-left: 16px; }
+        .explanation strong { color: var(--text); }
+
+        /* ── FOOTER ── */
+        footer.os-footer {
+            border-top: 1px solid var(--border); padding: 28px 0;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+        .footer-right { display: flex; gap: 24px; }
+        .footer-right a {
+            font-family: var(--mono); font-size: 11px;
+            color: var(--muted); text-decoration: none; transition: color 0.2s;
+        }
+        .footer-right a:hover { color: var(--accent); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1000px) {
+            .controls-panel { grid-template-columns: 1fr; }
+            .workspace { grid-template-columns: 1fr; }
+            .explanation-grid { grid-template-columns: 1fr; }
+            .page-header h1 { font-size: 48px; }
+        }
+        @media (max-width: 600px) {
+            .page-wrap { padding: 0 16px; }
+        }
+    </style>
 </head>
-
 <body>
-    <div class="container">
-        <header class="navbar">
-            <div class="logo">OS Explorer</div>
-            <nav>
-                <a href="../index.html">Home</a>
-                <a href="../about.html">About</a>
-            </nav>
-        </header>
+<div class="page-wrap">
 
-        <section class="hero">
-            <h1>Resource Allocation Graph</h1>
-            <p>Visualize process-resource relationships and detect deadlocks</p>
-        </section>
+    <!-- NAVBAR -->
+    <header class="navbar-os">
+        <a href="../index.html" class="logo-wrap">
+            <div class="logo-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <span class="logo">OS <span>EXPLORER</span></span>
+        </a>
+        <nav class="os-nav">
+            <a href="../index.html">Home</a>
+            <a href="../about.html">About</a>
+        </nav>
+    </header>
 
-        <section class="simulation-section">
-            <div class="controls-panel">
-                <div class="controls-group">
-                    <h3>Add Elements</h3>
-                    <div class="element-controls">
-                        <button class="btn" id="add-process-btn">Add Process</button>
-                        <button class="btn" id="add-resource-btn">Add Resource</button>
-                    </div>
-                </div>
-                
-                <div class="controls-group">
-                    <h3>Create Edges</h3>
-                    <div class="edge-controls">
-                        <select id="from-select">
-                            <option value="">Select Source</option>
-                        </select>
-                        <select id="to-select">
-                            <option value="">Select Target</option>
-                        </select>
-                        <button class="btn" id="add-edge-btn">Add Edge</button>
-                    </div>
-                </div>
-                
-                <div class="controls-group">
-                    <h3>Actions</h3>
-                    <div class="action-controls">
-                        <button class="btn" id="detect-deadlock-btn">Detect Deadlock</button>
-                        <button class="btn" id="reset-btn">Reset Graph</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="graph-container">
-                <div class="graph" id="rag-graph"></div>
-                <div class="status-panel" id="status-panel">
-                    <div class="status-heading">Status</div>
-                    <div class="status-content" id="status-content">
-                        Create a Resource Allocation Graph by adding processes and resources, then connect them with edges.
-                    </div>
-                </div>
-            </div>
-            
-            <div class="explanation">
-                <h2>About Resource Allocation Graphs</h2>
-                <p>A Resource Allocation Graph (RAG) is a directed graph used to detect deadlocks in operating systems. It visually represents the relationships between processes and resources.</p>
-                
-                <div class="explanation-grid">
-                    <div class="explanation-item">
-                        <h3>Graph Elements</h3>
-                        <ul>
-                            <li><strong>Processes:</strong> Represented as circles</li>
-                            <li><strong>Resources:</strong> Represented as squares</li>
-                            <li><strong>Request Edge:</strong> Process → Resource (wants to acquire)</li>
-                            <li><strong>Assignment Edge:</strong> Resource → Process (already allocated)</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="explanation-item">
-                        <h3>Deadlock Detection</h3>
-                        <p>A deadlock exists in the system if and only if the resource allocation graph contains a cycle.</p>
-                        <p>When a cycle is detected, it indicates that a set of processes are each waiting for resources held by another process in the set, creating a circular wait condition.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="breadcrumb-os"><a href="../index.html">Home</a> / Deadlock / Resource Allocation Graph</div>
+        <h1>RESOURCE<br><span class="accent">ALLOCATION GRAPH</span></h1>
+        <div class="module-tag">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
+            Module 06 · Deadlock Detection
+        </div>
     </div>
 
-    <script src="resource-allocation-graph.js"></script>
-    <script src="index.js"></script>
-</body>
+    <!-- CONTROLS -->
+    <div class="controls-panel">
+        <div class="controls-group">
+            <h3>Add Elements</h3>
+            <div class="btn-row">
+                <button class="btn" id="add-process-btn">+ Process</button>
+                <button class="btn" id="add-resource-btn">+ Resource</button>
+            </div>
+        </div>
+        <div class="controls-group">
+            <h3>Create Edges</h3>
+            <div class="btn-row">
+                <select id="from-select"><option value="">-- source node</option></select>
+                <select id="to-select"><option value="">-- target node</option></select>
+                <button class="btn" id="add-edge-btn">Add Edge</button>
+            </div>
+        </div>
+        <div class="controls-group">
+            <h3>Actions</h3>
+            <div class="btn-row">
+                <button class="btn" id="detect-deadlock-btn">Detect Deadlock</button>
+                <button class="btn" id="undo-edge-btn">Undo Edge</button>
+                <button class="btn btn-danger" id="reset-btn">Reset</button>
+            </div>
+        </div>
+    </div>
 
+    <!-- WORKSPACE -->
+    <div class="workspace">
+        <div id="rag-graph">
+            <div class="graph-watermark">rag-canvas v1.0</div>
+        </div>
+        <div class="status-panel">
+            <div class="status-header">
+                <div class="status-dot" id="status-dot"></div>
+                <span class="status-title">System Status</span>
+            </div>
+            <div class="status-body" id="status-content">
+                Add processes and resources, then connect them with edges.
+            </div>
+            <div class="status-legend">
+                <div class="legend-item"><div class="legend-circle"></div> Process node (circle)</div>
+                <div class="legend-item"><div class="legend-square"></div> Resource node (square)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPLANATION -->
+    <div class="explanation">
+        <h2>RESOURCE ALLOCATION <span style="color:var(--accent)">GRAPHS</span></h2>
+        <p>A directed graph used to detect deadlocks in operating systems — visually representing relationships between processes and resources.</p>
+        <div class="explanation-grid">
+            <div class="explanation-item">
+                <h3>Graph Elements</h3>
+                <ul>
+                    <li><strong>Processes</strong> — represented as circles</li>
+                    <li><strong>Resources</strong> — represented as squares</li>
+                    <li><strong>Request Edge</strong> — Process → Resource (wants to acquire)</li>
+                    <li><strong>Assignment Edge</strong> — Resource → Process (already allocated)</li>
+                </ul>
+            </div>
+            <div class="explanation-item">
+                <h3>Deadlock Detection</h3>
+                <p>A deadlock exists if and only if the RAG contains a cycle. When detected, a set of processes are each waiting for resources held by another — creating a circular wait condition.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="os-footer">
+        <div class="footer-left">OS Explorer · Operating Systems Laboratory Project</div>
+        <div class="footer-right">
+            <a href="../index.html">Home</a>
+            <a href="../about.html">Team</a>
+        </div>
+    </footer>
+
+</div>
+
+<script src="resource-allocation-graph.js"></script>
+</body>
 </html>

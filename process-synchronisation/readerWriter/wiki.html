@@ -2,87 +2,281 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Readers-Writers Problem</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="../index.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Readers-Writers Problem — OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    pre {
-      
-      padding: 1rem;
-      
+    :root {
+      --bg:            #0d1017;
+      --bg2:           #111520;
+      --surface:       #161b27;
+      --border:        rgba(82,170,255,0.18);
+      --border-bright: rgba(82,170,255,0.45);
+      --accent:        #60b8ff;
+      --accent-dim:    rgba(96,184,255,0.12);
+      --purple:        #a78bfa;
+      --amber:         #f5a623;
+      --text:          #eef2f7;
+      --muted:         #8fa4bc;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(96,184,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(96,184,255,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+
+    /* NAVBAR */
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+    }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--accent); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; color: var(--accent);
+    }
+    .logo { font-family: var(--display); font-size: 24px; letter-spacing: 2px; }
+    .logo span { color: var(--accent); }
+    nav { display: flex; gap: 8px; }
+    nav a {
+      color: var(--muted); text-decoration: none; font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid transparent; border-radius: 4px; transition: all 0.2s;
+    }
+    nav a:hover { color: var(--accent); border-color: var(--border-bright); background: rgba(96,184,255,0.05); }
+
+    /* PAGE HEADER */
+    .page-header { padding: 48px 0 36px; }
+    .breadcrumb { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-header h1 { font-family: var(--display); font-size: 56px; letter-spacing: 3px; line-height: 1; }
+    .page-header .module-tag {
+      display: inline-block; margin-top: 14px;
+      background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3);
+      color: var(--purple); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 4px;
+    }
+
+    hr.divider { border: none; border-top: 1px solid var(--border); }
+
+    /* CONTENT */
+    .content { padding: 40px 0 80px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* PANEL */
+    .panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .panel-header {
+      background: var(--surface); padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .panel-header .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .panel-header .dot.purple { background: var(--purple); }
+    .panel-header .dot.amber  { background: var(--amber); }
+    .panel-body { padding: 24px 28px; }
+
+    /* PROSE */
+    .panel-body p {
+      font-family: var(--sans); font-size: 13px; color: var(--muted); line-height: 1.75;
+      margin-bottom: 12px;
+    }
+    .panel-body p:last-child { margin-bottom: 0; }
+    .panel-body strong { color: var(--text); }
+    .panel-body ul, .panel-body ol { padding-left: 20px; font-family: var(--sans); font-size: 13px; color: var(--muted); line-height: 1.75; }
+    .panel-body li { margin-bottom: 6px; }
+    .panel-body li strong { color: var(--text); }
+
+    /* WARN TAG */
+    .warn-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.25);
+      color: var(--amber); font-size: 11px; letter-spacing: 0.08em;
+      padding: 3px 10px; border-radius: 4px; margin-top: 4px;
+    }
+
+    /* VARS GRID */
+    .vars-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 4px; }
+    .var-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;
+    }
+    .var-card .var-name { font-family: var(--mono); font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+    .var-card .var-init { font-family: var(--mono); font-size: 11px; color: var(--purple); margin-bottom: 6px; }
+    .var-card .var-desc { font-family: var(--sans); font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* CODE BLOCK */
+    .code-label {
+      font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px; padding-left: 2px;
+    }
+    .code-block {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 18px 20px; font-family: var(--mono); font-size: 12.5px;
+      line-height: 2; color: var(--muted); overflow-x: auto; white-space: pre;
+    }
+    .code-block .kw  { color: var(--purple); }
+    .code-block .fn  { color: var(--accent); }
+    .code-block .cmt { color: rgba(143,164,188,0.4); font-style: italic; }
+    .code-block .val { color: var(--amber); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    footer {
+      border-top: 1px solid var(--border); padding: 28px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-left { font-size: 11px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a { font-size: 11px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-right a:hover { color: var(--accent); }
+
+    @media (max-width: 640px) {
+      .vars-grid { grid-template-columns: 1fr; }
+      .two-col   { grid-template-columns: 1fr; }
+      .page-header h1 { font-size: 40px; }
     }
   </style>
 </head>
 <body>
-  <div class="container my-5">
-    <h2 class="mb-4">Readers-Writers Problem</h2>
+<div class="container">
 
-    <p><strong>Shared Data:</strong> (e.g., a file or record)</p>
-    <ul>
-      <li><strong>Readers</strong> – only read the shared object</li>
-      <li><strong>Writers</strong> – update (read and write) the shared object</li>
-    </ul>
+  <header class="navbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <span class="logo">OS <span>EXPLORER</span></span>
+    </div>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+    </nav>
+  </header>
 
-    <p><strong>Problem:</strong> If a writer and another process (reader or writer) access the shared data simultaneously, it can lead to inconsistency.</p>
-
-    <h4 class="mt-4">Variations of the Readers-Writers Problem</h4>
-    <ol>
-      <li>
-        <strong>First Readers-Writers Problem:</strong><br>
-        No reader should wait unless a writer has already obtained permission to use the shared object.
-        <ul>
-          <li>Readers do not wait if a writer is only waiting.</li>
-          <li><strong>Writers may starve.</strong></li>
-        </ul>
-      </li>
-      <li>
-        <strong>Second Readers-Writers Problem:</strong><br>
-        Once a writer is ready, it should write as soon as possible, preventing new readers from starting.
-        <ul>
-          <li><strong>Readers may starve.</strong></li>
-        </ul>
-      </li>
-    </ol>
-
-    <h4 class="mt-4">First Readers-Writers Problem Implementation</h4>
-    <p><strong>Shared Variables:</strong></p>
-    <ul>
-      <li><code class="inline">int readcount</code> – keeps track of how many readers are currently accessing the object</li>
-      <li><code class="inline">semaphore mutex</code> – ensures mutual exclusion when <code class="inline">readcount</code> is updated</li>
-      <li><code class="inline">semaphore wrt</code> – mutual exclusion for writers</li>
-    </ul>
-
-    <p><strong>Initial Values:</strong></p>
-    <ul>
-      <li><code class="inline">mutex = 1</code></li>
-      <li><code class="inline">wrt = 1</code></li>
-      <li><code class="inline">readcount = 0</code></li>
-    </ul>
-
-    <h5 class="mt-4">Writer Process</h5>
-    <pre><code>wait(wrt);
-// ...
-// writing is performed
-// ...
-signal(wrt);</code></pre>
-
-    <h5 class="mt-4">Reader Process</h5>
-    <pre><code>wait(mutex);
-readcount++;
-if (readcount == 1)
-    wait(wrt);
-signal(mutex);
-
-// ...
-// reading is performed
-// ...
-
-wait(mutex);
-readcount--;
-if (readcount == 0)
-    signal(wrt);
-signal(mutex);</code></pre>
+  <div class="page-header">
+    <div class="breadcrumb"><a href="../index.html">Home</a> / <a href="index.html">Process Synchronisation</a> / Wiki</div>
+    <h1>READERS-WRITERS<br>PROBLEM</h1>
+    <span class="module-tag">Module 12 · Synchronisation — Reference</span>
   </div>
+
+  <hr class="divider">
+
+  <div class="content">
+
+    <!-- Overview -->
+    <div class="panel">
+      <div class="panel-header"><div class="dot"></div> Overview</div>
+      <div class="panel-body">
+        <p><strong>Shared Data</strong> (e.g. a file or record) is accessed concurrently by two classes of processes:</p>
+        <ul>
+          <li><strong>Readers</strong> — only read the shared object; do not modify it.</li>
+          <li><strong>Writers</strong> — update (read and write) the shared object.</li>
+        </ul>
+        <p style="margin-top:12px"><strong>Problem:</strong> If a writer and any other process access the shared data simultaneously, it can lead to data inconsistency.</p>
+      </div>
+    </div>
+
+    <!-- Variations -->
+    <div class="panel">
+      <div class="panel-header"><div class="dot purple"></div> Variations</div>
+      <div class="panel-body">
+        <p><strong>First Readers-Writers Problem</strong></p>
+        <p>No reader should wait unless a writer has already obtained permission to use the shared object. Readers do not wait even if a writer is queued.</p>
+        <div class="warn-tag">⚠ Writers may starve</div>
+
+        <p style="margin-top:20px"><strong>Second Readers-Writers Problem</strong></p>
+        <p>Once a writer is ready, it writes as soon as possible. New readers are blocked until the writer finishes.</p>
+        <div class="warn-tag">⚠ Readers may starve</div>
+      </div>
+    </div>
+
+    <!-- Shared Variables -->
+    <div class="panel">
+      <div class="panel-header"><div class="dot amber"></div> Shared Variables — First R-W Problem</div>
+      <div class="panel-body">
+        <div class="vars-grid">
+          <div class="var-card">
+            <div class="var-name">int readcount</div>
+            <div class="var-init">= 0</div>
+            <div class="var-desc">Tracks how many readers are currently accessing the object.</div>
+          </div>
+          <div class="var-card">
+            <div class="var-name">semaphore mutex</div>
+            <div class="var-init">= 1</div>
+            <div class="var-desc">Ensures mutual exclusion when <code>readcount</code> is updated.</div>
+          </div>
+          <div class="var-card">
+            <div class="var-name">semaphore wrt</div>
+            <div class="var-init">= 1</div>
+            <div class="var-desc">Provides mutual exclusion for writers (and first/last reader).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code -->
+    <div class="two-col">
+
+      <div class="panel">
+        <div class="panel-header"><div class="dot"></div> Writer Process</div>
+        <div class="panel-body">
+          <div class="code-block"><span class="fn">wait</span>(<span class="val">wrt</span>);
+
+<span class="cmt">// writing is performed</span>
+
+<span class="fn">signal</span>(<span class="val">wrt</span>);</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><div class="dot purple"></div> Reader Process</div>
+        <div class="panel-body">
+          <div class="code-block"><span class="fn">wait</span>(<span class="val">mutex</span>);
+  readcount++;
+  <span class="kw">if</span> (readcount == <span class="val">1</span>)
+    <span class="fn">wait</span>(<span class="val">wrt</span>);
+<span class="fn">signal</span>(<span class="val">mutex</span>);
+
+<span class="cmt">// reading is performed</span>
+
+<span class="fn">wait</span>(<span class="val">mutex</span>);
+  readcount--;
+  <span class="kw">if</span> (readcount == <span class="val">0</span>)
+    <span class="fn">signal</span>(<span class="val">wrt</span>);
+<span class="fn">signal</span>(<span class="val">mutex</span>);</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+
+  <footer>
+    <div class="footer-left">OS Explorer · Module 12 — Process Synchronisation</div>
+    <div class="footer-right">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">Team</a>
+    </div>
+  </footer>
+
+</div>
 </body>
 </html>

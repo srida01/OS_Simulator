@@ -2,68 +2,99 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Producer-Consumer Problem</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="../index.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    pre {
-      padding: 1rem;
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <div class="container my-5">
-    <h2>Producer-Consumer Problem</h2>
+<div class="container">
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <span class="logo">OS <span>EXPLORER</span></span>
+    </div>
+    <nav>
+      <a href="../../index.html">Home</a>
+      <a href="../../about.html">About</a>
+      <a href="index.html">Simulator</a>
+    </nav>
+  </header>
 
-    <p>The Producer-Consumer problem is a classic example of a multi-process synchronization scenario. It involves two types of processes: <strong>producers</strong>, which generate data and place it into a buffer, and <strong>consumers</strong>, which remove data from the buffer and process it.</p>
+  <hr class="divider">
 
-    <h4>Problem Description</h4>
-    <ul>
-      <li>A shared buffer pool with <code class="inline">n</code> slots (each holding one item).</li>
-      <li>Producers add items to the buffer.</li>
-      <li>Consumers remove items from the buffer.</li>
-      <li>Synchronization is needed to prevent <strong>race conditions</strong> and ensure <strong>buffer availability</strong>.</li>
-    </ul>
+  <!-- CONTENT -->
+  <section class="main-content" style="grid-template-columns: 1fr; padding: 40px 0 80px;">
+    <div class="content-panel">
+      <h1>PRODUCER<br><span style="color: var(--accent);">CONSUMER</span></h1>
 
-    <h5>Shared Data</h5>
-    <ul>
-      <li><code class="inline">semaphore mutex</code> – ensures mutual exclusion while accessing the buffer.</li>
-      <li><code class="inline">semaphore full</code> – counts the number of full buffers.</li>
-      <li><code class="inline">semaphore empty</code> – counts the number of empty buffers.</li>
-    </ul>
+      <div class="settings-card">
+        <h3 style="font-family: var(--sans); font-size: 16px; color: var(--text); margin-bottom: 16px;">Problem Description</h3>
+        <p style="font-family: var(--sans); font-size: 13px; color: var(--muted); line-height: 1.8; margin-bottom: 16px;">The Producer-Consumer problem is a classic example of a multi-process synchronization scenario. It involves two types of processes: <strong style="color: var(--text);">producers</strong>, which generate data and place it into a buffer, and <strong style="color: var(--text);">consumers</strong>, which remove data from the buffer and process it.</p>
 
-    <p><strong>Initial values:</strong> <code class="inline">mutex = 1</code>, <code class="inline">full = 0</code>, <code class="inline">empty = n</code></p>
+        <h4 style="font-family: var(--sans); font-size: 14px; color: var(--text); margin: 24px 0 12px; font-weight: 600;">Key Concepts</h4>
+        <ul style="font-family: var(--sans); font-size: 13px; color: var(--muted); line-height: 1.8; margin-left: 20px; margin-bottom: 16px;">
+          <li>A shared buffer pool with <code style="background: rgba(96,184,255,0.1); color: var(--accent); padding: 2px 6px; border-radius: 3px; font-family: var(--mono); font-size: 12px;">n</code> slots (each holding one item).</li>
+          <li>Producers add items to the buffer.</li>
+          <li>Consumers remove items from the buffer.</li>
+          <li>Synchronization is needed to prevent <strong style="color: var(--text);">race conditions</strong> and ensure <strong style="color: var(--text);">buffer availability</strong>.</li>
+        </ul>
+      </div>
 
-    <h5 class="mt-4">Producer Process</h5>
-    <pre><code>do {
-    // ...
-    // produce an item in nextp
-    // ...
-    wait(empty);
-    wait(mutex);
-    // ...
-    // add nextp to buffer
-    // ...
-    signal(mutex);
-    signal(full);
+      <div class="settings-card">
+        <h4 style="font-family: var(--sans); font-size: 14px; color: var(--text); margin-bottom: 12px; font-weight: 600;">Shared Data (Semaphores)</h4>
+        <ul style="font-family: var(--sans); font-size: 13px; color: var(--muted); line-height: 1.8; margin-left: 20px; margin-bottom: 12px;">
+          <li><code style="background: rgba(96,184,255,0.1); color: var(--accent); padding: 2px 6px; border-radius: 3px; font-family: var(--mono); font-size: 12px;">semaphore mutex</code> – ensures mutual exclusion while accessing the buffer.</li>
+          <li><code style="background: rgba(96,184,255,0.1); color: var(--accent); padding: 2px 6px; border-radius: 3px; font-family: var(--mono); font-size: 12px;">semaphore full</code> – counts the number of full buffers.</li>
+          <li><code style="background: rgba(96,184,255,0.1); color: var(--accent); padding: 2px 6px; border-radius: 3px; font-family: var(--mono); font-size: 12px;">semaphore empty</code> – counts the number of empty buffers.</li>
+        </ul>
+        <p style="font-family: var(--mono); font-size: 12px; color: var(--accent); background: rgba(96,184,255,0.05); padding: 12px; border-left: 2px solid var(--accent); border-radius: 4px;"><strong>Initial values:</strong> mutex = 1, full = 0, empty = n</p>
+      </div>
+
+      <div class="settings-card">
+        <h4 style="font-family: var(--sans); font-size: 14px; color: var(--text); margin-bottom: 12px; font-weight: 600;">Producer Process</h4>
+        <pre style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 12px; line-height: 1.6; color: var(--text); font-family: var(--mono);"><code>do {
+  // produce an item in nextp
+  wait(empty);
+  wait(mutex);
+  // add nextp to buffer
+  signal(mutex);
+  signal(full);
 } while (1);</code></pre>
+      </div>
 
-    <h5 class="mt-4">Consumer Process</h5>
-    <pre><code>do {
-    wait(full);
-    wait(mutex);
-    // ...
-    // remove an item from buffer to nextc
-    // ...
-    signal(mutex);
-    signal(empty);
-    // ...
-    // consume the item in nextc
-    // ...
+      <div class="settings-card">
+        <h4 style="font-family: var(--sans); font-size: 14px; color: var(--text); margin-bottom: 12px; font-weight: 600;">Consumer Process</h4>
+        <pre style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 12px; line-height: 1.6; color: var(--text); font-family: var(--mono);"><code>do {
+  wait(full);
+  wait(mutex);
+  // remove an item from buffer to nextc
+  signal(mutex);
+  signal(empty);
+  // consume the item in nextc
 } while (1);</code></pre>
+      </div>
 
-    <p class="mt-4"><strong>Note:</strong> There is symmetry between the producer and consumer processes in how they acquire and release semaphores.</p>
-  </div>
+      <div class="settings-card">
+        <p style="font-family: var(--sans); font-size: 13px; color: var(--dim); line-height: 1.8;"><strong style="color: var(--accent);">Note:</strong> There is symmetry between the producer and consumer processes in how they acquire and release semaphores.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    <div class="footer-left">OS Explorer · Producer-Consumer Documentation</div>
+    <div class="footer-right">
+      <a href="../../index.html">Home</a>
+      <a href="index.html">Simulator</a>
+    </div>
+  </footer>
+</div>
 </body>
 </html>

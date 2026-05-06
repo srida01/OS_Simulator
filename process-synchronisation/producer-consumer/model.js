@@ -354,8 +354,8 @@
         y = 16;
       } 
   
-      this._ctx.fillStyle = options.color || '#000';
-      this._ctx.font = options.font || '24px Arial';
+      this._ctx.fillStyle = options.color || '#eef2f7';
+      this._ctx.font = options.font || '14px IBM Plex Mono';
       this._ctx.textAlign = options.align || 'left';
       this._ctx.fillText(message, x, y);
   
@@ -426,12 +426,13 @@
       var x = this._prodX();
       var y = this._prodY();
       this.drawRect(x, y, this._prodW, this._prodH, {
-        color: '#FFE0B2',
-        border: '#000000',
+        color: 'rgba(96, 184, 255, 0.15)',
+        border: '#60b8ff',
         radius: 10
       });
       this.drawText(producerText(producer), this._dimX / 2, y + 0.6, {
-        align: 'center'
+        align: 'center',
+        color: '#60b8ff'
       });
       if (producer.state === 'producing') {
         this._drawChunk(producer.chunk, this._chunkX(), y + 1);
@@ -445,12 +446,13 @@
       var x = this._consX(consumer);
       var y = this._consY(consumer);
       this.drawRect(x, y, this._consW, this._consH, {
-        color: '#FFE0B2',
-        border: '#000000',
+        color: 'rgba(167, 139, 250, 0.15)',
+        border: '#a78bfa',
         radius: 10
       })
       this.drawText(consumerText(consumer), this._dimX / 2, y + 1.6, {
-        align: 'center'
+        align: 'center',
+        color: '#a78bfa'
       });
       if (consumer.state === 'consuming' || consumer.state === 'flushing') {
         this._drawChunk(consumer.chunk, this._chunkX(), y);
@@ -465,22 +467,22 @@
       var y = this._queueY();
       offset = offset || 0;
       this.drawRect(x, y, this._queueW, this._queueH(queue), {
-        color: '#FFF',
-        border: '#000'
+        color: 'rgba(22, 27, 39, 0.8)',
+        border: '#60b8ff'
       });
       this.drawRect(
         x - 0.2, 
         y - 1/this._unitY, 
         this._queueW + 0.4, 
         2/this._unitY, 
-        {color: '#FFF'}
+        {color: '#0d1017'}
       );
       this.drawRect(
         x - 0.2, 
         y - 1/this._unitY + this._queueH(queue), 
         this._queueW + 0.4, 
         2/this._unitY, 
-        {color: '#FFF'}
+        {color: '#0d1017'}
       );
       for (var i = 0; i < queue.chunks.length; i++) {
         this._drawChunk(queue.chunks[i], x, y + queue.cap - i - 1 - offset);
@@ -488,9 +490,9 @@
     }
   
     Renderer.prototype._drawChunk = function(chunk, x, y) {
-      var payloadColor = (chunk.id % 2) ? '#F8CECC' : '#E1D5E7';
+      var payloadColor = (chunk.id % 2) ? '#60b8ff' : '#a78bfa';
       this.drawRect(x, y, this._chunkW, this._chunkH, {
-        color: 'white', 
+        color: 'rgba(22, 27, 39, 0.6)', 
         radius: 3
       });
       this.drawRect(x, y, this._chunkW * chunk.progress / 100, this._chunkH, {
@@ -498,10 +500,10 @@
         radius: 3
       });
       this._strokeRect(x, y, this._chunkW, this._chunkH, {
-        color: 'black', 
+        color: '#60b8ff', 
         radius: 3
       });
-      this.drawText(chunk.id, x + 0.5, y + 0.65, {align: 'center'});
+      this.drawText(chunk.id, x + 0.5, y + 0.65, {align: 'center', color: '#eef2f7'});
     }
   
     Renderer.prototype._drawBackpressureWarn = function(queue) {
@@ -509,7 +511,7 @@
         'Backpressure!', 
         this._queueX() + this._queueW + 1.5,
         this._queueY() + this._queueH(queue) / 2,
-        {align: 'center', color: 'red', rotate: -30}
+        {align: 'center', color: '#f5a623', rotate: -30}
       );
     };
   
@@ -518,7 +520,7 @@
         'Draining!', 
         this._queueX() - 1.5,
         this._queueY() + this._queueH(queue) / 2,
-        {align: 'center', color: 'green', rotate: -30}
+        {align: 'center', color: '#28c840', rotate: -30}
       );
     };
   
@@ -528,7 +530,8 @@
         this._dimX / 2, 
         this._dimY - 0.5, {
           align: 'center',
-          font: 'italic 14px Arial'
+          font: 'italic 11px IBM Plex Mono',
+          color: '#8fa4bc'
       });
     };
   
@@ -694,5 +697,4 @@
       model.start();
       return model;
     }
-  })();
-  
+})();

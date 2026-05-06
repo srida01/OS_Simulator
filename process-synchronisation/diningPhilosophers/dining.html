@@ -1,487 +1,586 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dining Philosophers — OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --bg:            #0d1017;
+      --bg2:           #111520;
+      --surface:       #161b27;
+      --border:        rgba(82, 170, 255, 0.18);
+      --border-bright: rgba(82, 170, 255, 0.45);
+      --accent:        #60b8ff;
+      --accent-dim:    rgba(96, 184, 255, 0.15);
+      --purple:        #a78bfa;
+      --text:          #eef2f7;
+      --muted:         #8fa4bc;
+      --dim:           rgba(96, 183, 255, 0.803);
+      --mono:  'IBM Plex Mono', monospace;
+      --sans:  'IBM Plex Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-  <!-- Favicons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(96,184,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(96,184,255,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
 
-  <!-- Google Fonts -->
-  <link
-    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
-    rel="stylesheet">
+    .page-wrap {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 32px; position: relative; z-index: 1;
+    }
 
-  <!-- Template Main CSS File -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    /* ── NAVBAR ── */
+    .navbar-os {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--accent); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+    .logo { font-family: var(--display); font-size: 24px; letter-spacing: 2px; color: var(--text); }
+    .logo span { color: var(--accent); }
 
-  <!-- EXTRA LINKS -->
+    nav.os-nav { display: flex; align-items: center; gap: 8px; }
+    nav.os-nav a {
+      color: var(--muted); text-decoration: none;
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid transparent; border-radius: 4px;
+      transition: all 0.2s;
+    }
+    nav.os-nav a:hover, nav.os-nav a.active {
+      color: var(--accent);
+      border-color: var(--border-bright);
+      background: rgba(96,184,255,0.05);
+    }
 
-  <link rel="stylesheet" href="./bootstrap.min.css">
-  <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+    /* ── PAGE HEADER ── */
+    .page-header { margin-bottom: 40px; animation: fadeUp 0.5s ease both; }
+    .breadcrumb-os {
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .breadcrumb-os a { color: var(--accent); text-decoration: none; }
+    .breadcrumb-os a:hover { text-decoration: underline; }
+    .page-header h1 {
+      font-family: var(--display); font-size: 64px;
+      letter-spacing: 4px; line-height: 0.95; color: var(--text);
+    }
+    .page-header h1 .accent { color: var(--accent); }
+    .page-header .module-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 16px;
+      background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.25);
+      border-radius: 4px; padding: 6px 14px;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--purple);
+    }
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    /* ── LAYOUT ── */
+    .sim-layout {
+      display: grid; grid-template-columns: 1fr 380px;
+      gap: 24px; margin-bottom: 48px;
+    }
 
+    .panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+    .panel-header {
+      background: var(--surface); padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-title {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .panel-body { padding: 28px; }
 
-  <!-- SCRIPT FOR THE PAGE-->
-  <title>Dining Philosopher's Simulation</title>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    /* ── SIMULATION CANVAS ── */
+    .sim-canvas {
+      position: relative; width: 100%;
+      padding-bottom: 80%;
+      min-height: 480px;
+    }
+    .sim-canvas-inner {
+      position: absolute; inset: 0;
+    }
 
+    /* Philosopher circles */
+    .philosopher {
+      position: absolute;
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 4px;
+      border: 2px solid var(--border-bright);
+      background: var(--surface);
+      transition: all 0.35s ease;
+      cursor: default;
+    }
+    .philosopher .ph-num {
+      font-family: var(--display); font-size: 22px; color: var(--accent); line-height: 1;
+    }
+    .philosopher .ph-label {
+      font-family: var(--mono); font-size: 8px; color: var(--muted);
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    .philosopher.thinking { border-color: var(--border-bright); background: var(--surface); }
+    .philosopher.hungry   { border-color: #f5a623; background: rgba(245,166,35,0.12); box-shadow: 0 0 16px rgba(245,166,35,0.25); }
+    .philosopher.hungry .ph-num { color: #f5a623; }
+    .philosopher.eating   { border-color: #28c840; background: rgba(40,200,64,0.12); box-shadow: 0 0 24px rgba(40,200,64,0.3); }
+    .philosopher.eating .ph-num { color: #28c840; }
+
+    .ph-name-label {
+      position: absolute;
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      text-align: center; white-space: nowrap;
+      letter-spacing: 0.08em;
+    }
+
+    /* Fork (chopstick) */
+    .fork {
+      position: absolute;
+      width: 44px; height: 44px; border-radius: 8px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.35s ease;
+      font-size: 20px;
+    }
+    .fork.free  { border-color: var(--border); background: var(--surface); }
+    .fork.taken { border-color: #ff5f57; background: rgba(255,95,87,0.15); box-shadow: 0 0 14px rgba(255,95,87,0.3); }
+
+    /* Bowl */
+    .bowl {
+      position: absolute;
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--bg2); border: 1.5px solid var(--border-bright);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Eating bowl overlay */
+    .eat-bowl {
+      position: absolute;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(40,200,64,0.1); border: 1px solid rgba(40,200,64,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      transition: all 0.3s;
+      opacity: 0;
+    }
+    .eat-bowl.visible { opacity: 1; }
+
+    /* ── STATE TABLE ── */
+    .state-table { width: 100%; border-collapse: collapse; font-family: var(--mono); }
+    .state-table thead tr {
+      border-bottom: 1px solid var(--border-bright);
+    }
+    .state-table th {
+      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); padding: 8px 10px; text-align: center;
+      font-weight: 400;
+    }
+    .state-table td {
+      padding: 10px 10px; text-align: center;
+      font-size: 12px; border-bottom: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+    .state-table td:first-child {
+      color: var(--accent); font-family: var(--display); font-size: 16px; letter-spacing: 1px;
+    }
+    .state-table tr:last-child td { border-bottom: none; }
+
+    .state-yes        { color: var(--accent); }
+    .state-hungry-yes { color: #f5a623; }
+    .state-eating-yes { color: #28c840; }
+    .state-dim        { color: var(--muted); opacity: 0.4; }
+
+    /* ── CONTROLS ── */
+    .controls-panel { animation-delay: 0.1s; }
+    .chance-display {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 16px;
+      margin-bottom: 20px;
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      min-height: 48px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .chance-display .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .chance-text { color: var(--text); }
+
+    .btn-next {
+      width: 100%;
+      background: rgba(96,184,255,0.08);
+      border: 1px solid var(--border-bright);
+      color: var(--accent);
+      font-family: var(--display); font-size: 22px; letter-spacing: 3px;
+      padding: 16px;
+      border-radius: 8px; cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .btn-next:hover {
+      background: rgba(96,184,255,0.16);
+      box-shadow: 0 0 20px rgba(96,184,255,0.15);
+    }
+
+    .legend { margin-top: 20px; }
+    .legend-title {
+      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ── FOOTER ── */
+    footer.os-footer {
+      border-top: 1px solid var(--border); padding: 28px 0;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 48px;
+    }
+    .footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); text-decoration: none; transition: color 0.2s;
+    }
+    .footer-right a:hover { color: var(--accent); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .sim-layout { grid-template-columns: 1fr; }
+      .page-header h1 { font-size: 48px; }
+    }
+  </style>
 </head>
+<body>
+<div class="page-wrap">
 
-<body style=" background-image: url('../background.jpg');background-size: cover">
-  <!-- ======= Header ======= -->
-  <div style="background: rgba(255, 255, 255, 0.6); padding: 40px 40px;">
-  <h1 style="margin-top: 2%; margin-left: 2%;">Dining Philosophers' Problem</h1>
-  
-  <div style="padding: 25%;">
+  <!-- NAVBAR -->
+  <header class="navbar-os">
+    <a href="../index.html" class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <span class="logo">OS <span>EXPLORER</span></span>
+    </a>
+    <nav class="os-nav">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+    </nav>
+  </header>
 
-    <button type="button" , id="num" , name="num" , class="btn btn-primary" ,
-      style="height:70px;width:300px;position:absolute;top:36%;left:75%;font-size:17px ;background-color: rgb(90, 122, 235);">Number
-      generated: </button>
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="breadcrumb-os"><a href="../index.html">Home</a> / <a href="../process-synchronisation/index.html">Process Synchronisation</a> / Dining Philosophers</div>
+    <h1>DINING<br><span class="accent">PHILOSOPHERS</span></h1>
+    <div class="module-tag">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/></svg>
+      Module 12 · Synchronization Problem
+    </div>
+  </div>
 
+  <!-- SIMULATION -->
+  <div class="sim-layout">
 
-    <!-- <p id="hungry1" style="position:absolute;top:60%;right:23%; font-size: 25px">ter</p>
-        <p id="eating1" style="position:absolute;top:60%;right:3%; font-size: 25px">ter</p>
-     -->
-    <div style="position:absolute;top:50%;left:70%;background-color: rgb(87, 156, 234);">
-
-      <!-- <table  style="font-size:25px;width:100%"> -->
-
-        <table class="table" style="position: absolute; top: 10px; left:2px">
-          <thead>
-            <tr>
-              <th scope="col" >Philosopher </th>
-              <th scope="col" >Thinking</th>
-              <th scope="col">Hungry</th>
-              <th scope="col">Eating</th>
-            </tr>
-          </thead>
-          <tbody class="table-group-divider">
-            <tr scope ="row" style="background-color: #a6e5e5	">
-              <td width="120px" height="30px" style="text-align: center;">1</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t11">Yes</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t12">-</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t13">-</td>
-    
-            </tr>
-            <tr scope ="row"  style="background-color: #b4b5f0	">
-              <td width="120px" height="30px" style="text-align: center;">2</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t21">Yes</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t22">-</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t23">-</td>
-    
-            </tr>
-            <tr scope ="row" style="background-color:  #a6e5e5	">
-              <td width="120px" height="30px" style="text-align: center;">3</td>
-              <td id="t31" width="120px" height="30px" style="text-align: center;">Yes</td>
-              <td id="t32" width="120px" height="30px" style="text-align: center;">-</td>
-              <td id="t33" width="120px" height="30px" style="text-align: center;">-</td>
-    
-            </tr>
-            <tr scope ="row" style="background-color: #b4b5f0	">
-              <td width="120px" height="30px" style="text-align: center;">4</td>
-              <td id="t41" width="120px" height="30px" style="text-align: center;">Yes</td>
-              <td id="t42" width="120px" height="30px" style="text-align: center;">-</td>
-              <td id="t43" width="120px" height="30px" style="text-align: center;">-</td>
-    
-            </tr>
-            <tr scope ="row" style="background-color:  #a6e5e5	">
-              <td width="120px" height="30px" style="text-align: center;">5</td>
-              <td id="t51" width="120px" height="30px" style="text-align: center;">Yes</td>
-              <td id="t52" width="120px" height="30px" style="text-align: center;">-</td>
-              <td id="t53" width="120px" height="30px" style="text-align: center;">-</td>
-    
-            </tr>
-          </tbody>
-        </table>
+    <!-- Sim canvas -->
+    <div class="panel" style="animation-delay:0.05s">
+      <div class="panel-header">
+        <span class="panel-title">Simulation View</span>
+        <span class="panel-title" id="sim-status" style="color:var(--accent)">· READY</span>
+      </div>
+      <div class="panel-body" style="padding:20px;">
+        <div class="sim-canvas">
+          <div class="sim-canvas-inner" id="sim-canvas">
+            <!-- Central bowl -->
+            <div class="bowl">🍝</div>
+            <!-- Philosophers & forks placed by JS -->
+          </div>
+        </div>
+      </div>
     </div>
 
-    <p style="position:absolute;top:16%;left:41%;">Philosopher 1</p>
-    <p style="position:absolute;top:42%;left:29%;">Philosopher 5</p>
-    <p style="position:absolute;top:27%;left:56.5%;">Philosopher 2</p>
-    <p style="position:absolute;top:88%;left:37.8%;">Philosopher 4</p>
-    <p style="position:absolute;top:80%;left:56%;">Philosopher 3</p>
+    <!-- Controls + state -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
 
-    
+      <!-- State table -->
+      <div class="panel" style="animation-delay:0.1s">
+        <div class="panel-header">
+          <span class="panel-title">State Table</span>
+        </div>
+        <div class="panel-body" style="padding:0 0 4px 0;">
+          <table class="state-table">
+            <thead>
+              <tr>
+                <th>Phil</th>
+                <th>Thinking</th>
+                <th>Hungry</th>
+                <th>Eating</th>
+              </tr>
+            </thead>
+            <tbody id="state-tbody"></tbody>
+          </table>
+        </div>
+      </div>
 
-    <button type="button" , id="one" , name="one" ,
-      style="height:125px;width:125px;position: absolute;top:19%;left:40%;border-radius:125px;border: none;  background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Man-3d-Light-icon.png'); background-size: cover; color: white;">
-      </button>
+      <!-- Controls -->
+      <div class="panel controls-panel" style="animation-delay:0.15s">
+        <div class="panel-header">
+          <span class="panel-title">Controls</span>
+        </div>
+        <div class="panel-body">
+          <div class="chance-display">
+            <div class="dot"></div>
+            <span id="chance-text" class="chance-text">Press Next! to begin the simulation</span>
+          </div>
+          <button class="btn-next" onclick="initiate()">▶ Next!</button>
 
-    <button type="button" , id="five" , name="one" ,
-      style="height:125px;width:125px;position:absolute;top:45%;left:29%;border-radius:125px;border: none; background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Woman-3d-Light-icon.png'); background-size: cover;">
-    </button>
+          <div class="legend">
+            <div class="legend-title">Legend</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent);opacity:0.5;border:1px solid var(--accent)"></div> Thinking</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f5a623"></div> Hungry</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#28c840"></div> Eating</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff5f57;border-radius:4px"></div> Fork taken</div>
+          </div>
+        </div>
+      </div>
 
-    <button type="button" , id="two" , name="one" ,
-      style="height:125px;width:125px;position:absolute;top:30%;left:55.5%;border-radius:125px;border: none;background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Man-3d-Medium-icon.png'); background-size: cover">
-    </button>
-
-    <button type="button" , id="four" , name="one" ,
-      style="height:125px;width:125px;position:absolute;top:72%;left:37%;border-radius:125px;border: none;background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Man-3d-Medium-Dark-icon.png'); background-size: cover">
-    </button>
-
-    <button type="button" , id="three" , name="one" ,
-      style="height:125px;width:125px;position:absolute;top:63%;left:55%;border-radius:125px;border: none;background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Woman-3d-Medium-Light-icon.png'); background-size: cover">
-    </button>
-
-  
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 31%;left:42%;visibility: hidden;" id="bowl1">
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 46%;left:36.6%;visibility: hidden;" id="bowl5">
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 38%;left:51%;visibility: hidden;" id="bowl2">
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 62%;left:41%;visibility: hidden;" id="bowl4">
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 57%;left:51%;visibility: hidden;" id="bowl3">
-
-
-
-    <button type="button" , id="first" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:39%;left:38%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(-120deg);background-repeat: no-repeat; background-size: cover;border: none;">
-    </button>
-
-    <button type="button" , id="second" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:34%;left:49%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(-40deg);background-repeat: no-repeat; background-size: cover;border: none;background-repeat: no-repeat;">
-    </button>
-
-    <button type="button" , id="third" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:50%;left:55%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(20deg);background-repeat: no-repeat; background-size: cover;border: none;background-repeat: no-repeat;">
-      </button>
-
-    <button type="button" , id="fifth" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:59%;left:38%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(160deg);background-repeat: no-repeat; background-size: cover;border: none;background-repeat: no-repeat;">
-    </button>
-
-    <button type="button" , id="fourth" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:68%;left:48%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(90deg);background-repeat: no-repeat; background-size: cover;border: none;background-repeat: no-repeat;">
-      </button>
-
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 46%;left:44.5%">
-
-      <button type="button" , class="btn btn-primary" , onclick="initiate()" ,
-      style="height:70px;width:300px; background-color: rgb(44, 165, 252);border: none;position:absolute;top:20%;right:5%;font-size:25px">Next!</button>
-
+    </div>
   </div>
 
-    <script type="text/javascript">
-      var phils = [0, 0, 0, 0, 0], forks = [0, 0, 0, 0, 0];
+  <!-- FOOTER -->
+  <footer class="os-footer">
+    <div class="footer-left">OS Explorer · Operating Systems Laboratory Project</div>
+    <div class="footer-right">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">Team</a>
+    </div>
+  </footer>
 
-      function initiate() {
-        var num = Math.random();
-        var n = Math.floor(num * 5);
+</div>
 
-        if (n == 0) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 1"
+<script>
+  // ── State ──
+  var phils = [0,0,0,0,0]; // 0=thinking, 1=hungry, 2=eating
+  var forks = [0,0,0,0,0]; // 0=free, 1=taken
 
-        }
-        if (n == 1) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 2"
-        }
-        if (n == 2) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 3"
-        }
-        if (n == 3) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 4"
-        }
-        if (n == 4) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 5"
-        }
+  // ── Layout helpers ──
+  const NAMES = ['Philosopher 1','Philosopher 2','Philosopher 3','Philosopher 4','Philosopher 5'];
+  // Angles (degrees from top, clockwise) for 5 philosophers
+  const PH_ANGLES = [270, 342, 54, 126, 198];
+  // FK_ANGLES[i] = fork between philosopher i and philosopher i+1
+  // So fork i is the RIGHT fork of philosopher i, and LEFT fork of philosopher i+1
+  const FK_ANGLES = [306, 18, 90, 162, 234];
 
-        if (phils[n] == 0) {
-          phils[n] = 1;
-          if (n == 0) {
-            var change12 = document.getElementById("t12");
-            change12.innerHTML = "Yes"
-            var change11 = document.getElementById("t11");
-            change11.innerHTML = "-";
-            var change13 = document.getElementById("t13");
-            change13.innerHTML = "-";
-          }
-          if (n == 1) {
-            var change22 = document.getElementById("t22");
-            change22.innerHTML = "Yes";
-            var change21 = document.getElementById("t21");
-            change21.innerHTML = "-";
-            var change23 = document.getElementById("t23");
-            change23.innerHTML = "-";
-          }
-          if (n == 2) {
-            var change32 = document.getElementById("t32");
-            change32.innerHTML = "Yes";
-            var change31 = document.getElementById("t31");
-            change31.innerHTML = "-";
-            var change33 = document.getElementById("t33");
-            change33.innerHTML = "-";
-          }
-          if (n == 3) {
-            var change42 = document.getElementById("t42");
-            change42.innerHTML = "Yes";
+  function polarToPercent(angleDeg, r) {
+    const rad = (angleDeg - 90) * Math.PI / 180;
+    return {
+      x: 50 + r * Math.cos(rad),
+      y: 50 + r * Math.sin(rad)
+    };
+  }
 
-            var change41 = document.getElementById("t41");
-            change41.innerHTML = "-";
+  function buildCanvas() {
+    const canvas = document.getElementById('sim-canvas');
 
-            var change43 = document.getElementById("t43");
-            change43.innerHTML = "-";
-          }
-          if (n == 4) {
-            var change52 = document.getElementById("t52");
-            change52.innerHTML = "Yes";
+    // Philosophers
+    PH_ANGLES.forEach((angle, i) => {
+      const pos = polarToPercent(angle, 36);
+      const ph = document.createElement('div');
+      ph.className = 'philosopher thinking';
+      ph.id = `ph${i}`;
+      ph.style.left = `calc(${pos.x}% - 40px)`;
+      ph.style.top  = `calc(${pos.y}% - 40px)`;
+      ph.innerHTML = `<span class="ph-num">${i+1}</span><span class="ph-label">thinking</span>`;
+      canvas.appendChild(ph);
 
-            var change51 = document.getElementById("t51");
-            change51.innerHTML = "-";
+      // Name label (slightly further out)
+      const lpos = polarToPercent(angle, 47);
+      const lbl = document.createElement('div');
+      lbl.className = 'ph-name-label';
+      lbl.style.left = `calc(${lpos.x}% - 50px)`;
+      lbl.style.top  = `calc(${lpos.y}% - 8px)`;
+      lbl.style.width = '100px';
+      lbl.textContent = `P${i+1}`;
+      canvas.appendChild(lbl);
 
-            var change53 = document.getElementById("t53");
-            change53.innerHTML = "-";
-          }
-        }
+      // Eating bowl overlay
+      const bowl = document.createElement('div');
+      bowl.className = 'eat-bowl';
+      bowl.id = `ebowl${i}`;
+      bowl.innerHTML = '🍝';
+      const bpos = polarToPercent(angle, 24);
+      bowl.style.left = `calc(${bpos.x}% - 24px)`;
+      bowl.style.top  = `calc(${bpos.y}% - 24px)`;
+      canvas.appendChild(bowl);
+    });
 
-        else if (phils[n] == 1) {
+    // Forks
+    // Fork i sits between philosopher i and philosopher (i+1)%5
+    FK_ANGLES.forEach((angle, i) => {
+      const pos = polarToPercent(angle, 22);
+      const fk = document.createElement('div');
+      fk.className = 'fork free';
+      fk.id = `fk${i}`;
+      fk.style.left = `calc(${pos.x}% - 22px)`;
+      fk.style.top  = `calc(${pos.y}% - 22px)`;
+      fk.innerHTML = '🥢';
+      canvas.appendChild(fk);
+    });
 
-          if (forks[n] == 0 && forks[(n + 1) % 5] == 0) {
-            phils[n] = 2;
-            forks[n] = 1;
-            forks[(n + 1) % 5] = 1;
+    buildStateTable();
+  }
 
-            if (n == 0) {
-              document.getElementById('bowl1').style.visibility = 'visible';
-              var change12 = document.getElementById("t12");
-              change12.innerHTML = "-"
-              var change11 = document.getElementById("t11");
-              change11.innerHTML = "-";
-              var change13 = document.getElementById("t13");
-              change13.innerHTML = "Yes";
-            }
-            if (n == 1) {
-              document.getElementById('bowl2').style.visibility = 'visible';
-              var change22 = document.getElementById("t22");
-              change22.innerHTML = "-";
-              var change21 = document.getElementById("t21");
-              change21.innerHTML = "-";
-              var change23 = document.getElementById("t23");
-              change23.innerHTML = "Yes";
-            }
-            if (n == 2) {
-              document.getElementById('bowl3').style.visibility = 'visible';
-              var change32 = document.getElementById("t32");
-              change32.innerHTML = "-";
-              var change31 = document.getElementById("t31");
-              change31.innerHTML = "-";
-              var change33 = document.getElementById("t33");
-              change33.innerHTML = "Yes";
-            }
-            if (n == 3) {
-              document.getElementById("bowl4").style.visibility = "visible";
+  function buildStateTable() {
+    const tbody = document.getElementById('state-tbody');
+    tbody.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      const row = document.createElement('tr');
+      row.id = `row${i}`;
+      row.innerHTML = `
+        <td>${i+1}</td>
+        <td id="s${i}t" class="state-yes">Yes</td>
+        <td id="s${i}h" class="state-dim">—</td>
+        <td id="s${i}e" class="state-dim">—</td>
+      `;
+      tbody.appendChild(row);
+    }
+  }
 
-              var change42 = document.getElementById("t42");
-              change42.innerHTML = "-";
-
-              var change41 = document.getElementById("t41");
-              change41.innerHTML = "-";
-
-              var change43 = document.getElementById("t43");
-              change43.innerHTML = "Yes";
-            }
-            if (n == 4) {
-              document.getElementById("bowl5").style.visibility = "visible";
-
-              var change52 = document.getElementById("t52");
-              change52.innerHTML = "-";
-
-              var change51 = document.getElementById("t51");
-              change51.innerHTML = "-";
-
-              var change53 = document.getElementById("t53");
-              change53.innerHTML = "Yes";
-            }
-
-          }
-          else {
-            k = n + 1;
-            alert("Philosopher " + k + " can't start eating now!");
-          }
-
-        }
-
-
-        else if (phils[n] == 2) {
-          phils[n] = 0;
-          forks[n] = 0;
-          forks[(n + 1) % 5] = 0;
-
-          if (n == 0) {
-
-            document.getElementById("bowl1").style.visibility = 'hidden';
-            var change12 = document.getElementById("t12");
-            change12.innerHTML = "-"
-            var change11 = document.getElementById("t11");
-            change11.innerHTML = "Yes";
-            var change13 = document.getElementById("t13");
-            change13.innerHTML = "-";
-          }
-          if (n == 1) {
-            document.getElementById("bowl2").style.visibility = 'hidden';
-            var change22 = document.getElementById("t22");
-            change22.innerHTML = "-";
-            var change21 = document.getElementById("t21");
-            change21.innerHTML = "Yes";
-            var change23 = document.getElementById("t23");
-            change23.innerHTML = "-";
-          }
-          if (n == 2) {
-            document.getElementById("bowl3").style.visibility = 'hidden'
-            var change32 = document.getElementById("t32");
-            change32.innerHTML = "-";
-            var change31 = document.getElementById("t31");
-            change31.innerHTML = "Yes";
-            var change33 = document.getElementById("t33");
-            change33.innerHTML = "-";
-          }
-          if (n == 3) {
-            document.getElementById("bowl4").style.visibility = 'hidden';
-            var change42 = document.getElementById("t42");
-            change42.innerHTML = "-";
-
-            var change41 = document.getElementById("t41");
-            change41.innerHTML = "Yes";
-
-            var change43 = document.getElementById("t43");
-            change43.innerHTML = "-";
-          }
-          if (n == 4) {
-            document.getElementById("bowl5").style.visibility = 'hidden';
-            var change52 = document.getElementById("t52");
-            change52.innerHTML = "-";
-
-            var change51 = document.getElementById("t51");
-            change51.innerHTML = "Yes";
-
-            var change53 = document.getElementById("t53");
-            change53.innerHTML = "-";
-          }
-
-        }
-
-        if (phils[0] == 0) {
-          document.getElementById("one").style.backgroundColor = '#DCDCDC';
-        }
-        if (phils[1] == 0) {
-          document.getElementById("two").style.backgroundColor = '#DCDCDC';
-        }
-        if (phils[2] == 0) {
-          document.getElementById("three").style.backgroundColor = '#DCDCDC';
-        }
-        if (phils[3] == 0) {
-          document.getElementById("four").style.backgroundColor = '#DCDCDC';
-        }
-        if (phils[4] == 0) {
-          document.getElementById("five").style.backgroundColor = '#DCDCDC';
-        }
-
-
-
-        if (phils[0] == 1) {
-          document.getElementById("one").style.backgroundColor = '#FFFF00';
-        }
-        if (phils[1] == 1) {
-          document.getElementById("two").style.backgroundColor = '#FFFF00';
-        }
-        if (phils[2] == 1) {
-          document.getElementById("three").style.backgroundColor = '#FFFF00';
-        }
-        if (phils[3] == 1) {
-          document.getElementById("four").style.backgroundColor = '#FFFF00';
-        }
-        if (phils[4] == 1) {
-          document.getElementById("five").style.backgroundColor = '#FFFF00';
-        }
-
-        if (phils[0] == 2) {
-          document.getElementById("one").style.backgroundColor = '#FF0000';
-        }
-        if (phils[1] == 2) {
-          document.getElementById("two").style.backgroundColor = '#FF0000';
-        }
-        if (phils[2] == 2) {
-          document.getElementById("three").style.backgroundColor = '#FF0000';
-        }
-        if (phils[3] == 2) {
-          document.getElementById("four").style.backgroundColor = '#FF0000';
-        }
-        if (phils[4] == 2) {
-          document.getElementById("five").style.backgroundColor = '#FF0000';
-        }
-
-        if (forks[0] == 0) {
-          document.getElementById("first").style.backgroundColor = '#DCDCDC';
-        }
-        if (forks[1] == 0) {
-          document.getElementById("second").style.backgroundColor = '#DCDCDC';
-        }
-        if (forks[2] == 0) {
-          document.getElementById("third").style.backgroundColor = '#DCDCDC';
-        }
-        if (forks[3] == 0) {
-          document.getElementById("fourth").style.backgroundColor = '#DCDCDC';
-        }
-        if (forks[4] == 0) {
-          document.getElementById("fifth").style.backgroundColor = '#DCDCDC';
-        }
-
-        if (forks[0] == 1) {
-          document.getElementById("first").style.backgroundColor = '#FF0000';
-        }
-        if (forks[1] == 1) {
-          document.getElementById("second").style.backgroundColor = '#FF0000';
-        }
-        if (forks[2] == 1) {
-          document.getElementById("third").style.backgroundColor = '#FF0000';
-        }
-        if (forks[3] == 1) {
-          document.getElementById("fourth").style.backgroundColor = '#FF0000';
-        }
-        if (forks[4] == 1) {
-          document.getElementById("fifth").style.backgroundColor = '#FF0000';
-        }
-
+  function updateStateTable() {
+    for (let i = 0; i < 5; i++) {
+      const t = document.getElementById(`s${i}t`);
+      const h = document.getElementById(`s${i}h`);
+      const e = document.getElementById(`s${i}e`);
+      if (phils[i] === 0) {
+        t.textContent = 'Yes'; t.className = 'state-yes';
+        h.textContent = '—';   h.className = 'state-dim';
+        e.textContent = '—';   e.className = 'state-dim';
+      } else if (phils[i] === 1) {
+        t.textContent = '—';   t.className = 'state-dim';
+        h.textContent = 'Yes'; h.className = 'state-hungry-yes';
+        e.textContent = '—';   e.className = 'state-dim';
+      } else {
+        t.textContent = '—';   t.className = 'state-dim';
+        h.textContent = '—';   h.className = 'state-dim';
+        e.textContent = 'Yes'; e.className = 'state-eating-yes';
       }
-    </script>
-  </div>
+    }
+  }
 
-  
+  function updatePhilosopherEl(i) {
+    const el = document.getElementById(`ph${i}`);
+    const label = el.querySelector('.ph-label');
+    el.className = 'philosopher';
+    if (phils[i] === 0)      { el.classList.add('thinking'); label.textContent = 'thinking'; }
+    else if (phils[i] === 1) { el.classList.add('hungry');   label.textContent = 'hungry'; }
+    else                     { el.classList.add('eating');   label.textContent = 'eating'; }
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
-      class="bi bi-arrow-up-short"></i></a>
+    const bowl = document.getElementById(`ebowl${i}`);
+    bowl.classList.toggle('visible', phils[i] === 2);
+  }
 
-  <!-- Vendor JS Files -->
-  <!-- <script src="../../assets/vendor/purecounter/purecounter.js"></script>
-  <script src="../../assets/vendor/aos/aos.js"></script>
-  <script src="../../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="../../assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="../../assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="../../assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="../../assets/vendor/php-email-form/validate.js"></script>
- Template Main JS File 
-  <script src="../../assets/js/main.js"></script> -->
+  function updateForkEl(i) {
+    const el = document.getElementById(`fk${i}`);
+    el.className = 'fork ' + (forks[i] === 0 ? 'free' : 'taken');
+  }
+
+  function initiate() {
+    var n = Math.floor(Math.random() * 5);
+    const chanceEl = document.getElementById('chance-text');
+    const statusEl = document.getElementById('sim-status');
+
+    chanceEl.textContent = `Chance given to: Philosopher ${n+1}`;
+
+    // Fork layout:
+    //   fork i is between philosopher i and philosopher (i+1)%5
+    //   So philosopher n's LEFT fork  = fork (n-1+5)%5
+    //      philosopher n's RIGHT fork = fork n
+    var leftFork  = (n - 1 + 5) % 5;
+    var rightFork = n;
+
+    if (phils[n] === 0) {
+      // Thinking → Hungry
+      phils[n] = 1;
+      statusEl.textContent = `· P${n+1} IS HUNGRY`;
+      statusEl.style.color = '#f5a623';
+
+    } else if (phils[n] === 1) {
+      // Hungry → try to eat
+      if (forks[leftFork] === 0 && forks[rightFork] === 0) {
+        phils[n] = 2;
+        forks[leftFork]  = 1;
+        forks[rightFork] = 1;
+        updateForkEl(leftFork);
+        updateForkEl(rightFork);
+        statusEl.textContent = `· P${n+1} IS EATING`;
+        statusEl.style.color = '#28c840';
+      } else {
+        chanceEl.textContent = `Philosopher ${n+1} can't eat — forks unavailable!`;
+        statusEl.textContent = '· BLOCKED';
+        statusEl.style.color = '#ff5f57';
+      }
+
+    } else if (phils[n] === 2) {
+      // Eating → Thinking (release forks)
+      phils[n] = 0;
+      forks[leftFork]  = 0;
+      forks[rightFork] = 0;
+      updateForkEl(leftFork);
+      updateForkEl(rightFork);
+      statusEl.textContent = '· THINKING';
+      statusEl.style.color = 'var(--accent)';
+    }
+
+    updatePhilosopherEl(n);
+    updateStateTable();
+  }
+
+  // Init
+  buildCanvas();
+</script>
 </body>
-
 </html>
