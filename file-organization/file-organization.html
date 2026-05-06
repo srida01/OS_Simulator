@@ -1,114 +1,243 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>File Organization Simulation</title>
-    <link rel="stylesheet" href="../styles.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="file-organization.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="file-organization.css">
+  <title>DAG File System — OS Mini Project</title>
 </head>
-
 <body>
-    <div class="container">
-        <header class="navbar">
-            <div class="logo">OS Explorer</div>
-            <nav>
-                <a href="../index.html">Home</a>
-                <a href="../about.html">About</a>
-            </nav>
-        </header>
+  <div class="bg-grid"></div>
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
 
-        <section class="hero">
-            <h1>File Organization Techniques</h1>
-            <p>Interactive simulation of file organization structures</p>
-        </section>
+  <div class="module-wrapper">
+    <header class="navbar">
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <span class="logo">OS <span>EXPLORER</span></span>
+      </div>
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
+      </nav>
+    </header>
 
-        <section class="organization-selector">
-            <button class="org-btn active" id="multi-level-btn">Multi-level Hierarchical</button>
-            <button class="org-btn" id="single-level-btn">Single-level Directory</button>
-        </section>
+    <!-- Header -->
+    <header class="module-header">
+      <div class="module-title">
+        <div class="title-eyebrow"><span class="dot"></span>OS Mini Project · File Systems</div>
+        <h1>DAG File System</h1>
+        <p class="subtitle">Simulate Directed Acyclic Graph file systems with dependency tracking, cycle detection &amp; topological sorting.</p>
+      </div>
+      <div class="theme-toggle-wrap">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle theme">
+          <span class="theme-icon">◐</span>
+        </button>
+      </div>
+    </header>
 
-        <section class="simulation-section">
-            <div class="controls">
-                <input type="text" id="new-item-name" placeholder="Enter name">
-                <button class="btn" id="add-folder-btn">Add Folder</button>
-                <button class="btn" id="add-file-btn">Add File</button>
-                <button class="btn" id="delete-btn">Delete Selected</button>
-            </div>
-            
-            <!-- Multi-level File Tree (default view) -->
-            <div class="file-tree active" id="multi-level-tree">
-                <div class="folder open" data-name="root">
-                    root
-                    <div class="children">
-                        <div class="folder" data-name="home">
-                            home
-                            <div class="children">
-                                <div class="folder" data-name="user">
-                                    user
-                                    <div class="children">
-                                        <div class="file" data-name="document.txt">document.txt</div>
-                                        <div class="file" data-name="image.jpg">image.jpg</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="folder" data-name="etc">
-                            etc
-                            <div class="children">
-                                <div class="file" data-name="config.conf">config.conf</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Single-level File Tree (initially hidden) -->
-            <div class="file-tree" id="single-level-tree" style="display: none;">
-                <div class="folder open" data-name="root">
-                    root
-                    <div class="children">
-                        <div class="file" data-name="file1.txt">file1.txt</div>
-                        <div class="file" data-name="file2.txt">file2.txt</div>
-                        <div class="file" data-name="image1.jpg">image1.jpg</div>
-                        <div class="file" data-name="document.pdf">document.pdf</div>
-                        <div class="file" data-name="spreadsheet.xlsx">spreadsheet.xlsx</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="explanation" id="multi-level-explanation">
-                <h2>Multi-level Hierarchical File System</h2>
-                <p>A hierarchical file system organizes files into a tree structure, with directories (folders) containing files and other directories. This approach provides a logical organization scheme that mirrors real-world organization.</p>
-                <h3>Key Characteristics:</h3>
-                <ul>
-                    <li><strong>Tree Structure:</strong> Files and directories form a tree with the root at the top</li>
-                    <li><strong>Nested Directories:</strong> Directories can contain subdirectories to any depth</li>
-                    <li><strong>Path Navigation:</strong> Files are accessed through paths like /root/home/user/file.txt</li>
-                    <li><strong>Efficient Organization:</strong> Good for organizing large numbers of files</li>
-                </ul>
-                <p><strong>Examples:</strong> Unix/Linux file system, Windows NTFS, macOS HFS+/APFS</p>
-            </div>
-            
-            <div class="explanation" id="single-level-explanation" style="display: none;">
-                <h2>Single-level Directory File System</h2>
-                <p>A single-level directory system places all files in one directory, creating a flat structure with no hierarchy. All files must have unique names within this single directory.</p>
-                <h3>Key Characteristics:</h3>
-                <ul>
-                    <li><strong>Flat Structure:</strong> No subdirectories, all files in one location</li>
-                    <li><strong>Simple Navigation:</strong> Direct access to all files</li>
-                    <li><strong>Naming Constraints:</strong> Every file must have a unique name</li>
-                    <li><strong>Limited Organization:</strong> Becomes unwieldy with many files</li>
-                </ul>
-                <p><strong>Examples:</strong> Early operating systems like MS-DOS in its simplest usage, some embedded systems</p>
-            </div>
-        </section>
+    <!-- Live Stats Bar -->
+    <div class="stats-bar" id="live-summary">
+      <div class="stat-pill">
+        <span class="stat-pill-val" id="stat-files">0</span>
+        <span class="stat-pill-label">Files</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-pill">
+        <span class="stat-pill-val" id="stat-dirs">0</span>
+        <span class="stat-pill-label">Folders</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-pill">
+        <span class="stat-pill-val" id="stat-links">0</span>
+        <span class="stat-pill-label">Links</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-pill">
+        <span class="stat-pill-val" id="stat-size">0 KB</span>
+        <span class="stat-pill-label">Total Size</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-pill validation-pill" id="validation-pill">
+        <span class="pulse-dot"></span>
+        <span id="validation-text">Ready</span>
+      </div>
     </div>
 
-    <script src="file-organization.js"></script>
-    
-</body>
+    <!-- Status Banner -->
+    <div id="error-msg" class="status-banner top-status-banner hidden" role="alert" aria-live="assertive"></div>
 
+    <!-- Main Builder Card -->
+    <div class="builder-shell">
+
+      <!-- Left Panel: Controls -->
+      <div class="left-panel">
+
+        <!-- Structure Mode Selector -->
+        <div class="panel-section">
+          <div class="section-label"><span class="section-num">MODE</span>&nbsp;Directory Structure</div>
+          <div class="structure-selector">
+            <button class="struct-btn active" data-structure="dag" onclick="setStructureMode('dag', this)">
+              <span class="struct-icon">◈</span>
+              <span class="struct-name">DAG</span>
+              <span class="struct-desc">Shared refs</span>
+            </button>
+            <button class="struct-btn" data-structure="single" onclick="setStructureMode('single', this)">
+              <span class="struct-icon">▬</span>
+              <span class="struct-name">Single</span>
+              <span class="struct-desc">Flat</span>
+            </button>
+            <button class="struct-btn" data-structure="multi" onclick="setStructureMode('multi', this)">
+              <span class="struct-icon">◫</span>
+              <span class="struct-name">Multi</span>
+              <span class="struct-desc">Nested</span>
+            </button>
+            <button class="struct-btn" data-structure="tree" onclick="setStructureMode('tree', this)">
+              <span class="struct-icon">⬡</span>
+              <span class="struct-name">Tree</span>
+              <span class="struct-desc">Rooted</span>
+            </button>
+          </div>
+          <div id="structure-hint" class="hint-band">
+            DAG mode allows shared references while still preventing cycles.
+          </div>
+        </div>
+
+        <!-- Step 1: Files -->
+        <div class="panel-section">
+          <div class="section-label"><span class="section-num">01</span>&nbsp;Add Files</div>
+          <div class="input-row">
+            <div class="input-wrap">
+              <span class="input-icon">📄</span>
+              <input type="text" id="file-name-input" class="field" placeholder="filename" autocomplete="off" />
+            </div>
+            <button class="add-btn" type="button" onclick="addFile()">+</button>
+          </div>
+          <div id="files-list" class="chip-list empty-state-inline">No files added yet.</div>
+        </div>
+
+        <!-- Step 2: Directories -->
+        <div class="panel-section">
+          <div class="section-label"><span class="section-num">02</span>&nbsp;Add Directories</div>
+          <div class="input-row">
+            <div class="input-wrap">
+              <span class="input-icon">📁</span>
+              <input type="text" id="directory-name-input" class="field" placeholder="folder-name" autocomplete="off" />
+            </div>
+            <button class="add-btn" type="button" onclick="addDirectory()">+</button>
+          </div>
+          <div id="directories-list" class="chip-list empty-state-inline">No directories added yet.</div>
+        </div>
+
+        <!-- Step 3: Dependencies -->
+        <div class="panel-section">
+          <div class="section-label"><span class="section-num">03</span>&nbsp;Link Dependencies</div>
+          <div class="dep-form">
+            <div class="select-wrap">
+              <label class="select-label">Parent Node</label>
+              <select id="dependency-from" class="field select-field"></select>
+            </div>
+            <div class="dep-arrow-badge">→</div>
+            <div class="select-wrap">
+              <label class="select-label">Child Node</label>
+              <select id="dependency-to" class="field select-field"></select>
+            </div>
+            <button class="add-btn add-btn-link" type="button" onclick="addDependency()">Link</button>
+          </div>
+          <div id="dependencies-list" class="chip-list empty-state-inline">No dependencies added yet.</div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="panel-section">
+          <div class="section-label"><span class="section-num">⚡</span>&nbsp;Quick Presets</div>
+          <div class="preset-row">
+            <button class="preset-btn" onclick="loadPreset('single')">Single</button>
+            <button class="preset-btn" onclick="loadPreset('multi')">Multi</button>
+            <button class="preset-btn" onclick="loadPreset('tree')">Tree</button>
+            <button class="preset-btn" onclick="loadPreset('dag')">DAG</button>
+            <button class="preset-btn preset-danger" onclick="loadPreset('cycle')">Cycle ⚠</button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="panel-section action-section">
+          <button class="run-btn" onclick="runSimulation()">
+            <span class="run-icon">▶</span> Run Simulation
+          </button>
+          <div class="secondary-actions">
+            <button class="sec-btn" onclick="resetAll()">↺ Reset</button>
+            <button class="sec-btn" onclick="exportResults()" id="export-btn" style="display:none;">⬇ Export JSON</button>
+          </div>
+        </div>
+
+      </div><!-- /left-panel -->
+
+      <!-- Right Panel: Live Status -->
+      <div class="right-panel">
+        <div class="status-card-main" id="live-status-card">
+          <span class="status-kicker">Validation Center</span>
+          <h4>Ready to build</h4>
+          <p>Choose a structure, add nodes, and create valid parent-to-child relations. Rule checks and cycle detection will appear here in real time.</p>
+        </div>
+
+        <!-- Concept Cards -->
+        <div class="concept-list">
+          <div class="concept-item">
+            <span class="concept-num">01</span>
+            <div>
+              <strong>Single-Level</strong>
+              <p>Flat directory. Easy for small systems, conflicts grow quickly.</p>
+            </div>
+          </div>
+          <div class="concept-item">
+            <span class="concept-num">02</span>
+            <div>
+              <strong>Multi-Level</strong>
+              <p>Nested subdirectories, one parent per item.</p>
+            </div>
+          </div>
+          <div class="concept-item">
+            <span class="concept-num">03</span>
+            <div>
+              <strong>Tree</strong>
+              <p>One root, every node has exactly one parent.</p>
+            </div>
+          </div>
+          <div class="concept-item concept-item-accent">
+            <span class="concept-num">04</span>
+            <div>
+              <strong>DAG + Innovation</strong>
+              <p>Shared refs without cycles. Includes lookup cost &amp; storage analysis.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /builder-shell -->
+
+    <!-- Output Area -->
+    <div id="visual-output">
+      <div class="output-placeholder">
+        <div class="placeholder-icon">
+          <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6M3 21h18M3 10l9-7 9 7" />
+          </svg>
+        </div>
+        <p>Results will appear here after simulation</p>
+        <span class="placeholder-hint">// Load a preset and click Run →</span>
+      </div>
+    </div>
+
+  </div><!-- /module-wrapper -->
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="./file-organization.js"></script>
+</body>
 </html>
