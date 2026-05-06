@@ -2,64 +2,640 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dining Philosophers Problem</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="../index.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dining Philosophers — Wiki · OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:            #0d1017;
+      --bg2:           #111520;
+      --surface:       #161b27;
+      --border:        rgba(82, 170, 255, 0.18);
+      --border-bright: rgba(82, 170, 255, 0.45);
+      --accent:        #60b8ff;
+      --accent-dim:    rgba(96, 184, 255, 0.15);
+      --purple:        #a78bfa;
+      --orange:        #f5a623;
+      --green:         #28c840;
+      --text:          #eef2f7;
+      --muted:         #8fa4bc;
+      --dim:           rgba(96, 183, 255, 0.803);
+      --mono:  'IBM Plex Mono', monospace;
+      --sans:  'IBM Plex Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(96,184,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(96,184,255,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .page-wrap {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 32px; position: relative; z-index: 1;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar-os {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo-icon {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--accent); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+    .logo { font-family: var(--display); font-size: 24px; letter-spacing: 2px; color: var(--text); }
+    .logo span { color: var(--accent); }
+
+    nav.os-nav { display: flex; align-items: center; gap: 8px; }
+    nav.os-nav a {
+      color: var(--muted); text-decoration: none;
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid transparent; border-radius: 4px;
+      transition: all 0.2s;
+    }
+    nav.os-nav a:hover, nav.os-nav a.active {
+      color: var(--accent); border-color: var(--border-bright);
+      background: rgba(96,184,255,0.05);
+    }
+
+    /* ── TWO-COLUMN LAYOUT ── */
+    .wiki-layout {
+      display: grid; grid-template-columns: 220px 1fr;
+      gap: 40px; align-items: start;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: sticky; top: 32px;
+      animation: fadeUp 0.4s ease both;
+    }
+    .sidebar-title {
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 16px;
+      padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    }
+    .sidebar-link {
+      display: block; font-family: var(--mono); font-size: 12px; color: var(--muted);
+      text-decoration: none; padding: 7px 0 7px 14px;
+      border-left: 2px solid var(--border);
+      transition: all 0.2s; letter-spacing: 0.06em;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      color: var(--accent); border-color: var(--accent);
+    }
+
+    .sidebar-sim-btn {
+      margin-top: 28px;
+      display: block; width: 100%; text-align: center;
+      background: rgba(96,184,255,0.08); border: 1px solid var(--border-bright);
+      color: var(--accent); text-decoration: none;
+      font-family: var(--display); font-size: 16px; letter-spacing: 2px;
+      padding: 12px; border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .sidebar-sim-btn:hover {
+      background: rgba(96,184,255,0.16);
+      box-shadow: 0 0 20px rgba(96,184,255,0.15);
+    }
+
+    /* ── CONTENT ── */
+    .wiki-content { animation: fadeUp 0.5s ease 0.1s both; }
+
+    .breadcrumb-os {
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;
+    }
+    .breadcrumb-os a { color: var(--accent); text-decoration: none; }
+
+    .wiki-content h1.page-title {
+      font-family: var(--display); font-size: 72px;
+      letter-spacing: 4px; line-height: 0.92; color: var(--text);
+      margin-bottom: 12px;
+    }
+    .wiki-content h1.page-title .accent { color: var(--accent); }
+
+    .module-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-bottom: 40px;
+      background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.25);
+      border-radius: 4px; padding: 6px 14px;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--purple);
+    }
+
+    /* Section anchor */
+    .wiki-section { margin-bottom: 52px; }
+    .wiki-section:first-of-type { margin-top: 0; }
+
+    .section-label {
+      font-family: var(--mono); font-size: 10px; color: var(--dim);
+      letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .wiki-section h2 {
+      font-family: var(--display); font-size: 34px; letter-spacing: 2px;
+      color: var(--text); margin-bottom: 16px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .wiki-section h3 {
+      font-family: var(--display); font-size: 22px; letter-spacing: 1px;
+      color: var(--accent); margin: 24px 0 10px;
+    }
+
+    .wiki-section p {
+      font-family: var(--sans); font-size: 14px; color: var(--muted);
+      line-height: 1.85; margin-bottom: 14px;
+    }
+    .wiki-section p strong {
+      color: var(--text); font-weight: 600;
+    }
+
+    .wiki-section ul {
+      list-style: none; margin-bottom: 16px;
+    }
+    .wiki-section ul li {
+      font-family: var(--sans); font-size: 14px; color: var(--muted);
+      line-height: 1.75; padding: 6px 0 6px 22px; position: relative;
+      border-bottom: 1px solid rgba(82,170,255,0.06);
+    }
+    .wiki-section ul li:last-child { border-bottom: none; }
+    .wiki-section ul li::before {
+      content: '›'; position: absolute; left: 6px;
+      color: var(--accent); font-size: 16px; top: 5px;
+    }
+    .wiki-section ul li strong { color: var(--text); }
+
+    /* Code block */
+    .code-block {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; margin: 20px 0;
+    }
+    .code-block-header {
+      background: var(--surface); padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .code-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .code-block-title {
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      letter-spacing: 0.1em; margin-left: auto;
+    }
+    .code-block pre {
+      padding: 20px; font-family: var(--mono); font-size: 13px;
+      line-height: 1.9; color: var(--text); overflow-x: auto;
+    }
+    .code-block code .kw   { color: var(--purple); }
+    .code-block code .fn   { color: var(--accent); }
+    .code-block code .cm   { color: var(--muted); font-style: italic; }
+    .code-block code .num  { color: var(--orange); }
+
+    /* Info / warning callout */
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: rgba(96,184,255,0.04);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px; margin: 20px 0;
+    }
+    .callout.warn { border-color: var(--orange); background: rgba(245,166,35,0.04); }
+    .callout.good { border-color: var(--green);  background: rgba(40,200,64,0.04); }
+
+    .callout-label {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .callout-label.info { color: var(--accent); }
+    .callout-label.warn { color: var(--orange); }
+    .callout-label.good { color: var(--green); }
+
+    .callout p {
+      font-family: var(--sans); font-size: 13px; color: var(--muted);
+      line-height: 1.75; margin: 0;
+    }
+
+    /* Inline code */
+    code.inline {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 4px; padding: 2px 7px;
+      font-family: var(--mono); font-size: 12px; color: var(--accent);
+    }
+
+    /* Strategy cards */
+    .strategy-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0;
+    }
+    .strategy-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 20px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .strategy-card:hover { border-color: var(--border-bright); background: var(--surface); }
+    .strategy-card .sc-num {
+      font-family: var(--mono); font-size: 10px; color: var(--dim);
+      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .strategy-card h4 {
+      font-family: var(--display); font-size: 16px; letter-spacing: 1px;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .strategy-card p {
+      font-family: var(--sans); font-size: 12px; color: var(--muted);
+      line-height: 1.65; margin: 0;
+    }
+
+    /* ── FOOTER ── */
+    footer.os-footer {
+      border-top: 1px solid var(--border); padding: 28px 0;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 64px;
+    }
+    .footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--muted); text-decoration: none; transition: color 0.2s;
+    }
+    .footer-right a:hover { color: var(--accent); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 860px) {
+      .wiki-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .strategy-grid { grid-template-columns: 1fr; }
+      .wiki-content h1.page-title { font-size: 52px; }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Dining Philosophers Problem</h2>
+<div class="page-wrap">
 
-    <p>The Dining Philosophers Problem illustrates the challenges of resource allocation and process synchronization. It involves five philosophers who alternate between thinking and eating. Each needs two chopsticks (one on the left and one on the right) to eat from a shared bowl of rice.</p>
+  <!-- NAVBAR -->
+  <header class="navbar-os">
+    <a href="../index.html" class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <span class="logo">OS <span>EXPLORER</span></span>
+    </a>
+    <nav class="os-nav">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+    </nav>
+  </header>
 
-    <h4>Problem Description</h4>
-    <ul>
-      <li>Five philosophers sit around a table.</li>
-      <li>Each has one chopstick on their left and right.</li>
-      <li>They can pick up one chopstick at a time.</li>
-      <li>They eat only when both chopsticks are acquired.</li>
-      <li>After eating, they release the chopsticks and go back to thinking.</li>
-    </ul>
+  <div class="wiki-layout">
 
-    <h4>Goal</h4>
-    <p>
-      Design a solution that allows <strong>concurrent access</strong> while avoiding <strong>deadlock</strong> and <strong>starvation</strong>.
-    </p>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-title">On this page</div>
+      <a class="sidebar-link active" href="#overview">Overview</a>
+      <a class="sidebar-link" href="#description">Problem Description</a>
+      <a class="sidebar-link" href="#goal">Goal</a>
+      <a class="sidebar-link" href="#pseudocode">Pseudocode</a>
+      <a class="sidebar-link" href="#deadlock">Deadlock Issue</a>
+      <a class="sidebar-link" href="#strategies">Handling Strategies</a>
 
-    <h5>Shared Data</h5>
-    <ul>
-      <li><code class="inline">semaphore chopstick[5]</code> – represents each chopstick (all initialized to 1).</li>
-    </ul>
-    
-    
+      <a class="sidebar-sim-btn" href="dining.html">▶ Launch Simulation</a>
+    </aside>
 
-    <h5>Philosopher Process (Pseudocode)</h5>
-    <pre><code>do {
-    wait(chopstick[i]);
-    wait(chopstick[(i+1)%5]);
-    // ...
-    // eat
-    // ...
-    signal(chopstick[i]);
-    signal(chopstick[(i+1)%5]);
-    // ...
-    // think
-    // ...
-} while (TRUE);</code></pre>
+    <!-- MAIN CONTENT -->
+    <main class="wiki-content">
 
-    <h4>Deadlock Issue</h4>
-    <p>
-      If all philosophers pick up their left chopstick at the same time, none can acquire the right one, resulting in a deadlock. All semaphores are then set to 0, and the system halts.
-    </p>
+      <div class="breadcrumb-os">
+        <a href="../index.html">Home</a> / <a href="../process-synchronisation/index.html">Synchronisation</a> / Wiki
+      </div>
 
-    <h4>Deadlock Handling Strategies</h4>
-    <ul>
-      <li><strong>Limit Concurrency:</strong> Allow at most four philosophers to sit at the table simultaneously.</li>
-      <li><strong>Check Availability:</strong> Allow picking up chopsticks only if both are available (in a critical section).</li>
-      <li><strong>Asymmetric Solution:</strong> Odd-numbered philosophers pick up the left chopstick first, while even-numbered ones pick up the right first to avoid circular wait.</li>
-    </ul>
+      <h1 class="page-title">DINING<br><span class="accent">PHILOSOPHERS</span></h1>
+      <div class="module-tag">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41"/></svg>
+        Module 12 · Synchronization Problem · Wiki
+      </div>
+
+      <!-- OVERVIEW -->
+      <section class="wiki-section" id="overview">
+        <div class="section-label">01 / Overview</div>
+        <h2>OVERVIEW</h2>
+        <p>The <strong>Dining Philosophers Problem</strong> is a classic computer science thought experiment formulated by Edsger Dijkstra in 1965. It illustrates the fundamental challenges of <strong>resource allocation</strong> and <strong>process synchronization</strong> in concurrent systems.</p>
+        <p>The problem involves five philosophers seated around a circular table. Each philosopher alternates between <strong>thinking</strong> and <strong>eating</strong>, and each requires two chopsticks to eat — one from their left, one from their right.</p>
+
+        <div class="callout">
+          <div class="callout-label info">Key Insight</div>
+          <p>The scenario models real OS scenarios where multiple processes compete for a limited set of shared resources, and a naive allocation strategy can lead to total system deadlock.</p>
+        </div>
+      </section>
+
+      <!-- DESCRIPTION -->
+      <section class="wiki-section" id="description">
+        <div class="section-label">02 / Problem Description</div>
+        <h2>PROBLEM DESCRIPTION</h2>
+        <p>The setup is deceptively simple, yet captures the essence of multi-process resource contention:</p>
+        <ul>
+          <li>Five philosophers sit around a circular table with a shared bowl of rice in the center.</li>
+          <li>Five chopsticks are placed between them — one between each adjacent pair.</li>
+          <li>A philosopher can only eat when they hold <strong>both</strong> the left and right chopstick.</li>
+          <li>They may only pick up <strong>one chopstick at a time</strong>.</li>
+          <li>After eating, they release both chopsticks and return to thinking.</li>
+        </ul>
+
+        <p>The challenge: chopsticks are <strong>shared resources</strong>. Each chopstick sits between two philosophers and can only be held by one at a time.</p>
+      </section>
+
+      <!-- GOAL -->
+      <section class="wiki-section" id="goal">
+        <div class="section-label">03 / Goal</div>
+        <h2>GOAL</h2>
+        <p>Design a concurrent algorithm that:</p>
+        <ul>
+          <li>Allows philosophers to eat whenever they can acquire both adjacent chopsticks.</li>
+          <li>Avoids <strong>deadlock</strong> — a state where all philosophers hold one chopstick and wait forever for the other.</li>
+          <li>Prevents <strong>starvation</strong> — ensuring no philosopher waits indefinitely to eat.</li>
+          <li>Maximizes <strong>concurrency</strong> — allowing multiple philosophers to eat simultaneously when possible.</li>
+        </ul>
+
+        <h3>Shared Data Structure</h3>
+        <p>Each chopstick is represented as a <strong>semaphore</strong>, initialized to 1 (available):</p>
+        <div style="margin:4px 0 0 0">
+          <code class="inline">semaphore chopstick[5] = {1, 1, 1, 1, 1}</code>
+        </div>
+      </section>
+
+      <!-- PSEUDOCODE -->
+      <section class="wiki-section" id="pseudocode">
+        <div class="section-label">04 / Pseudocode</div>
+        <h2>PHILOSOPHER PROCESS</h2>
+        <p>Each philosopher <code class="inline">i</code> runs the following loop indefinitely:</p>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#febc2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+            <span class="code-block-title">philosopher_process.c — pseudocode</span>
+          </div>
+          <pre><code><span class="kw">do</span> {
+    <span class="cm">// Acquire left chopstick</span>
+    <span class="fn">wait</span>(chopstick[i]);
+
+    <span class="cm">// Acquire right chopstick</span>
+    <span class="fn">wait</span>(chopstick[(i + <span class="num">1</span>) % <span class="num">5</span>]);
+
+    <span class="cm">// ── Critical Section ──</span>
+    <span class="cm">// eat for a while...</span>
+
+    <span class="cm">// Release left chopstick</span>
+    <span class="fn">signal</span>(chopstick[i]);
+
+    <span class="cm">// Release right chopstick</span>
+    <span class="fn">signal</span>(chopstick[(i + <span class="num">1</span>) % <span class="num">5</span>]);
+
+    <span class="cm">// think for a while...</span>
+
+} <span class="kw">while</span> (<span class="num">TRUE</span>);</code></pre>
+        </div>
+
+        <p>The <code class="inline">wait()</code> call decrements the semaphore (acquires the resource). The <code class="inline">signal()</code> call increments it (releases the resource). If <code class="inline">wait()</code> is called on a semaphore with value 0, the process blocks until the resource is freed.</p>
+      </section>
+
+      <!-- DEADLOCK -->
+      <section class="wiki-section" id="deadlock">
+        <div class="section-label">05 / Deadlock Issue</div>
+        <h2>DEADLOCK ISSUE</h2>
+        <p>The naive solution above has a critical flaw. Consider this scenario:</p>
+
+        <div class="callout warn">
+          <div class="callout-label warn">⚠ Deadlock Scenario</div>
+          <p>All five philosophers become hungry simultaneously and each picks up their <strong>left chopstick</strong> at the same time. Every semaphore drops to 0. Now each philosopher waits for their right chopstick — which is held by the neighbor to their right. No philosopher can proceed. The system is in <strong>total deadlock</strong>.</p>
+        </div>
+
+        <p>The four <strong>necessary conditions</strong> for deadlock (Coffman conditions) are all met:</p>
+        <ul>
+          <li><strong>Mutual Exclusion:</strong> A chopstick can only be held by one philosopher at a time.</li>
+          <li><strong>Hold and Wait:</strong> Each philosopher holds one chopstick while waiting for another.</li>
+          <li><strong>No Preemption:</strong> A chopstick cannot be forcibly taken from a philosopher.</li>
+          <li><strong>Circular Wait:</strong> Each philosopher waits for the resource held by the next one, forming a cycle.</li>
+        </ul>
+      </section>
+
+            <!-- STRATEGIES -->
+      <section class="wiki-section" id="strategies">
+        <div class="section-label">06 / Handling Strategies</div>
+        <h2>DEADLOCK HANDLING STRATEGIES</h2>
+        <p>Several strategies exist to break one or more of the Coffman conditions and prevent deadlock:</p>
+
+        <div class="strategy-grid">
+          <div class="strategy-card">
+            <div class="sc-num">Strategy 01</div>
+            <h4>LIMIT CONCURRENCY</h4>
+            <p>Allow at most <strong>four philosophers</strong> to sit at the table simultaneously. This breaks the circular wait condition — at least one philosopher can always obtain both chopsticks.</p>
+          </div>
+          <div class="strategy-card">
+            <div class="sc-num">Strategy 02</div>
+            <h4>ATOMIC PICKUP</h4>
+            <p>Allow a philosopher to pick up both chopsticks <strong>only if both are available</strong>, inside a critical section. This prevents partial resource acquisition and eliminates hold-and-wait.</p>
+          </div>
+          <div class="strategy-card">
+            <div class="sc-num">Strategy 03</div>
+            <h4>ASYMMETRIC ORDER</h4>
+            <p><strong>Odd-numbered</strong> philosophers pick up the left chopstick first; <strong>even-numbered</strong> ones pick up the right first. This asymmetry breaks the circular wait condition.</p>
+          </div>
+        </div>
+
+        <div class="callout good">
+          <div class="callout-label good">✓ Best Practice</div>
+          <p>In real operating systems, resource ordering (Strategy 3) is the most commonly applied technique — processes must always request resources in a globally defined order, preventing circular dependencies.</p>
+        </div>
+
+        <h3>Strategy 1: Limiting Concurrency</h3>
+        <p>Allow at most N-1 philosophers (4 out of 5) to attempt eating simultaneously. A semaphore initialized to 4 guards the entry:</p>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#febc2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+            <span class="code-block-title">limit_concurrency.c — pseudocode</span>
+          </div>
+          <pre><code><span class="kw">semaphore</span> table = <span class="num">4</span>;
+<span class="kw">semaphore</span> chopstick[<span class="num">5</span>] = {<span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>};
+
+<span class="kw">do</span> {
+    <span class="fn">wait</span>(table);           <span class="cm">// Limit to 4 simultaneous diners</span>
+    <span class="fn">wait</span>(chopstick[i]);    <span class="cm">// Get left chopstick</span>
+    <span class="fn">wait</span>(chopstick[(i+<span class="num">1</span>)%<span class="num">5</span>]); <span class="cm">// Get right chopstick</span>
+
+    <span class="cm">// ... eat ...</span>
+
+    <span class="fn">signal</span>(chopstick[(i+<span class="num">1</span>)%<span class="num">5</span>]);
+    <span class="fn">signal</span>(chopstick[i]);
+    <span class="fn">signal</span>(table);        <span class="cm">// Release table seat</span>
+} <span class="kw">while</span> (<span class="num">TRUE</span>);</code></pre>
+        </div>
+
+        <p><strong>Advantage:</strong> Simple to implement. <strong>Disadvantage:</strong> Underutilizes resources — we never use all 5 chopsticks simultaneously, even though it's theoretically possible.</p>
+
+        <h3>Strategy 2: Atomic Acquisition</h3>
+        <p>Use a monitor or mutex to ensure both chopsticks are acquired <strong>atomically</strong>. If a philosopher cannot acquire both, they release the first and wait:</p>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#febc2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+            <span class="code-block-title">atomic_acquisition.c — pseudocode</span>
+          </div>
+          <pre><code><span class="kw">semaphore</span> mutex = <span class="num">1</span>;
+<span class="kw">semaphore</span> chopstick[<span class="num">5</span>] = {<span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>};
+
+<span class="kw">do</span> {
+    <span class="fn">wait</span>(mutex);
+    <span class="cm">// Critical section: check both resources</span>
+    <span class="kw">if</span> (chopstick[i] == <span class="num">1</span> && chopstick[(i+<span class="num">1</span>)%<span class="num">5</span>] == <span class="num">1</span>) {
+        chopstick[i] = <span class="num">0</span>;
+        chopstick[(i+<span class="num">1</span>)%<span class="num">5</span>] = <span class="num">0</span>;
+        <span class="fn">signal</span>(mutex);
+        <span class="cm">// ... eat ...</span>
+        chopstick[i] = <span class="num">1</span>;
+        chopstick[(i+<span class="num">1</span>)%<span class="num">5</span>] = <span class="num">1</span>;
+    } <span class="kw">else</span> {
+        <span class="fn">signal</span>(mutex);
+        <span class="cm">// Retry after brief delay</span>
+    }
+} <span class="kw">while</span> (<span class="num">TRUE</span>);</code></pre>
+        </div>
+
+        <p><strong>Advantage:</strong> No hold-and-wait. <strong>Disadvantage:</strong> Busy-waiting or spinning wastes CPU cycles; philosophers may suffer starvation if unlucky with timing.</p>
+
+        <h3>Strategy 3: Resource Ordering (Asymmetric Order)</h3>
+        <p>Break the circular wait by enforcing a <strong>global resource order</strong>. Philosophers with even IDs pick up their right chopstick first; odd-numbered ones pick up their left first:</p>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#febc2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+            <span class="code-block-title">asymmetric_order.c — pseudocode</span>
+          </div>
+          <pre><code><span class="kw">semaphore</span> chopstick[<span class="num">5</span>] = {<span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>};
+
+<span class="cm">// Philosopher i</span>
+<span class="kw">do</span> {
+    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>) {
+        <span class="cm">// Even philosopher: pick RIGHT first, then LEFT</span>
+        <span class="fn">wait</span>(chopstick[(i+<span class="num">1</span>)%<span class="num">5</span>]);
+        <span class="fn">wait</span>(chopstick[i]);
+    } <span class="kw">else</span> {
+        <span class="cm">// Odd philosopher: pick LEFT first, then RIGHT</span>
+        <span class="fn">wait</span>(chopstick[i]);
+        <span class="fn">wait</span>(chopstick[(i+<span class="num">1</span>)%<span class="num">5</span>]);
+    }
+
+    <span class="cm">// ... eat ...</span>
+
+    <span class="fn">signal</span>(chopstick[i]);
+    <span class="fn">signal</span>(chopstick[(i+<span class="num">1</span>)%<span class="num">5</span>]);
+
+} <span class="kw">while</span> (<span class="num">TRUE</span>);</code></pre>
+        </div>
+
+        <p><strong>Advantage:</strong> Simple, no busy-waiting, no artificial concurrency limits. <strong>Implementation:</strong> This is the most widely used approach in practice.</p>
+
+        <div class="callout">
+          <div class="callout-label info">Why It Works</div>
+          <p>With asymmetric ordering, there is no circular dependency. Philosopher 0 (even) waits for chopsticks in order [right, left], while Philosopher 1 (odd) waits for [left, right]. The global order imposed prevents cycles, ensuring at least one philosopher can always make progress.</p>
+        </div>
+
+        <h3>Strategy 4: Monitor-Based Solution</h3>
+        <p>The most elegant solution uses a <strong>monitor</strong> — a high-level synchronization construct combining a mutex and condition variables. Each philosopher's state (thinking, hungry, eating) is tracked, and they eat only when both neighbors are not eating:</p>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#febc2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+            <span class="code-block-title">monitor_solution.c — pseudocode</span>
+          </div>
+          <pre><code><span class="kw">monitor</span> DiningPhilosophers {
+    <span class="kw">enum</span> State {THINKING, HUNGRY, EATING};
+    State state[<span class="num">5</span>] = {THINKING, THINKING, THINKING, THINKING, THINKING};
+    <span class="kw">condition</span> self[<span class="num">5</span>];
+
+    <span class="kw">void</span> <span class="fn">pickup</span>(<span class="kw">int</span> i) {
+        state[i] = HUNGRY;
+        <span class="kw">while</span> (state[(i+<span class="num">4</span>)%<span class="num">5</span>] == EATING || state[(i+<span class="num">1</span>)%<span class="num">5</span>] == EATING) {
+            self[i].<span class="fn">wait</span>();  <span class="cm">// Wait until neighbors finish</span>
+        }
+        state[i] = EATING;
+    }
+
+    <span class="kw">void</span> <span class="fn">putdown</span>(<span class="kw">int</span> i) {
+        state[i] = THINKING;
+        self[(i+<span class="num">4</span>)%<span class="num">5</span>].<span class="fn">signal</span>();  <span class="cm">// Wake left neighbor</span>
+        self[(i+<span class="num">1</span>)%<span class="num">5</span>].<span class="fn">signal</span>();  <span class="cm">// Wake right neighbor</span>
+    }
+}
+
+<span class="cm">// Philosopher process</span>
+<span class="kw">do</span> {
+    DiningPhilosophers.<span class="fn">pickup</span>(i);
+    <span class="cm">// ... eat ...</span>
+    DiningPhilosophers.<span class="fn">putdown</span>(i);
+    <span class="cm">// ... think ...</span>
+} <span class="kw">while</span> (<span class="num">TRUE</span>);</code></pre>
+        </div>
+
+        <p><strong>Advantage:</strong> Guarantees deadlock-freedom and near-starvation-freedom when combined with fairness policies (e.g., FIFO waiting queues). <strong>Cleaner abstraction:</strong> No need to reason about semaphore ordering.</p>
+
+        <div class="callout good">
+          <div class="callout-label good">✓ Recommended Approach</div>
+          <p>The monitor-based solution is the gold standard in modern OS design. Languages like Java use monitors (synchronized blocks + wait/notify) and modern systems employ higher-level primitives like condition variables in pthread mutexes.</p>
+        </div>
+
+        <h3>Comparison Summary</h3>
+        <p>Each strategy trades off simplicity, efficiency, and fairness:</p>
+        <ul>
+          <li><strong>Concurrency Limiting:</strong> Simple but inefficient.</li>
+          <li><strong>Atomic Acquisition:</strong> Fair but prone to busy-waiting and starvation.</li>
+          <li><strong>Resource Ordering:</strong> Efficient and deadlock-free; most practical for low-level implementation.</li>
+          <li><strong>Monitor-Based:</strong> Elegant and fair; preferred in higher-level languages and modern OS kernels.</li>
+        </ul>
+      </section>
+
+    </main>
   </div>
+
+  <!-- FOOTER -->
+  <footer class="os-footer">
+    <div class="footer-left">OS Explorer · Operating Systems Laboratory Project</div>
+    <div class="footer-right">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">Team</a>
+    </div>
+  </footer>
+
+</div>
 </body>
 </html>

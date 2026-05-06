@@ -1,62 +1,94 @@
 <!doctype html>
-
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Producer-Consumer simulation</title>
   <meta name="description" content="Producer-Consumer problem visualization">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-  <div class="container-2">
-  <div style="display: flex;">  
-  
-  <div class="container">
-    <h1>Producer-Consumer Problem</h1>
-    <table>
-      <tr>
-        <td>Producing delay min</td>
-        <td><input id="prod-delay-min" type="number" min="200" step="100" class="form-control form-control-sm"></td>
-      </tr>
+<div class="container">
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <span class="logo">OS <span>EXPLORER</span></span>
+    </div>
+    <nav>
+      <a href="../../index.html">Home</a>
+      <a href="../../about.html">About</a>
+      <a href="wiki.html">Docs</a>
+    </nav>
+  </header>
 
-      <tr>
-        <td>Producing delay max</td>
-        <td><input id="prod-delay-max" type="number" min="200" step="100" class="form-control form-control-sm"></td>
-      </tr>
+  <hr class="divider">
 
-      <tr>
-        <td>Consuming delay min</td>
-        <td><input id="cons-delay-min" type="number" min="200" step="100" class="form-control form-control-sm"></td>
-      </tr>
+  <!-- MAIN CONTENT -->
+  <section class="main-content">
+    <div class="content-panel">
+      <h1>PRODUCER<br><span style="color: var(--accent);">CONSUMER</span></h1>
+      
+      <div class="settings-card">
+        <table>
+          <tr>
+            <td>Producing delay min</td>
+            <td><input id="prod-delay-min" type="number" min="200" step="100"></td>
+          </tr>
+          <tr>
+            <td>Producing delay max</td>
+            <td><input id="prod-delay-max" type="number" min="200" step="100"></td>
+          </tr>
+          <tr>
+            <td>Consuming delay min</td>
+            <td><input id="cons-delay-min" type="number" min="200" step="100"></td>
+          </tr>
+          <tr>
+            <td>Consuming delay max</td>
+            <td><input id="cons-delay-max" type="number" min="200" step="100"></td>
+          </tr>
+          <tr>
+            <td>Produce chunks</td>
+            <td><input id="chunks-count" type="number" min="1"></td>
+          </tr>
+          <tr>
+            <td>Queue capacity</td>
+            <td><input id="queue-cap" type="number" min="1" max="6"></td>
+          </tr>
+        </table>
 
-      <tr>
-        <td>Consuming delay max</td>
-        <td><input id="cons-delay-max" type="number" min="200" step="100" class="form-control form-control-sm"></td>
-      </tr>
+        <div class="button-group">
+          <button id="options-apply" class="btn btn-primary">Apply</button>
+          <span class="preset-label">Presets:</span>
+          <a href="javascript: void 0" id="preset-fpsc" class="btn-preset">Fast→Slow</a>
+          <a href="javascript: void 0" id="preset-spfc" class="btn-preset">Slow→Fast</a>
+          <a href="javascript: void 0" id="preset-random" class="btn-preset">Random</a>
+        </div>
+      </div>
+    </div>
 
-      <tr>
-        <td>Produce chunks</td>
-        <td><input id="chunks-count" type="number" min="1" class="form-control form-control-sm"></td>
-      </tr>
+    <div class="canvas-panel">
+      <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+  </section>
 
-      <tr>
-        <td>Queue capacity</td>
-        <td><input id="queue-cap" type="number" min="1" max="6" class="form-control form-control-sm"></td>
-      </tr>
-    </table>
+  <hr class="divider">
 
-    <button id="options-apply" class="btn btn-primary">Apply</button> ...or use preset: <a href="javascript: void 0" id="preset-fpsc" class="btn-preset">Fast&rarr;Slow</a> / <a href="javascript: void 0" id="preset-spfc" class="btn-preset">Slow&rarr;Fast</a> / <a href="javascript: void 0" id="preset-random" class="btn-preset">Random</a>
-  </div>
-
-  <div id="canvas-container" style="width: 50%; float: right;">
-    <canvas id="canvas"></canvas>
-  </div>
-  </div>
-  </div>
+  <footer>
+    <div class="footer-left">OS Explorer · Producer-Consumer Simulation</div>
+    <div class="footer-right">
+      <a href="../../index.html">Home</a>
+      <a href="wiki.html">Documentation</a>
+    </div>
+  </footer>
+</div>
 
   <script src="model.js"></script>
   <script src="page.js"></script>

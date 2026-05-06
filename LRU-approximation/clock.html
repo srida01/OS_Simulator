@@ -1,31 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <title>Clock Algorithm - OS Visualizer</title>
 
     <style>
+        :root {
+            font-family: 'IBM Plex Mono', monospace;
+            font-feature-settings: 'liga' 1, 'calt' 1;
+            --bg: #0d1017;
+            --surface: #111520;
+            --surface-strong: #161b27;
+            --card: #111520;
+            --card-strong: #161b27;
+            --text: #eef2f7;
+            --text-soft: #8fa4bc;
+            --text-muted: #8fa4bc;
+            --accent: #60b8ff;
+            --accent-strong: #60b8ff;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --border: rgba(82, 170, 255, 0.18);
+            --border-bright: rgba(82, 170, 255, 0.45);
+            --mono: 'IBM Plex Mono', monospace;
+            --sans: 'IBM Plex Sans', sans-serif;
+            --display: 'Bebas Neue', sans-serif;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        
+
         body {
-            font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, rgba(173, 150, 220, 0.9), rgba(75, 192, 192, 0.9));
-            background-size: cover;
-            background-attachment: fixed;
-            color: #ffffff;
+            font-family: var(--mono);
+            background: var(--bg);
+            color: var(--text);
             position: relative;
             overflow-x: hidden;
         }
-        
+
         body::before {
             content: "";
             position: fixed;
@@ -33,329 +55,428 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><pattern id="dots" patternUnits="userSpaceOnUse" width="30" height="30"><circle cx="5" cy="5" r="1.5" fill="rgba(255, 255, 255, 0.2)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23dots)"/></svg>');
+            background-image:
+                linear-gradient(rgba(96, 184, 255, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(96, 184, 255, 0.06) 1px, transparent 1px);
+            background-size: 40px 40px;
             pointer-events: none;
-            z-index: -1;
+            z-index: 0;
         }
-        
+
         nav {
-            background-color: rgba(98, 0, 234, 0.95);
-            height: 80px;
+            max-width: 1280px;
+            margin: 0 auto;
+            background-color: transparent;
+            min-height: 85px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+            position: relative;
             z-index: 1000;
-            padding: 0 5%;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: none;
+            backdrop-filter: none;
         }
-        
+
         .logo {
-            font-size: 28px;
-            font-weight: 700;
-            color: #ffffff;
+            font-family: var(--display);
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text);
             text-decoration: none;
             transition: all 0.3s ease;
-            padding: 10px 20px;
-            border-radius: 8px;
-            letter-spacing: 1px;
+            padding: 0;
+            border-radius: 0;
+            letter-spacing: 2px;
         }
-        
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border: 1.5px solid var(--accent);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
         .logo:hover {
-            background-color: rgba(133, 2, 247, 0.8);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background-color: transparent;
+            color: var(--accent);
+            transform: none;
+            box-shadow: none;
         }
-        
+
         .nav-links {
             list-style: none;
             display: flex;
+            gap: 8px;
             margin: 0;
             padding: 0;
         }
-        
+
         .nav-links li {
             margin: 0 5px;
         }
-        
+
         .nav-links a {
-            color: #ffffff;
+            color: var(--text-soft);
             text-decoration: none;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 500;
             text-transform: uppercase;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            letter-spacing: 0.1em;
         }
-        
+
         .nav-links a:hover {
-            background-color: rgba(133, 2, 247, 0.8);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background-color: rgba(96, 184, 255, 0.05);
+            color: var(--accent);
+            border-color: var(--border-bright);
+            transform: none;
+            box-shadow: none;
         }
-        
+
         main {
-            padding-top: 120px;
+            position: relative;
+            z-index: 1;
+            padding-top: 56px;
             padding-bottom: 60px;
             min-height: 100vh;
         }
-        
+
         .container {
             width: 90%;
             max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 40px;
-            background-color: rgba(15, 15, 15, 0.8);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 40px;
+            padding: 0 0 12px;
+            background-color: transparent;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+            backdrop-filter: none;
         }
-        
+
         .header h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #6200ea;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-family: var(--display);
+            font-size: 72px;
+            line-height: 0.95;
+            font-weight: 400;
+            letter-spacing: 3px;
+            margin-bottom: 18px;
+            color: var(--text);
+            text-shadow: none;
         }
-        
+
         .header p {
-            font-size: 1.3rem;
+            font-family: var(--sans);
+            font-size: 14px;
             line-height: 1.6;
-            color: #d1c4e9;
+            color: var(--text-soft);
             max-width: 800px;
             margin: 0 auto;
         }
-        
+
         .overview-section {
-            background-color: rgba(209, 196, 233, 0.9);
-            color: #000000;
+            background-color: var(--card);
+            color: var(--text);
             padding: 30px;
-            border-radius: 16px;
+            border-radius: 12px;
             margin-bottom: 30px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 24px var(--shadow);
+            backdrop-filter: none;
         }
-        
+
         .overview-section h2 {
-            color: #6200ea;
+            color: var(--accent);
             margin-bottom: 20px;
-            font-size: 2.2rem;
+            font-family: var(--display);
+            font-size: 38px;
+            letter-spacing: 2px;
+            font-weight: 400;
         }
-        
+
         .overview-section h3 {
-            color: #8502f7;
+            color: var(--accent-strong);
             margin: 20px 0 10px;
-            font-size: 1.8rem;
+            font-size: 18px;
+            letter-spacing: 0.04em;
         }
-        
-        .overview-section p, .overview-section li {
-            font-size: 1.1rem;
+
+        .overview-section p,
+        .overview-section li {
+            font-family: var(--sans);
+            font-size: 14px;
             line-height: 1.6;
             margin-bottom: 10px;
         }
-        
+
         .overview-section ol {
             padding-left: 20px;
             margin-bottom: 20px;
         }
-        
+
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 30px;
             margin-bottom: 30px;
         }
-        
+
         .feature-card {
-            background-color: rgba(209, 196, 233, 0.9);
-            color: #000000;
+            background-color: var(--card);
+            color: var(--text);
             padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 24px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: none;
         }
-        
+
         .feature-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
         }
-        
+
         .feature-card h3 {
-            color: #6200ea;
+            color: var(--accent);
             margin-bottom: 15px;
-            font-size: 1.8rem;
+            font-family: var(--display);
+            font-size: 30px;
+            letter-spacing: 1.5px;
+            font-weight: 400;
         }
-        
+
+        .feature-card li {
+            font-family: var(--sans);
+            color: var(--text-soft);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
         .simulator-section {
-            background-color: rgba(15, 15, 15, 0.8);
+            background-color: var(--surface);
             padding: 30px;
-            border-radius: 16px;
+            border-radius: 12px;
             margin-bottom: 30px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 24px var(--shadow);
+            backdrop-filter: none;
         }
-        
+
         .simulator-section h2 {
-            color: #6200ea;
+            color: var(--accent);
             margin-bottom: 25px;
-            font-size: 2.2rem;
+            font-family: var(--display);
+            font-size: 38px;
+            letter-spacing: 2px;
+            font-weight: 400;
             text-align: center;
         }
-        
+
         .input-group {
             margin-bottom: 20px;
         }
-        
+
         label {
             display: block;
             margin-bottom: 10px;
-            font-size: 1.2rem;
-            color: #d1c4e9;
+            font-size: 12px;
+            color: var(--text-soft);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
-        
-        input[type="number"], input[type="text"] {
+
+        input[type="number"],
+        input[type="text"] {
             width: 100%;
             padding: 12px 15px;
             font-size: 1.1rem;
-            border: none;
+            border: 1px solid var(--border);
             border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(17, 21, 32, 0.92);
+            color: var(--text);
             margin-bottom: 15px;
-            font-family: 'Outfit', sans-serif;
+            font-family: var(--mono);
+            outline: none;
         }
-        
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(96, 184, 255, 0.12);
+        }
+
+        input::placeholder {
+            color: rgba(220, 220, 220, 0.7);
+        }
+
         button {
-            background-color: #6200ea;
-            color: white;
-            border: none;
+            background-color: var(--accent);
+            color: #081018;
+            border: 1px solid var(--border-bright);
             padding: 12px 25px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s ease;
+            font-family: var(--mono);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.1em;
             margin-bottom: 20px;
         }
-        
+
         button:hover {
-            background-color: #8502f7;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background-color: var(--accent-strong);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(96, 184, 255, 0.18);
         }
-        
+
         #frame-container {
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
             margin: 20px 0;
         }
-        
+
         .frame {
-            background-color: rgba(209, 196, 233, 0.9);
-            color: #000000;
+            background-color: var(--card-strong);
+            color: var(--text);
             padding: 15px 20px;
             border-radius: 10px;
             min-width: 120px;
             text-align: center;
             font-weight: 500;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 24px var(--shadow);
+            font-family: var(--mono);
         }
-        
+
         #replacement-log {
-            background-color: rgba(209, 196, 233, 0.9);
-            color: #000000;
+            background-color: rgba(17, 21, 32, 0.92);
+            color: var(--text-soft);
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
             max-height: 300px;
             overflow-y: auto;
+            border: 1px solid var(--border);
         }
-        
+
         #replacement-log p {
             margin-bottom: 10px;
             font-size: 1.1rem;
             line-height: 1.5;
             padding: 8px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
         }
-        
+
         .floating-shape {
-            position: absolute;
-            opacity: 0.4;
-            z-index: -1;
+            display: none;
         }
-        
+
         .shape1 {
             top: 15%;
             left: 10%;
             width: 150px;
             height: 150px;
             border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-            background-color: rgba(133, 2, 247, 0.6);
+            background-color: rgba(0, 224, 255, 0.16);
             animation: float 12s ease-in-out infinite;
         }
-        
+
         .shape2 {
             bottom: 20%;
             right: 15%;
             width: 180px;
             height: 180px;
             border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-            background-color: rgba(75, 192, 192, 0.6);
+            background-color: rgba(0, 184, 212, 0.16);
             animation: float 15s ease-in-out infinite;
         }
-        
+
         @keyframes float {
             0% {
                 transform: translateY(0) rotate(0deg);
             }
+
             50% {
                 transform: translateY(-20px) rotate(10deg);
             }
+
             100% {
                 transform: translateY(0) rotate(0deg);
             }
         }
-        
+
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 2.5rem;
+                font-size: 52px;
             }
-            
+
             .features-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .nav-links a {
                 font-size: 16px;
                 padding: 8px 15px;
             }
-            
+
             .logo {
                 font-size: 24px;
+            }
+
+            nav {
+                padding: 20px 16px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="floating-shape shape1"></div>
     <div class="floating-shape shape2"></div>
 
     <nav>
-        <a class="logo" href="../index.html">OS VISUALIZER</a>
+        <div class="logo-wrap">
+            <div class="logo-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+            </div>
+            <a class="logo" href="../index.html">OS <span>EXPLORER</span></a>
+        </div>
         <ul class="nav-links">
             <li><a href="../index.html">Home</a></li>
             <li><a href="../about.html">About</a></li>
-            <li><a href="lru-approx.html">Back to LRU Approx</a></li>
         </ul>
     </nav>
 
@@ -363,61 +484,77 @@
         <div class="container">
             <div class="header">
                 <h1>Clock Algorithm</h1>
-                <p>A visualization of the Clock Algorithm (Second Chance Algorithm) used for page replacement in operating systems.</p>
+                <p>A visualization of the Clock Algorithm (Second Chance Algorithm) used for page replacement in
+                    operating systems.</p>
             </div>
-            
+
             <div class="overview-section">
                 <h2>Clock Algorithm Overview</h2>
                 <p>
-                    The Clock Algorithm, also known as the Second Chance Algorithm, is a page replacement algorithm used in operating systems for managing memory.
+                    The Clock Algorithm, also known as the Second Chance Algorithm, is a page replacement algorithm used
+                    in operating systems for managing memory.
                 </p>
-            
+
                 <h3>How It Works:</h3>
                 <ol>
                     <li>The Clock Algorithm maintains a circular list (or "clock") of pages in memory.</li>
-                    <li>Each page in memory is associated with a reference bit, which indicates whether the page has been accessed since it was last considered for replacement.</li>
-                    <li>When a page needs to be replaced, the Clock Algorithm scans through the circular list of pages until it finds a page with a reference bit of 0 (indicating it has not been recently accessed).</li>
-                    <li>If all pages have their reference bits set to 1, indicating recent access, the algorithm gives the page a "second chance" by resetting its reference bit to 0 and moving to the next page in the clock.</li>
+                    <li>Each page in memory is associated with a reference bit, which indicates whether the page has
+                        been accessed since it was last considered for replacement.</li>
+                    <li>When a page needs to be replaced, the Clock Algorithm scans through the circular list of pages
+                        until it finds a page with a reference bit of 0 (indicating it has not been recently accessed).
+                    </li>
+                    <li>If all pages have their reference bits set to 1, indicating recent access, the algorithm gives
+                        the page a "second chance" by resetting its reference bit to 0 and moving to the next page in
+                        the clock.</li>
                     <li>This process continues until a page is found that can be replaced.</li>
                 </ol>
             </div>
-            
+
             <div class="features-grid">
                 <div class="feature-card">
                     <h3>Advantages</h3>
                     <ol>
-                        <li>Simple Implementation: The Clock Algorithm is relatively easy to implement compared to some other page replacement algorithms like LRU (Least Recently Used).</li>
-                        <li>Low Overhead: It requires minimal additional memory overhead, as it only requires a single reference bit per page.</li>
+                        <li>Better than FIFO: Unlike FIFO, the Clock Algorithm avoids immediately replacing recently
+                            used pages by giving them a second chance.</li>
+                        <li>Simple Implementation: The algorithm is relatively easy to implement compared to more
+                            complex algorithms like LRU.</li>
+                        <li>Efficient Approximation of LRU: Although not exactly LRU, it approximates LRU behavior with
+                            much lower complexity.</li>
                     </ol>
                 </div>
-                
+
                 <div class="feature-card">
                     <h3>Disadvantages</h3>
                     <ol>
-                        <li>Not Optimal: The Clock Algorithm may not always make the optimal replacement decision, as it does not consider the frequency or recency of page accesses beyond a binary "referenced" or "not referenced" status.</li>
-                        <li>Potential for Thrashing: In situations where the number of frames is insufficient to hold all the necessary pages, the Clock Algorithm may not effectively prioritize pages for retention, potentially leading to thrashing.</li>
-                        <li>Starvation: Pages with a high reference frequency may continue to be given a "second chance" indefinitely, leading to potential starvation for other pages waiting to be brought into memory.</li>
+                        <li>More Overhead than FIFO: The algorithm requires maintaining reference bits for pages, making
+                            it slightly more complex than FIFO.</li>
+                        <li>Not as Accurate as LRU: The Clock Algorithm does not maintain complete page usage history,
+                            so replacement decisions may not always be optimal.</li>
+                        <li>Performance Depends on Access Patterns: Its efficiency varies depending on how frequently
+                            and recently pages are accessed.</li>
+                        <li>May Replace Important Pages: In some cases, pages that are still useful may eventually be
+                            replaced after losing their second chance.</li>
                     </ol>
                 </div>
             </div>
-            
+
             <div class="simulator-section">
                 <h2>Clock Algorithm Simulator</h2>
-                
+
                 <div class="input-group">
                     <label for="frame-count">Enter the number of frames in memory:</label>
                     <input type="number" id="frame-count">
                     <button onclick="createFrames()">Create Frames</button>
                 </div>
-                
+
                 <div id="frame-container"></div>
-                
+
                 <div class="input-group">
                     <label for="page-reference">Enter the sequence of page references (comma-separated numbers):</label>
                     <input type="text" id="page-reference" placeholder="Example: 1,2,3,4,1,2,5,1,2,3,4,5">
                     <button onclick="replacePage()">Simulate Page Replacement</button>
                 </div>
-                
+
                 <div id="replacement-log"></div>
             </div>
         </div>
@@ -461,7 +598,7 @@
             // Iterate through page reference sequence
             for (var i = 0; i < sequence.length; i++) {
                 var page_id = sequence[i];
-                
+
                 // Check if page is already in memory
                 var pageFound = false;
                 for (var j = 0; j < memoryFrames.length; j++) {
@@ -478,7 +615,7 @@
                 if (!pageFound) {
                     pageMiss++;
                     var replacementDone = false;
-                    
+
                     // Find a frame with referenced bit 0 or set referenced bits to 0 as we scan
                     while (!replacementDone) {
                         if (memoryFrames[pointer].page_id === null) {
@@ -501,9 +638,9 @@
                             memoryFrames[pointer].referenced = false;
                             replacementLog.innerHTML += "<p>Frame " + pointer + " contains recently used page " + memoryFrames[pointer].page_id + ". Giving second chance.</p>";
                         }
-                        
+
                         pointer = (pointer + 1) % memoryFrames.length;
-                        
+
                         // If we've checked all frames and none are available, start replacing frames with reference bit 0
                         if (pointer === 0 && !replacementDone) {
                             // This will exit on the next iteration as we've reset reference bits
@@ -519,4 +656,5 @@
         }
     </script>
 </body>
+
 </html>

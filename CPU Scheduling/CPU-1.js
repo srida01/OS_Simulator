@@ -12,7 +12,7 @@ function addProcess(type) {
   const pid     = document.getElementById(type + 'Pid').value;
   const arrival = parseInt(document.getElementById(type + 'Arrival').value);
   const burst   = parseInt(document.getElementById(type + 'Burst').value);
-  if (!pid) return;
+  if (!pid || Number.isNaN(arrival) || Number.isNaN(burst) || burst <= 0) return;
   const arr = type === 'fcfs' ? fcfsProcesses : rrProcesses;
   arr.push({ pid, arrival, burst });
   displayProcesses(type);
@@ -29,6 +29,7 @@ function runFCFS(e) {
   e.preventDefault();
   let time=0, wtSum=0, tatSum=0, results=[];
   const procs = [...fcfsProcesses].sort((a,b)=>a.arrival-b.arrival);
+  if (!procs.length) return;
   procs.forEach(p=>{
     if(time < p.arrival) time = p.arrival;
     const start=time, end=start+p.burst;
@@ -46,9 +47,11 @@ function runFCFS(e) {
 function runRR(e) {
   e.preventDefault();
   const quantum = parseInt(document.getElementById('rrQuantum').value);
-  let time=0, wtSum=0, tatSum=0, done=0, idx=0, queue=[], results=[];
-  // clone with remaining
-  const procs = rrProcesses.map(p=>({ ...p, remaining:p.burst, arrival:p.arrival }));
+  if (!rrProcesses.length || Number.isNaN(quantum) || quantum <= 0) return;
+  let time=0, wtSum=0, tatSum=0, done=0, idx=0, queue=[], timeline=[], results=[];
+  const procs = rrProcesses
+    .map(p=>({ ...p, remaining:p.burst, arrival:p.arrival }))
+    .sort((a,b)=>a.arrival-b.arrival);
   while(done < procs.length) {
     while(idx<procs.length && procs[idx].arrival<=time) queue.push(procs[idx++]);
     if(!queue.length){ time++; continue; }
@@ -56,11 +59,11 @@ function runRR(e) {
     const exec = Math.min(cur.remaining, quantum);
     const start=time, end=start+exec;
     cur.remaining -= exec;
-    // first time start?
-    if(cur.remaining === p.burst) cur.start=start;
-    // if finished
+    timeline.push({ pid: cur.pid, start, end });
+    time=end;
+    while(idx<procs.length && procs[idx].arrival<=time) queue.push(procs[idx++]);
     if(cur.remaining===0){
-      const wt = end - cur.arrival - p.burst;
+      const wt = end - cur.arrival - cur.burst;
       const tat= end - cur.arrival;
       wtSum+=wt; tatSum+=tat;
       results.push({ pid:cur.pid, start, end, wt, tat });
@@ -68,9 +71,8 @@ function runRR(e) {
     } else {
       queue.push(cur);
     }
-    time=end;
   }
-  drawGantt(results, 'rrGanttChart');
+  drawGantt(timeline, 'rrGanttChart');
   drawResult(results, 'rrResultTable');
   document.getElementById('rrAvgWT').textContent = (wtSum/procs.length).toFixed(2);
   document.getElementById('rrAvgTAT').textContent = (tatSum/procs.length).toFixed(2);

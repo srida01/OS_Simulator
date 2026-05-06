@@ -1,27 +1,56 @@
 document.addEventListener('DOMContentLoaded', function () {
     const graph = document.getElementById('rag-graph');
     const statusContent = document.getElementById('status-content');
+    const statusDot = document.getElementById('status-dot');
     const addProcessBtn = document.getElementById('add-process-btn');
     const addResourceBtn = document.getElementById('add-resource-btn');
     const addEdgeBtn = document.getElementById('add-edge-btn');
+    const undoEdgeBtn = document.getElementById('undo-edge-btn');
     const detectDeadlockBtn = document.getElementById('detect-deadlock-btn');
     const resetBtn = document.getElementById('reset-btn');
     const fromSelect = document.getElementById('from-select');
     const toSelect = document.getElementById('to-select');
 
-    let processCount = 0;
-    let resourceCount = 0;
-    let nodes = {};
-    let edges = [];
-    let draggingNode = null;
-    let offsetX = 0;
-    let offsetY = 0;
+    const NODE_SIZE = 52;
+    const EDGE_COLOR      = '#3b8eea';
+    const HIGHLIGHT_COLOR = '#e3b341';
+
+    let processCount = 0, resourceCount = 0;
+    let nodes = {}, edges = [];
+    let draggingNode = null, offsetX = 0, offsetY = 0;
+
+    // ── SVG overlay ──
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible;';
+
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+    function createMarker(id, color) {
+        const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+        marker.setAttribute('id', id);
+        marker.setAttribute('markerWidth', '10');
+        marker.setAttribute('markerHeight', '7');
+        marker.setAttribute('refX', '9');
+        marker.setAttribute('refY', '3.5');
+        marker.setAttribute('orient', 'auto');
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        poly.setAttribute('points', '0 0, 10 3.5, 0 7');
+        poly.setAttribute('fill', color);
+        marker.appendChild(poly);
+        return marker;
+    }
+
+    defs.appendChild(createMarker('arrow-normal', EDGE_COLOR));
+    defs.appendChild(createMarker('arrow-highlight', HIGHLIGHT_COLOR));
+    svg.appendChild(defs);
+    graph.appendChild(svg);
 
     initializeGraph();
 
     addProcessBtn.addEventListener('click', addProcess);
     addResourceBtn.addEventListener('click', addResource);
     addEdgeBtn.addEventListener('click', addEdge);
+    undoEdgeBtn.addEventListener('click', undoEdge);
     detectDeadlockBtn.addEventListener('click', detectDeadlock);
     resetBtn.addEventListener('click', resetGraph);
     graph.addEventListener('mousedown', startDrag);
@@ -30,289 +59,186 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initializeGraph() {
         graph.style.position = 'relative';
-        graph.style.height = '400px';
-        updateStatus("Create a Resource Allocation Graph by adding processes and resources, then connect them with edges.");
+        graph.style.height = '480px';
+        updateStatus("Add processes and resources, then connect them with edges.");
+    }
+
+    function getBorderPoint(node, tx, ty) {
+        const cx = node.x + NODE_SIZE / 2;
+        const cy = node.y + NODE_SIZE / 2;
+        const dx = tx - cx, dy = ty - cy;
+        const r  = NODE_SIZE / 2;
+
+        if (node.type === 'process') {
+            const len = Math.sqrt(dx*dx + dy*dy) || 1;
+            return { x: cx + (dx/len)*r, y: cy + (dy/len)*r };
+        } else {
+            const absDx = Math.abs(dx), absDy = Math.abs(dy);
+            if (absDx === 0 && absDy === 0) return { x: cx, y: cy };
+            const scale = (absDx/r > absDy/r) ? r/absDx : r/absDy;
+            return { x: cx + dx*scale, y: cy + dy*scale };
+        }
     }
 
     function addProcess() {
         processCount++;
-        const processId = 'P' + processCount;
-        const processNode = document.createElement('div');
-        processNode.className = 'node process';
-        processNode.textContent = processId;
-        processNode.setAttribute('data-id', processId);
-        processNode.setAttribute('data-type', 'process');
-
-        const x = Math.floor(Math.random() * (graph.offsetWidth - 100)) + 50;
-        const y = Math.floor(Math.random() * (graph.offsetHeight - 100)) + 50;
-        processNode.style.left = x + 'px';
-        processNode.style.top = y + 'px';
-
-        graph.appendChild(processNode);
-
-        nodes[processId] = {
-            id: processId,
-            type: 'process',
-            element: processNode,
-            x: x,
-            y: y
-        };
-
+        const id = 'P' + processCount;
+        const el = document.createElement('div');
+        el.className = 'node process';
+        el.textContent = id;
+        el.setAttribute('data-id', id);
+        el.setAttribute('data-type', 'process');
+        const x = Math.floor(Math.random() * (graph.offsetWidth  - NODE_SIZE - 40)) + 20;
+        const y = Math.floor(Math.random() * (graph.offsetHeight - NODE_SIZE - 40)) + 20;
+        el.style.left = x + 'px'; el.style.top = y + 'px';
+        graph.appendChild(el);
+        nodes[id] = { id, type: 'process', element: el, x, y };
         updateDropdowns();
-        updateStatus(`Process ${processId} added to the graph.`);
+        updateStatus(`Process ${id} added.`);
     }
 
     function addResource() {
         resourceCount++;
-        const resourceId = 'R' + resourceCount;
-        const resourceNode = document.createElement('div');
-        resourceNode.className = 'node resource';
-        resourceNode.textContent = resourceId;
-        resourceNode.setAttribute('data-id', resourceId);
-        resourceNode.setAttribute('data-type', 'resource');
-
-        const x = Math.floor(Math.random() * (graph.offsetWidth - 100)) + 50;
-        const y = Math.floor(Math.random() * (graph.offsetHeight - 100)) + 50;
-        resourceNode.style.left = x + 'px';
-        resourceNode.style.top = y + 'px';
-
-        graph.appendChild(resourceNode);
-
-        nodes[resourceId] = {
-            id: resourceId,
-            type: 'resource',
-            element: resourceNode,
-            x: x,
-            y: y
-        };
-
+        const id = 'R' + resourceCount;
+        const el = document.createElement('div');
+        el.className = 'node resource';
+        el.textContent = id;
+        el.setAttribute('data-id', id);
+        el.setAttribute('data-type', 'resource');
+        const x = Math.floor(Math.random() * (graph.offsetWidth  - NODE_SIZE - 40)) + 20;
+        const y = Math.floor(Math.random() * (graph.offsetHeight - NODE_SIZE - 40)) + 20;
+        el.style.left = x + 'px'; el.style.top = y + 'px';
+        graph.appendChild(el);
+        nodes[id] = { id, type: 'resource', element: el, x, y };
         updateDropdowns();
-        updateStatus(`Resource ${resourceId} added to the graph.`);
+        updateStatus(`Resource ${id} added.`);
     }
 
     function addEdge() {
-        const fromId = fromSelect.value;
-        const toId = toSelect.value;
-
-        if (!fromId || !toId || fromId === toId) {
-            updateStatus("Invalid edge selection.");
-            return;
-        }
-
-        if (edges.some(edge => edge.from === fromId && edge.to === toId)) {
-            updateStatus("This edge already exists.");
-            return;
-        }
-
-        const fromType = nodes[fromId].type;
-        const toType = nodes[toId].type;
-
-        if (fromType === toType) {
-            updateStatus("Cannot connect nodes of the same type.");
-            return;
-        }
-
+        const fromId = fromSelect.value, toId = toSelect.value;
+        if (!fromId || !toId || fromId === toId) { updateStatus("Invalid edge selection."); return; }
+        if (edges.some(e => e.from === fromId && e.to === toId)) { updateStatus("Edge already exists."); return; }
+        if (nodes[fromId].type === nodes[toId].type) { updateStatus("Cannot connect nodes of the same type."); return; }
         createEdge(fromId, toId);
-        fromSelect.value = "";
-        toSelect.value = "";
-        updateStatus(`Edge created from ${fromId} to ${toId}.`);
+        fromSelect.value = ""; toSelect.value = "";
+        updateStatus(`Edge: ${fromId} → ${toId}`);
     }
 
     function createEdge(fromId, toId) {
-        const fromNode = nodes[fromId];
-        const toNode = nodes[toId];
-        const fromX = fromNode.x + 25;
-        const fromY = fromNode.y + 25;
-        const toX = toNode.x + 25;
-        const toY = toNode.y + 25;
+        const fn = nodes[fromId], tn = nodes[toId];
+        const start = getBorderPoint(fn, tn.x + NODE_SIZE/2, tn.y + NODE_SIZE/2);
+        const end   = getBorderPoint(tn, fn.x + NODE_SIZE/2, fn.y + NODE_SIZE/2);
 
-        const length = Math.sqrt((toX - fromX) ** 2 + (toY - fromY) ** 2);
-        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', start.x); line.setAttribute('y1', start.y);
+        line.setAttribute('x2', end.x);   line.setAttribute('y2', end.y);
+        line.setAttribute('stroke', EDGE_COLOR);
+        line.setAttribute('stroke-width', '2');
+        line.setAttribute('marker-end', 'url(#arrow-normal)');
+        svg.appendChild(line);
 
-        const edge = document.createElement('div');
-        edge.className = 'edge';
-        edge.style.width = length + 'px';
-        edge.style.left = fromX + 'px';
-        edge.style.top = fromY + 'px';
-        edge.style.transform = `rotate(${angle}rad)`;
-
-        const arrow = document.createElement('div');
-        arrow.className = 'arrow';
-        arrow.style.left = (length - 5) + 'px';
-
-        edge.appendChild(arrow);
-        graph.appendChild(edge);
-
-        edges.push({
-            from: fromId,
-            to: toId,
-            element: edge,
-            arrow: arrow,
-            fromX: fromX,
-            fromY: fromY,
-            toX: toX,
-            toY: toY
-        });
+        edges.push({ from: fromId, to: toId, line });
     }
 
     function updateEdges() {
         edges.forEach(edge => {
-            const fromNode = nodes[edge.from];
-            const toNode = nodes[edge.to];
-
-            const fromX = fromNode.x + 25;
-            const fromY = fromNode.y + 25;
-            const toX = toNode.x + 25;
-            const toY = toNode.y + 25;
-
-            const length = Math.sqrt((toX - fromX) ** 2 + (toY - fromY) ** 2);
-            const angle = Math.atan2(toY - fromY, toX - fromX);
-
-            edge.element.style.width = length + 'px';
-            edge.element.style.left = fromX + 'px';
-            edge.element.style.top = fromY + 'px';
-            edge.element.style.transform = `rotate(${angle}rad)`;
-            edge.arrow.style.left = (length - 5) + 'px';
+            const fn = nodes[edge.from], tn = nodes[edge.to];
+            const start = getBorderPoint(fn, tn.x + NODE_SIZE/2, tn.y + NODE_SIZE/2);
+            const end   = getBorderPoint(tn, fn.x + NODE_SIZE/2, fn.y + NODE_SIZE/2);
+            edge.line.setAttribute('x1', start.x); edge.line.setAttribute('y1', start.y);
+            edge.line.setAttribute('x2', end.x);   edge.line.setAttribute('y2', end.y);
         });
     }
 
     function detectDeadlock() {
         resetHighlighting();
-        const adjacencyList = {};
-        const processToResource = {};
-        const resourceToProcesses = {};
-
-        Object.keys(nodes).forEach(nodeId => {
-            if (nodes[nodeId].type === 'process') {
-                adjacencyList[nodeId] = [];
-            }
+        const adj = {}, p2r = {}, r2p = {};
+        Object.keys(nodes).forEach(id => { if (nodes[id].type === 'process') adj[id] = []; });
+        edges.forEach(e => {
+            if (nodes[e.from].type === 'process') { (p2r[e.from] = p2r[e.from]||[]).push(e.to); }
+            else                                   { (r2p[e.from] = r2p[e.from]||[]).push(e.to); }
         });
+        for (const p in p2r) p2r[p].forEach(r => (r2p[r]||[]).forEach(hp => adj[p].push(hp)));
 
-        edges.forEach(edge => {
-            const from = edge.from;
-            const to = edge.to;
-            const fromType = nodes[from].type;
-            const toType = nodes[to].type;
-
-            if (fromType === 'process' && toType === 'resource') {
-                processToResource[from] = processToResource[from] || [];
-                processToResource[from].push(to);
-            } else if (fromType === 'resource' && toType === 'process') {
-                resourceToProcesses[from] = resourceToProcesses[from] || [];
-                resourceToProcesses[from].push(to);
-            }
-        });
-
-        for (const process in processToResource) {
-            processToResource[process].forEach(resource => {
-                if (resourceToProcesses[resource]) {
-                    resourceToProcesses[resource].forEach(holdingProcess => {
-                        adjacencyList[process].push(holdingProcess);
-                    });
-                }
-            });
-        }
-
-        const visited = {};
-        const recStack = {};
+        const visited = {}, recStack = {};
         let cycleNodes = [];
 
         function dfs(node, path) {
-            if (recStack[node]) {
-                const cycleStart = path.indexOf(node);
-                cycleNodes = path.slice(cycleStart);
-                return true;
-            }
+            if (recStack[node]) { cycleNodes = path.slice(path.indexOf(node)); return true; }
             if (visited[node]) return false;
-
-            visited[node] = true;
-            recStack[node] = true;
+            visited[node] = recStack[node] = true;
             path.push(node);
-
-            for (const neighbor of adjacencyList[node]) {
-                if (dfs(neighbor, path)) return true;
-            }
-
-            recStack[node] = false;
-            path.pop();
-            return false;
+            for (const nb of adj[node]) { if (dfs(nb, path)) return true; }
+            recStack[node] = false; path.pop(); return false;
         }
 
-        let cycleDetected = false;
-        for (const process in adjacencyList) {
-            if (!visited[process] && dfs(process, [])) {
-                cycleDetected = true;
-                break;
-            }
-        }
+        let found = false;
+        for (const p in adj) { if (!visited[p] && dfs(p, [])) { found = true; break; } }
 
-        if (cycleDetected) {
+        if (found) {
             cycleNodes.forEach(id => nodes[id].element.classList.add('highlight'));
-
             for (let i = 0; i < cycleNodes.length; i++) {
-                const from = cycleNodes[i];
-                const to = cycleNodes[(i + 1) % cycleNodes.length];
-                processToResource[from]?.forEach(resource => {
-                    if (resourceToProcesses[resource]?.includes(to)) {
-                        highlightEdge(from, resource);
-                        highlightEdge(resource, to);
-                        nodes[resource].element.classList.add('highlight');
+                const from = cycleNodes[i], to = cycleNodes[(i+1)%cycleNodes.length];
+                (p2r[from]||[]).forEach(r => {
+                    if ((r2p[r]||[]).includes(to)) {
+                        highlightEdge(from, r); highlightEdge(r, to);
+                        nodes[r].element.classList.add('highlight');
                     }
                 });
             }
-
-            updateStatus(`Deadlock detected among: ${cycleNodes.join(', ')}`);
+            if(statusDot){statusDot.style.background='#f85149';statusDot.style.boxShadow='0 0 8px #f85149';}
+            updateStatus(`⚠ Deadlock detected: ${cycleNodes.join(' → ')}`);
         } else {
-            updateStatus("No deadlocks detected.");
+            if(statusDot){statusDot.style.background='#3fb950';statusDot.style.boxShadow='0 0 6px #3fb950';}
+            updateStatus("✓ No deadlocks detected. System is safe.");
         }
     }
 
     function highlightEdge(fromId, toId) {
         const edge = edges.find(e => e.from === fromId && e.to === toId);
         if (edge) {
-            edge.element.style.backgroundColor = '#ffeb3b';
-            edge.element.style.height = '3px';
-            edge.arrow.style.borderBottomColor = '#ffeb3b';
+            edge.line.setAttribute('stroke', HIGHLIGHT_COLOR);
+            edge.line.setAttribute('stroke-width', '3');
+            edge.line.setAttribute('marker-end', 'url(#arrow-highlight)');
         }
     }
 
     function resetHighlighting() {
-        Object.values(nodes).forEach(node => node.element.classList.remove('highlight'));
-        edges.forEach(edge => {
-            edge.element.style.backgroundColor = '#ffffff';
-            edge.element.style.height = '2px';
-            edge.arrow.style.borderBottomColor = '#ffffff';
+        Object.values(nodes).forEach(n => n.element.classList.remove('highlight'));
+        edges.forEach(e => {
+            e.line.setAttribute('stroke', EDGE_COLOR);
+            e.line.setAttribute('stroke-width', '2');
+            e.line.setAttribute('marker-end', 'url(#arrow-normal)');
         });
     }
 
+    function undoEdge() {
+        if (!edges.length) { updateStatus("No edges to undo."); return; }
+        const last = edges.pop();
+        svg.removeChild(last.line);
+        updateStatus(`Removed edge: ${last.from} → ${last.to}`);
+    }
+
     function resetGraph() {
-        while (graph.firstChild) graph.removeChild(graph.firstChild);
-        processCount = 0;
-        resourceCount = 0;
-        nodes = {};
-        edges = [];
+        while (svg.lastChild && svg.lastChild !== defs) svg.removeChild(svg.lastChild);
+        Array.from(graph.querySelectorAll('.node')).forEach(n => graph.removeChild(n));
+        processCount = resourceCount = 0; nodes = {}; edges = [];
         updateDropdowns();
-        updateStatus("Graph reset.");
+        if(statusDot){statusDot.style.background='#3fb950';statusDot.style.boxShadow='0 0 6px #3fb950';}
+        updateStatus("Graph reset. Ready for new simulation.");
     }
 
     function updateDropdowns() {
         while (fromSelect.options.length > 1) fromSelect.remove(1);
-        while (toSelect.options.length > 1) toSelect.remove(1);
-
-        Object.keys(nodes).forEach(nodeId => {
-            const optionFrom = document.createElement('option');
-            optionFrom.value = nodeId;
-            optionFrom.textContent = `${nodeId} (${nodes[nodeId].type})`;
-            const optionTo = optionFrom.cloneNode(true);
-
-            fromSelect.appendChild(optionFrom);
-            toSelect.appendChild(optionTo);
+        while (toSelect.options.length > 1)   toSelect.remove(1);
+        Object.keys(nodes).forEach(id => {
+            const a = document.createElement('option');
+            a.value = id; a.textContent = `${id} (${nodes[id].type})`;
+            fromSelect.appendChild(a); toSelect.appendChild(a.cloneNode(true));
         });
     }
 
-    function updateStatus(message) {
-        statusContent.textContent = message;
-    }
+    function updateStatus(msg) { statusContent.textContent = msg; }
 
     function startDrag(e) {
         if (e.target.classList.contains('node')) {
@@ -324,26 +250,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function drag(e) {
-        if (draggingNode) {
-            const graphRect = graph.getBoundingClientRect();
-            let newX = e.clientX - graphRect.left - offsetX;
-            let newY = e.clientY - graphRect.top - offsetY;
-
-            newX = Math.max(0, Math.min(newX, graphRect.width - draggingNode.offsetWidth));
-            newY = Math.max(0, Math.min(newY, graphRect.height - draggingNode.offsetHeight));
-
-            draggingNode.style.left = newX + 'px';
-            draggingNode.style.top = newY + 'px';
-
-            const nodeId = draggingNode.getAttribute('data-id');
-            nodes[nodeId].x = newX;
-            nodes[nodeId].y = newY;
-
-            updateEdges();
-        }
+        if (!draggingNode) return;
+        const rect = graph.getBoundingClientRect();
+        let x = e.clientX - rect.left - offsetX;
+        let y = e.clientY - rect.top  - offsetY;
+        x = Math.max(0, Math.min(x, rect.width  - draggingNode.offsetWidth));
+        y = Math.max(0, Math.min(y, rect.height - draggingNode.offsetHeight));
+        draggingNode.style.left = x + 'px'; draggingNode.style.top = y + 'px';
+        const id = draggingNode.getAttribute('data-id');
+        nodes[id].x = x; nodes[id].y = y;
+        updateEdges();
     }
 
-    function endDrag() {
-        draggingNode = null;
-    }
+    function endDrag() { draggingNode = null; }
 });

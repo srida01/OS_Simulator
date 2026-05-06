@@ -3,24 +3,410 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OS Explorer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="CPU-2.css">
+  <title>CPU Scheduling Simulator — OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:            #0d1017;
+      --bg2:           #111520;
+      --surface:       #161b27;
+      --border:        rgba(82, 170, 255, 0.18);
+      --border-bright: rgba(82, 170, 255, 0.45);
+      --accent:        #60b8ff;
+      --accent-dim:    rgba(96, 184, 255, 0.15);
+      --text:          #eef2f7;
+      --muted:         #8fa4bc;
+      --dim:           rgba(96, 183, 255, 0.8);
+      --mono:  'IBM Plex Mono', monospace;
+      --sans:  'IBM Plex Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(96,184,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(96,184,255,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 64px));
+      margin: 0 auto;
+      position: relative; z-index: 1;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+    }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 36px; height: 36px; border: 1.5px solid var(--accent);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      color: var(--accent); background: var(--accent-dim);
+    }
+    .logo {
+      font-family: var(--display); font-size: 24px; letter-spacing: 2px;
+      color: var(--text); text-decoration: none;
+    }
+    .logo span { color: var(--accent); }
+    nav { display: flex; align-items: center; gap: 8px; }
+    nav a {
+      color: var(--muted); text-decoration: none;
+      font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid transparent; border-radius: 4px;
+      transition: all 0.2s;
+    }
+    nav a:hover, nav a.active {
+      color: var(--accent);
+      border-color: var(--border-bright);
+      background: var(--accent-dim);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 50px 0 34px;
+      border-bottom: 1px solid var(--border);
+      animation: fadeUp 0.55s ease both;
+    }
+    .page-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--border-bright); background: var(--accent-dim);
+      border-radius: 4px; padding: 6px 14px; margin-bottom: 22px;
+      color: var(--accent); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    }
+    .hero h1 {
+      font-family: var(--display);
+      font-size: clamp(52px, 8vw, 74px);
+      line-height: 0.96; letter-spacing: 4px; margin-bottom: 14px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      max-width: 780px; color: var(--muted);
+      font-family: var(--sans); font-size: 13px; line-height: 1.75;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SIMULATION PANEL ── */
+    .simulation-panel {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px; margin: 28px 0;
+    }
+
+    /* ── ALGO TABS ── */
+    .algo-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+
+    .algo-tab {
+      padding: 12px 20px;
+      border: 1px solid var(--border); border-radius: 4px;
+      color: var(--muted); background: var(--surface);
+      cursor: pointer; font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    .algo-tab:hover, .algo-tab.active {
+      color: var(--accent);
+      border-color: var(--border-bright);
+      background: var(--accent-dim);
+    }
+
+    /* ── ALGORITHM DESCRIPTION ── */
+    .algorithm-description { margin: 18px 0; }
+    .algorithm-description h3 {
+      color: var(--accent); font-size: 10px;
+      letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .algorithm-description p {
+      color: var(--muted); font-family: var(--sans); font-size: 13px; line-height: 1.7;
+    }
+
+    /* ── INPUT SECTION ── */
+    .input-section {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 20px;
+    }
+
+    .process-input {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 10px; margin-bottom: 18px;
+    }
+
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .input-group label {
+      color: var(--muted); font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+
+    input, select {
+      min-height: 42px; padding: 10px 12px;
+      border-radius: 4px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text);
+      font-family: var(--mono); font-size: 12px; outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--border-bright);
+      box-shadow: 0 0 0 3px rgba(96, 184, 255, 0.08);
+    }
+    input::placeholder { color: var(--muted); }
+
+    button {
+      min-height: 42px; padding: 10px 16px;
+      border: 1px solid var(--border); border-radius: 4px;
+      color: var(--muted); background: var(--surface);
+      cursor: pointer; font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      border-color: var(--border-bright);
+      color: var(--accent);
+    }
+    button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .add-process-btn, .simulate-btn {
+      background: var(--accent);
+      color: #07111c;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .add-process-btn:hover, .simulate-btn:hover {
+      background: #80caff;
+      border-color: #80caff;
+      color: #07111c;
+      transform: translateY(-1px);
+    }
+
+    .delete-btn {
+      min-height: 32px; padding: 6px 12px;
+      color: #ffa0a0; border-color: rgba(255,95,87,0.4);
+      background: rgba(255,95,87,0.1); font-size: 10px;
+    }
+    .delete-btn:hover {
+      background: rgba(255,95,87,0.2);
+      border-color: rgba(255,95,87,0.7);
+      color: #ff8080;
+      transform: none;
+    }
+
+    .controls {
+      display: flex; justify-content: center; gap: 15px;
+      margin: 20px 0 0; flex-wrap: wrap;
+    }
+
+    /* ── PROCESS TABLE ── */
+    .process-table {
+      width: 100%; border-collapse: collapse;
+      margin: 20px 0; border-radius: 8px; overflow: hidden;
+    }
+    .process-table th, .process-table td {
+      padding: 12px 14px; text-align: center;
+      border: 1px solid var(--border);
+      font-family: var(--sans); font-size: 13px;
+    }
+    .process-table th {
+      background: var(--surface); color: var(--accent);
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .process-table td { color: var(--muted); background: var(--bg2); }
+    .process-table tr:hover td { background: var(--accent-dim); color: var(--text); }
+
+    /* ── ALGORITHM CONTAINER ── */
+    .algorithm-container { display: none; padding: 18px 0; margin-bottom: 8px; }
+    .algorithm-container.active { display: block; }
+    .algorithm-container h3 {
+      font-family: var(--display); font-size: 24px; letter-spacing: 2px;
+      color: var(--accent); margin-bottom: 16px;
+    }
+
+    /* ── GANTT CHART ── */
+    .gantt-chart {
+      width: 100%; min-height: 120px;
+      overflow-x: auto; overflow-y: hidden;
+      margin: 12px 0 18px; padding: 14px 0 52px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-bright) var(--surface);
+    }
+    .gantt-chart::-webkit-scrollbar { height: 4px; }
+    .gantt-chart::-webkit-scrollbar-track { background: var(--surface); }
+    .gantt-chart::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+    .gantt-row {
+      position: relative; height: 60px;
+    }
+
+    .gantt-block {
+      position: absolute; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; font-weight: 700; font-family: var(--mono);
+      font-size: 12px; letter-spacing: 0.05em;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .time-label {
+      position: absolute; color: var(--muted);
+      font-size: 11px; font-family: var(--mono);
+      bottom: -22px;
+    }
+
+    /* Gantt controls (injected by JS) — restyle via inherited vars */
+    .gantt-chart button {
+      min-height: 34px; padding: 6px 14px;
+      font-size: 10px;
+    }
+    .gantt-chart input[type="range"] {
+      min-height: unset; height: 4px;
+      accent-color: var(--accent);
+      background: var(--surface);
+      border: none; padding: 0;
+    }
+    .gantt-chart label {
+      color: var(--muted); font-size: 10px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .gantt-chart div[style*="color: green"] {
+      color: #68d391 !important;
+      font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    }
+    .gantt-chart div[style*="font-weight: bold"] {
+      color: var(--text) !important;
+      font-family: var(--mono); font-size: 11px;
+    }
+
+    /* ── METRICS ── */
+    .metrics {
+      display: grid; grid-template-columns: repeat(2, minmax(160px, 1fr));
+      gap: 12px; margin: 18px 0;
+    }
+    .metric-card {
+      padding: 20px; border-left: 2px solid var(--accent);
+      background: var(--surface); border-radius: 6px;
+      color: var(--muted); font-family: var(--sans);
+      font-size: 12px; text-align: center;
+      border: 1px solid var(--border); border-left: 2px solid var(--accent);
+    }
+    .metric-value {
+      margin-top: 8px; color: var(--accent);
+      font-family: var(--display); font-size: 36px; letter-spacing: 2px;
+    }
+
+    /* ── PROCESS COLOR LEGEND ── */
+    .process-colors {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 12px; margin: 15px 0;
+    }
+    .process-color-item {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--muted); font-family: var(--sans); font-size: 12px;
+    }
+    .color-box {
+      width: 14px; height: 14px;
+      display: inline-block; border-radius: 3px;
+    }
+
+    /* ── INFO BOX ── */
+    .info-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px; margin-bottom: 60px;
+    }
+    .info-box h3 {
+      font-family: var(--display); font-size: 28px; letter-spacing: 2px;
+      color: var(--accent); margin-bottom: 14px;
+    }
+    .info-box h4 {
+      font-family: var(--mono); font-size: 10px;
+      color: var(--accent); letter-spacing: 0.16em;
+      text-transform: uppercase; margin: 16px 0 10px;
+    }
+    .info-box p, .info-box li {
+      color: var(--muted); font-family: var(--sans);
+      font-size: 13px; line-height: 1.75;
+    }
+    .info-box ul { padding-left: 18px; }
+    .info-box li { margin: 6px 0; }
+    .info-box strong { color: var(--text); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 28px 0;
+      color: var(--muted); font-size: 11px; letter-spacing: 0.04em;
+      width: min(1180px, calc(100% - 64px));
+      margin: 0 auto; position: relative; z-index: 1;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a {
+      color: var(--muted); text-decoration: none;
+      font-size: 11px; transition: color 0.2s;
+    }
+    .footer-right a:hover { color: var(--accent); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .container { width: calc(100% - 32px); }
+      .navbar { flex-direction: column; align-items: flex-start; gap: 16px; }
+      nav, .algo-tabs { flex-wrap: wrap; }
+      .process-input { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .container { width: calc(100% - 24px); }
+      .process-input, .metrics { grid-template-columns: 1fr; }
+      .process-table { display: block; overflow-x: auto; white-space: nowrap; }
+      footer { flex-direction: column; gap: 12px; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
+
+    <!-- NAVBAR -->
     <header class="navbar">
-      <div class="logo">OS Explorer</div>
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <a href="../index.html" class="logo">OS <span>EXPLORER</span></a>
+      </div>
       <nav>
         <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
       </nav>
     </header>
 
+    <!-- HERO -->
     <section class="hero">
-      <h1>CPU Scheduling Simulator</h1>
-      <p>A visual simulation of various CPU scheduling algorithms in operating systems</p>
+      <div class="page-tag">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>
+        Module 01 · CPU Scheduling
+      </div>
+      <h1>CPU <span>SCHEDULING</span> SIMULATOR</h1>
+      <p>A real-time visual simulation of CPU scheduling algorithms — SJF, Priority, and SRJF — with animated Gantt charts and performance metrics.</p>
     </section>
 
+    <!-- SIMULATION PANEL -->
     <section class="simulation-panel">
       <div class="algo-tabs">
         <div class="algo-tab active" data-algo="sjf">SJF</div>
@@ -68,124 +454,100 @@
           </thead>
           <tbody id="process-table-body">
             <tr>
-              <td>P1</td>
-              <td>0</td>
-              <td>5</td>
-              <td>2</td>
+              <td>P1</td><td>0</td><td>5</td><td>2</td>
               <td><button class="delete-btn" data-id="P1">Delete</button></td>
             </tr>
             <tr>
-              <td>P2</td>
-              <td>1</td>
-              <td>3</td>
-              <td>1</td>
+              <td>P2</td><td>1</td><td>3</td><td>1</td>
               <td><button class="delete-btn" data-id="P2">Delete</button></td>
             </tr>
             <tr>
-              <td>P3</td>
-              <td>2</td>
-              <td>8</td>
-              <td>4</td>
+              <td>P3</td><td>2</td><td>8</td><td>4</td>
               <td><button class="delete-btn" data-id="P3">Delete</button></td>
             </tr>
             <tr>
-              <td>P4</td>
-              <td>3</td>
-              <td>2</td>
-              <td>3</td>
+              <td>P4</td><td>3</td><td>2</td><td>3</td>
               <td><button class="delete-btn" data-id="P4">Delete</button></td>
             </tr>
           </tbody>
         </table>
 
         <div class="controls">
-          <button id="simulate-btn" class="simulate-btn">Run Simulation</button>
+          <button id="simulate-btn" class="simulate-btn">▶ Run Simulation</button>
         </div>
       </div>
 
-      <div class="process-colors" id="process-colors">
-        <!-- Process colors will be displayed here -->
-      </div>
+      <div class="process-colors" id="process-colors"></div>
 
+      <!-- SJF CONTAINER -->
       <div id="sjf-container" class="algorithm-container active">
-        <h3>Shortest Job First (SJF) Scheduling</h3>
+        <h3>Shortest Job First (SJF)</h3>
         <div id="sjf-gantt" class="gantt-chart"></div>
         <div class="metrics">
           <div class="metric-card">
             <div>Average Turnaround Time</div>
-            <div class="metric-value" id="sjf-avg-tat">0.0</div>
+            <div class="metric-value" id="sjf-avg-tat">0.00</div>
           </div>
           <div class="metric-card">
             <div>Average Waiting Time</div>
-            <div class="metric-value" id="sjf-avg-wt">0.0</div>
+            <div class="metric-value" id="sjf-avg-wt">0.00</div>
           </div>
         </div>
         <table id="sjf-results" class="process-table">
           <thead>
             <tr>
-              <th>Process ID</th>
-              <th>Arrival Time</th>
-              <th>Burst Time</th>
-              <th>Completion Time</th>
-              <th>Turnaround Time</th>
-              <th>Waiting Time</th>
+              <th>Process ID</th><th>Arrival Time</th><th>Burst Time</th>
+              <th>Completion Time</th><th>Turnaround Time</th><th>Waiting Time</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
-      
+
+      <!-- PRIORITY CONTAINER -->
       <div id="priority-container" class="algorithm-container">
         <h3>Priority Scheduling</h3>
         <div id="priority-gantt" class="gantt-chart"></div>
         <div class="metrics">
           <div class="metric-card">
             <div>Average Turnaround Time</div>
-            <div class="metric-value" id="priority-avg-tat">0.0</div>
+            <div class="metric-value" id="priority-avg-tat">0.00</div>
           </div>
           <div class="metric-card">
             <div>Average Waiting Time</div>
-            <div class="metric-value" id="priority-avg-wt">0.0</div>
+            <div class="metric-value" id="priority-avg-wt">0.00</div>
           </div>
         </div>
         <table id="priority-results" class="process-table">
           <thead>
             <tr>
-              <th>Process ID</th>
-              <th>Arrival Time</th>
-              <th>Burst Time</th>
-              <th>Priority</th>
-              <th>Completion Time</th>
-              <th>Turnaround Time</th>
-              <th>Waiting Time</th>
+              <th>Process ID</th><th>Arrival Time</th><th>Burst Time</th>
+              <th>Priority</th><th>Completion Time</th><th>Turnaround Time</th><th>Waiting Time</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
-      
+
+      <!-- SRJF CONTAINER -->
       <div id="srjf-container" class="algorithm-container">
-        <h3>Shortest Remaining Job First (SRJF) Scheduling</h3>
+        <h3>Shortest Remaining Job First (SRJF)</h3>
         <div id="srjf-gantt" class="gantt-chart"></div>
         <div class="metrics">
           <div class="metric-card">
             <div>Average Turnaround Time</div>
-            <div class="metric-value" id="srjf-avg-tat">0.0</div>
+            <div class="metric-value" id="srjf-avg-tat">0.00</div>
           </div>
           <div class="metric-card">
             <div>Average Waiting Time</div>
-            <div class="metric-value" id="srjf-avg-wt">0.0</div>
+            <div class="metric-value" id="srjf-avg-wt">0.00</div>
           </div>
         </div>
         <table id="srjf-results" class="process-table">
           <thead>
             <tr>
-              <th>Process ID</th>
-              <th>Arrival Time</th>
-              <th>Burst Time</th>
-              <th>Completion Time</th>
-              <th>Turnaround Time</th>
-              <th>Waiting Time</th>
+              <th>Process ID</th><th>Arrival Time</th><th>Burst Time</th>
+              <th>Completion Time</th><th>Turnaround Time</th><th>Waiting Time</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -193,22 +555,28 @@
       </div>
     </section>
 
+    <!-- INFO BOX -->
     <section class="info-box">
       <h3>About CPU Scheduling Algorithms</h3>
-      <p>CPU scheduling is the process of determining which process in the ready queue will be allocated the CPU for execution. The primary objective is to maximize CPU utilization and throughput while minimizing turnaround time, waiting time, and response time.</p>
-      
-      <h4>Algorithms Implemented:</h4>
+      <p>CPU scheduling determines which process in the ready queue is allocated the CPU. The primary objective is to maximize CPU utilization and throughput while minimizing turnaround time, waiting time, and response time.</p>
+      <h4>Algorithms Implemented</h4>
       <ul>
-        <li><strong>Shortest Job First (SJF)</strong>: A non-preemptive scheduling algorithm that selects the process with the smallest execution time first.</li>
-        <li><strong>Priority Scheduling</strong>: Processes are scheduled based on priority. Lower numbers typically indicate higher priority.</li>
-        <li><strong>Shortest Remaining Time First (SRJF)</strong>: Preemptive version of SJF where the process with the smallest remaining time is selected for execution.</li>
+        <li><strong>Shortest Job First (SJF):</strong> A non-preemptive algorithm that selects the process with the smallest execution time first.</li>
+        <li><strong>Priority Scheduling:</strong> Processes are scheduled based on priority. Lower numbers indicate higher priority.</li>
+        <li><strong>Shortest Remaining Time First (SRJF):</strong> Preemptive version of SJF — the process with the smallest remaining time is always selected.</li>
       </ul>
     </section>
-  </div>
+
+  </div><!-- /.container -->
 
   <footer>
-    &copy; 2025 OS Explorer | CS257: Operating Systems Laboratory
+    <span>OS Explorer · Operating Systems Laboratory Project</span>
+    <div class="footer-right">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">Team</a>
+    </div>
   </footer>
+
   <script src="CPU-2.js"></script>
-  </body>
-  </html>
+</body>
+</html>

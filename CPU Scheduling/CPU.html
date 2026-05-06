@@ -3,239 +3,301 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OS Explorer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>CPU Scheduling — OS Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-      height: 100%;
-      color: #fff;
+    :root {
+      --bg:            #0d1017;
+      --bg2:           #111520;
+      --surface:       #161b27;
+      --border:        rgba(82, 170, 255, 0.18);
+      --border-bright: rgba(82, 170, 255, 0.45);
+      --accent:        #60b8ff;
+      --accent-dim:    rgba(96, 184, 255, 0.15);
+      --purple:        #a78bfa;
+      --text:          #eef2f7;
+      --muted:         #8fa4bc;
+      --mono:  'IBM Plex Mono', monospace;
+      --sans:  'IBM Plex Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
     }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: url('../landing.jpeg') no-repeat center center fixed;
-      background-size: cover;
-      position: relative;
+      background: var(--bg); color: var(--text);
+      font-family: var(--mono); min-height: 100vh; overflow-x: hidden;
     }
-
     body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: -1;
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(96,184,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(96,184,255,0.06) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
     }
-
     .container {
-      min-height: 100vh;
-      padding: 0 40px;
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 32px; position: relative; z-index: 1;
     }
 
+    /* NAVBAR */
     .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 24px 0; border-bottom: 1px solid var(--border);
     }
-
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 36px; height: 36px; border: 1.5px solid var(--accent);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      color: var(--accent); background: var(--accent-dim);
+    }
     .logo {
-      font-size: 24px;
-      font-weight: 700;
-      color: #ffffff;
+      font-family: var(--display); font-size: 24px; letter-spacing: 2px;
+      color: var(--text); text-decoration: none;
+    }
+    .logo span { color: var(--accent); }
+    nav { display: flex; align-items: center; gap: 8px; }
+    nav a {
+      color: var(--muted); text-decoration: none; font-family: var(--mono);
+      font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid transparent; border-radius: 4px;
+      transition: all 0.2s;
+    }
+    nav a:hover, nav a.active {
+      color: var(--accent); border-color: var(--border-bright); background: var(--accent-dim);
     }
 
-    .navbar nav a {
-      color: #ffffff;
-      margin-left: 20px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s ease;
+    /* PAGE HEADER */
+    .page-header {
+      padding: 60px 0 40px; border-bottom: 1px solid var(--border);
+      margin-bottom: 60px; animation: fadeUp 0.6s ease both;
+    }
+    .page-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent-dim); border: 1px solid var(--border-bright);
+      border-radius: 4px; padding: 6px 14px; font-family: var(--mono);
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 24px;
+    }
+    .page-header h1 {
+      font-family: var(--display); font-size: 72px;
+      letter-spacing: 4px; margin-bottom: 16px; line-height: 1;
+    }
+    .page-header h1 span { color: var(--accent); }
+    .page-header p {
+      font-family: var(--sans); color: var(--muted);
+      font-size: 14px; max-width: 600px; line-height: 1.8;
     }
 
-    .navbar nav a:hover {
-      color: #00e0ff;
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
     }
 
-    .hero {
-      text-align: center;
-      margin: 60px 0 40px;
+    /* CARDS GRID */
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 24px; margin-bottom: 64px;
     }
 
-    .hero h1 {
-      font-size: 42px;
-      margin-bottom: 15px;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    .module-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-top: 2px solid var(--accent); border-radius: 16px;
+      padding: 36px; text-decoration: none; color: inherit;
+      display: flex; flex-direction: column; gap: 20px;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+      animation: fadeUp 0.4s ease both; cursor: pointer;
+    }
+    .module-card:nth-child(1) { animation-delay: .05s; }
+    .module-card:nth-child(2) { animation-delay: .10s; border-top-color: var(--purple); }
+
+    .module-card:hover {
+      border-color: var(--border-bright);
+      box-shadow: 0 0 40px rgba(96,184,255,0.12), 0 8px 32px rgba(0,0,0,0.4);
+      transform: translateY(-4px);
+    }
+    .module-card:nth-child(2):hover {
+      box-shadow: 0 0 40px rgba(167,139,250,0.12), 0 8px 32px rgba(0,0,0,0.4);
     }
 
-    .hero p {
-      font-size: 18px;
-      color: #dcdcdc;
-      margin-bottom: 30px;
+    .card-num {
+      font-family: var(--mono); font-size: 10px; color: var(--accent);
+      letter-spacing: 0.18em; text-transform: uppercase;
+    }
+    .module-card:nth-child(2) .card-num { color: var(--purple); }
+
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--accent-dim);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+    .module-card:nth-child(2) .card-icon {
+      background: rgba(167,139,250,0.12); color: var(--purple);
     }
 
-    .algorithm-cards {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      flex-wrap: wrap;
-      margin: 40px 0;
+    .card-title {
+      font-family: var(--display); font-size: 32px;
+      letter-spacing: 2px; color: var(--text); margin-bottom: 8px;
+    }
+    .card-desc {
+      font-family: var(--sans); font-size: 13px;
+      color: var(--muted); line-height: 1.7;
     }
 
-    .algorithm-card {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 30px;
-      width: 350px;
-      text-align: center;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(8px);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: pointer;
+    .algo-list {
+      display: flex; flex-direction: column; gap: 8px;
     }
-
-    .algorithm-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-      background: rgba(255, 255, 255, 0.15);
+    .algo-item {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 2px solid rgba(96,184,255,0.4);
+      border-radius: 6px; padding: 10px 14px;
+      font-family: var(--sans); font-size: 13px; color: var(--muted);
     }
-
-    .algorithm-card h3 {
-      color: #00e0ff;
-      font-size: 24px;
-      margin-bottom: 15px;
+    .module-card:nth-child(2) .algo-item {
+      border-left-color: rgba(167,139,250,0.4);
     }
-
-    .algorithm-list {
-      list-style-type: none;
-      padding: 0;
-      margin: 20px 0;
+    .algo-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0;
     }
+    .module-card:nth-child(2) .algo-dot { background: var(--purple); }
 
-    .algorithm-list li {
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    .card-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent-dim); border: 1px solid var(--border-bright);
+      border-radius: 6px; padding: 12px 20px;
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); transition: all 0.2s; width: fit-content;
     }
-
-    .algorithm-list li:last-child {
-      border-bottom: none;
+    .module-card:nth-child(2) .card-cta {
+      background: rgba(167,139,250,0.12);
+      border-color: rgba(167,139,250,0.45); color: var(--purple);
     }
+    .module-card:hover .card-cta { background: var(--accent); color: #07111c; }
+    .module-card:nth-child(2):hover .card-cta { background: var(--purple); color: #07111c; }
 
-    .card-button {
-      background: #00e0ff;
-      color: #121228;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 50px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 20px;
-      font-size: 16px;
-    }
-
-    .card-button:hover {
-      background: #00b8d4;
-      transform: translateY(-2px);
-    }
-
+    /* INFO BOX */
     .info-box {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 20px;
-      max-width: 800px;
-      margin: 40px auto;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(8px);
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 32px; margin-bottom: 64px;
+      animation: fadeUp 0.4s ease 0.2s both;
     }
-
     .info-box h3 {
-      color: #00e0ff;
-      margin-top: 0;
+      font-family: var(--display); font-size: 28px;
+      letter-spacing: 2px; margin-bottom: 16px; color: var(--accent);
     }
+    .info-box p {
+      font-family: var(--sans); font-size: 13px;
+      color: var(--muted); line-height: 1.8; max-width: 800px;
+    }
+    .info-box p + p { margin-top: 12px; }
 
+    /* FOOTER */
     footer {
-      text-align: center;
-      padding: 20px 0;
-      color: #dcdcdc;
-      font-size: 14px;
-      width: 100%;
+      border-top: 1px solid var(--border); padding: 28px 0;
+      display: flex; align-items: center; justify-content: space-between;
     }
+    .footer-left { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a {
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .footer-right a:hover { color: var(--accent); }
 
-    @media (max-width: 768px) {
-      .container {
-        padding: 0 20px;
-      }
-      .algorithm-card {
-        width: 100%;
-      }
-      .hero h1 {
-        font-size: 32px;
-      }
+    @media (max-width: 900px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .page-header h1 { font-size: 52px; }
+    }
+    @media (max-width: 600px) {
+      .container { padding: 0 16px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header class="navbar">
-      <div class="logo">OS Explorer</div>
-      <nav>
-        <a href="../index.html">Home</a>
-      </nav>
-    </header>
+<div class="container">
 
-    <section class="hero">
-      <h1>CPU Scheduling Algorithms</h1>
-      <p>Explore various CPU scheduling algorithms and understand their impact on system performance</p>
-    </section>
-
-    <div class="algorithm-cards">
-      <div class="algorithm-card" onclick="window.location.href='CPU-1.html'">
-        <h3>Basic Scheduling</h3>
-        <ul class="algorithm-list">
-          <li>First Come First Serve (FCFS)</li>
-          <li>Round Robin (RR)</li>
-        </ul>
-        <p>Fundamental scheduling algorithms that form the basis of CPU management in operating systems.</p>
-        <button class="card-button">Explore Basic Schedulers</button>
+  <header class="navbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
       </div>
-
-      <div class="algorithm-card" onclick="window.location.href='CPU-2.html'">
-        <h3>Priority-Based Scheduling</h3>
-        <ul class="algorithm-list">
-          <li>Shortest Job First (SJF)</li>
-          <li>Priority Scheduling</li>
-          <li>Shortest Remaining Job First (SRJF)</li>
-        </ul>
-        <p>Advanced scheduling algorithms that optimize system metrics based on job characteristics.</p>
-        <button class="card-button">Explore Priority Schedulers</button>
-      </div>
+      <a href="../index.html" class="logo">OS <span>EXPLORER</span></a>
     </div>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+    </nav>
+  </header>
 
-    <section class="info-box">
-      <h3>About CPU Scheduling</h3>
-      <p>CPU scheduling is a critical component of operating system design that determines which processes get CPU time and in what order. Effective scheduling algorithms help optimize system metrics like throughput, waiting time, and response time.</p>
-      
-      <p>This simulator allows you to visualize and compare different CPU scheduling algorithms to better understand their behavior and performance characteristics under various workloads.</p>
-    </section>
+  <div class="page-header">
+    <div class="page-tag">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>
+      Module 01 · CPU Scheduling
+    </div>
+    <h1>CPU <span>SCHEDULING</span></h1>
+    <p>Explore and simulate five core CPU scheduling algorithms across two interactive modules — from simple queue-based strategies to preemptive priority-driven schedulers.</p>
+  </div>
+
+  <div class="cards-grid">
+
+    <!-- Card 1: Basic -->
+    <a class="module-card" href="CPU-1.html">
+      <div>
+        <div class="card-num">Module 01-A · Basic Scheduling</div>
+      </div>
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>
+      </div>
+      <div>
+        <div class="card-title">BASIC SCHEDULERS</div>
+        <div class="card-desc">Fundamental scheduling algorithms that form the foundation of CPU management. Visualize Gantt charts and compare waiting and turnaround times in real time.</div>
+      </div>
+      <div class="algo-list">
+        <div class="algo-item"><span class="algo-dot"></span>First Come First Serve (FCFS)</div>
+        <div class="algo-item"><span class="algo-dot"></span>Round Robin (RR)</div>
+      </div>
+      <div class="card-cta">▶ Launch Simulator</div>
+    </a>
+
+    <!-- Card 2: Advanced -->
+    <a class="module-card" href="CPU-2.html">
+      <div>
+        <div class="card-num">Module 01-B · Priority Scheduling</div>
+      </div>
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <div>
+        <div class="card-title">PRIORITY SCHEDULERS</div>
+        <div class="card-desc">Advanced algorithms that optimize system metrics based on job characteristics. Watch animated Gantt charts build in real time with play, pause, and speed controls.</div>
+      </div>
+      <div class="algo-list">
+        <div class="algo-item"><span class="algo-dot"></span>Shortest Job First (SJF)</div>
+        <div class="algo-item"><span class="algo-dot"></span>Priority Scheduling</div>
+        <div class="algo-item"><span class="algo-dot"></span>Shortest Remaining Time First (SRTF)</div>
+      </div>
+      <div class="card-cta">▶ Launch Simulator</div>
+    </a>
+
+  </div>
+
+  <div class="info-box">
+    <h3>ABOUT CPU SCHEDULING</h3>
+    <p>CPU scheduling determines which process in the ready queue is allocated the CPU for execution. The primary objective is to maximize CPU utilization and throughput while minimizing turnaround time, waiting time, and response time.</p>
+    <p>This module lets you compare non-preemptive approaches like FCFS and SJF against preemptive strategies like Round Robin and SRTF — observing how each handles different workloads and arrival patterns.</p>
   </div>
 
   <footer>
-    &copy; 2025 OS Explorer | CS257: Operating Systems Laboratory
+    <div class="footer-left">OS Explorer · CPU Scheduling Module</div>
+    <div class="footer-right">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">Team</a>
+    </div>
   </footer>
 
-  <script>
-    // Simple script to make the entire card clickable
-    document.querySelectorAll('.algorithm-card').forEach(card => {
-      card.addEventListener('click', function() {
-        const href = this.getAttribute('onclick').split("'")[1];
-        window.location.href = href;
-      });
-    });
-  </script>
+</div>
 </body>
 </html>
